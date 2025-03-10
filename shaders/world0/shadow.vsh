@@ -1,13 +1,13 @@
 #version 120
+
 #include "/lib/settings.glsl"
+
 #ifdef IS_LPV_ENABLED
 	#extension GL_ARB_explicit_attrib_location: enable
 	#extension GL_ARB_shader_image_load_store: enable
-	#extension GL_ARB_shading_language_packing : enable
 #endif
 
 #define RENDER_SHADOW
-
 
 /*
 !! DO NOT REMOVE !!
@@ -20,15 +20,8 @@ Read the terms of modification and sharing before changing something below pleas
 const float PI = 3.1415927;
 varying vec2 texcoord;
 uniform mat4 shadowProjectionInverse;
-uniform mat4 shadowProjection;
 uniform mat4 shadowModelViewInverse;
-uniform mat4 shadowModelView;
-uniform mat4 gbufferModelView;
-uniform mat4 gbufferModelViewInverse;
-uniform mat4 gbufferProjection;
-uniform mat4 gbufferProjectionInverse;
 uniform int hideGUI;
-uniform vec3 cameraPosition;
 uniform float frameTimeCounter;
 uniform int frameCounter;
 uniform float screenBrightness;
@@ -44,11 +37,16 @@ uniform vec3 shadowLightVec;
 uniform float shadowMaxProj;
 attribute vec4 mc_midTexCoord;
 varying vec4 color;
+#ifdef LPV_SHADOWS
+	varying vec3 worldPos;
+	flat varying vec3 worldNormal;
+#endif
 
 attribute vec4 mc_Entity;
 uniform int blockEntityId;
 uniform int entityId;
 
+#include "/lib/projections.glsl"
 #include "/lib/Shadow_Params.glsl"
 #include "/lib/bokeh.glsl"
 #include "/lib/blocks.glsl"
@@ -60,11 +58,6 @@ uniform int entityId;
 	#else
 		attribute vec3 at_midBlock;
 	#endif
-
-	#ifdef LPV_ENTITY_LIGHTS
-		uniform usampler1D texBlockData;
-	#endif
-	
     uniform int currentRenderedItemId;
 	uniform int renderStage;
 
@@ -76,72 +69,56 @@ const float PI48 = 150.796447372*WAVY_SPEED;
 float pi2wt = PI48*frameTimeCounter;
 
 vec2 calcWave(in vec3 pos) {
-
-    float magnitude = abs(sin(dot(vec4(frameTimeCounter, pos),vec4(1.0,0.005,0.005,0.005)))*0.5+0.72)*0.013;
+	float magnitude = abs(sin(dot(vec4(frameTimeCounter, pos),vec4(1.0,0.005,0.005,0.005)))*0.5+0.72)*0.013;
 	vec2 ret = (sin(pi2wt*vec2(0.0063,0.0015)*4. - pos.xz + pos.y*0.05)+0.1)*magnitude;
-
-    return ret;
+	return ret;
 }
 
 vec3 calcMovePlants(in vec3 pos) {
-    vec2 move1 = calcWave(pos );
+	vec2 move1 = calcWave(pos );
 	float move1y = -length(move1);
-   return vec3(move1.x,move1y,move1.y)*5.*WAVY_STRENGTH/255.0;
+	return vec3(move1.x,move1y,move1.y)*5.*WAVY_STRENGTH/255.0;
 }
 
 vec3 calcWaveLeaves(in vec3 pos, in float fm, in float mm, in float ma, in float f0, in float f1, in float f2, in float f3, in float f4, in float f5) {
-
-    float magnitude = abs(sin(dot(vec4(frameTimeCounter, pos),vec4(1.0,0.005,0.005,0.005)))*0.5+0.72)*0.013;
+	float magnitude = abs(sin(dot(vec4(frameTimeCounter, pos),vec4(1.0,0.005,0.005,0.005)))*0.5+0.72)*0.013;
 	vec3 ret = (sin(pi2wt*vec3(0.0063,0.0224,0.0015)*1.5 - pos))*magnitude;
-
-    return ret;
+	return ret;
 }
 
 vec3 calcMoveLeaves(in vec3 pos, in float f0, in float f1, in float f2, in float f3, in float f4, in float f5, in vec3 amp1, in vec3 amp2) {
-    vec3 move1 = calcWaveLeaves(pos      , 0.0054, 0.0400, 0.0400, 0.0127, 0.0089, 0.0114, 0.0063, 0.0224, 0.0015) * amp1;
-    return move1*5.*WAVY_STRENGTH/255.;
+	vec3 move1 = calcWaveLeaves(pos      , 0.0054, 0.0400, 0.0400, 0.0127, 0.0089, 0.0114, 0.0063, 0.0224, 0.0015) * amp1;
+	return move1*5.*WAVY_STRENGTH/255.;
 }
-bool intersectCone(float coneHalfAngle, vec3 coneTip , vec3 coneAxis, vec3 rayOrig, vec3 rayDir, float maxZ)
-{
-  vec3 co = rayOrig - coneTip;
-  float prod = dot(normalize(co),coneAxis);
-  if (prod <= -coneHalfAngle) return true;   //In view frustrum
 
-  float a = dot(rayDir,coneAxis)*dot(rayDir,coneAxis) - coneHalfAngle*coneHalfAngle;
-  float b = 2. * (dot(rayDir,coneAxis)*dot(co,coneAxis) - dot(rayDir,co)*coneHalfAngle*coneHalfAngle);
-  float c = dot(co,coneAxis)*dot(co,coneAxis) - dot(co,co)*coneHalfAngle*coneHalfAngle;
+bool intersectCone(float coneHalfAngle, vec3 coneTip , vec3 coneAxis, vec3 rayOrig, vec3 rayDir, float maxZ) {
+	vec3 co = rayOrig - coneTip;
+	float prod = dot(normalize(co),coneAxis);
+	if (prod <= -coneHalfAngle) return true;   //In view frustrum
 
-  float det = b*b - 4.*a*c;
-  if (det < 0.) return false;    // No intersection with either forward cone and backward cone
+	float a = dot(rayDir,coneAxis)*dot(rayDir,coneAxis) - coneHalfAngle*coneHalfAngle;
+	float b = 2. * (dot(rayDir,coneAxis)*dot(co,coneAxis) - dot(rayDir,co)*coneHalfAngle*coneHalfAngle);
+	float c = dot(co,coneAxis)*dot(co,coneAxis) - dot(co,co)*coneHalfAngle*coneHalfAngle;
 
-  det = sqrt(det);
-  float t2 = (-b + det) / (2. * a);
-  if (t2 <= 0.0 || t2 >= maxZ) return false;  //Idk why it works
+	float det = b*b - 4.*a*c;
+	if (det < 0.) return false;    // No intersection with either forward cone and backward cone
 
-  return true;
+	det = sqrt(det);
+	float t2 = (-b + det) / (2. * a);
+	if (t2 <= 0.0 || t2 >= maxZ) return false;  //Idk why it works
+
+	return true;
 }
-#define diagonal3(m) vec3((m)[0].x, (m)[1].y, m[2].z)
-#define  projMAD(m, v) (diagonal3(m) * (v) + (m)[3].xyz)
-
-
 
 // uniform float far;
-uniform float dhFarPlane;
 
 #include "/lib/DistantHorizons_projections.glsl"
 
-vec4 toClipSpace3(vec3 viewSpacePosition) {
+vec4 toClipSpace4(vec3 viewSpacePosition) {
 
 	// mat4 projection = DH_shadowProjectionTweak(gl_ProjectionMatrix);
 
-    return vec4(projMAD(gl_ProjectionMatrix, viewSpacePosition),1.0);
-}
-vec3 viewToWorld(vec3 viewPos) {
-    vec4 pos;
-    pos.xyz = viewPos;
-    pos.w = 0.0;
-    pos = shadowModelViewInverse * pos;
-    return pos.xyz;
+	return vec4(projMAD(gl_ProjectionMatrix, viewSpacePosition),1.0);
 }
 
 // uniform int renderStage;
@@ -152,6 +129,7 @@ void main() {
 	color = gl_Color;
 
 	vec3 position = mat3(gl_ModelViewMatrix) * vec3(gl_Vertex) + gl_ModelViewMatrix[3].xyz;
+
 	// playerpos = vec4(0.0);
 	// playerpos = gbufferModelViewInverse * (gl_ModelViewMatrix * gl_Vertex);
 	
@@ -202,76 +180,69 @@ void main() {
 	// 	}
 	// #endif
 
-	#if defined IS_LPV_ENABLED || defined WAVY_PLANTS
+	// #if defined IS_LPV_ENABLED || defined WAVY_PLANTS || !defined PLANET_CURVATURE
 		vec3 playerpos = mat3(shadowModelViewInverse) * position + shadowModelViewInverse[3].xyz;
+	// #endif
+
+	#ifdef LPV_SHADOWS
+		#ifdef WAVY_PLANTS
+			worldPos = playerpos;
+		#else
+			worldPos = mat3(shadowModelViewInverse) * position + shadowModelViewInverse[3].xyz;
+		#endif
+		worldNormal = mat3(shadowModelViewInverse) * gl_NormalMatrix * gl_Normal;
 	#endif
 
 	#if defined IS_LPV_ENABLED && defined MC_GL_EXT_shader_image_load_store
 		PopulateShadowVoxel(playerpos);
 	#endif
 
-	// #ifdef WAVY_PLANTS
-  	// 	bool istopv = gl_MultiTexCoord0.t < mc_midTexCoord.t;
-  	// 	if (
-  	// 		(
-  	// 			blockId == BLOCK_GROUND_WAVING || blockId == BLOCK_GROUND_WAVING_VERTICAL ||
-  	// 			blockId == BLOCK_GRASS_SHORT || (blockId == BLOCK_GRASS_TALL_UPPER && istopv) ||
-  	// 			blockId == BLOCK_SAPLING
-	// 		) && length(position.xy) < 24.0
-	// 	) {
-	// 		playerpos += calcMovePlants(playerpos + cameraPosition)*gl_MultiTexCoord1.y;
-	// 		position = mat3(shadowModelView) * playerpos + shadowModelView[3].xyz;
-  	// 	}
-
-  	// 	if (blockId == BLOCK_AIR_WAVING && length(position.xy) < 24.0) {
-	// 		playerpos += calcMoveLeaves(playerpos + cameraPosition, 0.0040, 0.0064, 0.0043, 0.0035, 0.0037, 0.0041, vec3(1.0,0.2,1.0), vec3(0.5,0.1,0.5))*gl_MultiTexCoord1.y;
-	// 		position = mat3(shadowModelView) * playerpos + shadowModelView[3].xyz;
-  	// 	}
-	// #endif
-
-	int blockId = int(mc_Entity.x + 0.5);
+	vec3 worldpos = playerpos;
 
 	#ifdef WAVY_PLANTS
 		// also use normal, so up/down facing geometry does not get detatched from its model parts.
 		bool InterpolateFromBase = gl_MultiTexCoord0.t < max(mc_midTexCoord.t, abs(viewToWorld(normalize(gl_NormalMatrix * gl_Normal)).y));
+		if((
+			// these wave off of the ground. the area connected to the ground does not wave.
+			(InterpolateFromBase && (mc_Entity.x == BLOCK_GRASS_TALL_LOWER || mc_Entity.x == BLOCK_GRASS_SHORT || mc_Entity.x == BLOCK_SAPLING || mc_Entity.x == BLOCK_GROUND_WAVING_VERTICAL))
 
-		if(	
-			(
-				// these wave off of the ground. the area connected to the ground does not wave.
-				(InterpolateFromBase && (blockId == BLOCK_GRASS_TALL_LOWER || blockId == BLOCK_GROUND_WAVING || blockId == BLOCK_GRASS_SHORT || blockId == BLOCK_SAPLING || blockId == BLOCK_GROUND_WAVING_VERTICAL)) 
+			// these wave off of the ceiling. the area connected to the ceiling does not wave.
+			|| (!InterpolateFromBase && (mc_Entity.x == BLOCK_VINE_OTHER))
 
-				// these wave off of the ceiling. the area connected to the ceiling does not wave.
-				|| (!InterpolateFromBase && (blockId == BLOCK_VINE_OTHER))
+			// these wave off of the air. they wave uniformly
+			|| (mc_Entity.x == BLOCK_GRASS_TALL_UPPER || mc_Entity.x == BLOCK_AIR_WAVING)
 
-				// these wave off of the air. they wave uniformly
-				|| (blockId == BLOCK_GRASS_TALL_UPPER || blockId == BLOCK_AIR_WAVING)
+			#ifndef RP_MODEL_FIX
+				|| (InterpolateFromBase && (mc_Entity.x == BLOCK_GROUND_WAVING)) || (mc_Entity.x == BLOCK_CAVE_VINE_BERRIES)
+			#endif
 
-			) && length(position.xy) < 24.0
-		){
-			vec3 worldpos = playerpos;
+		) && length(position) < 32.0) {
 
 			// apply displacement for waving plant blocks
 			worldpos += calcMovePlants(playerpos + cameraPosition) * max(gl_MultiTexCoord1.y,0.5);
 
 			// apply displacement for waving leaf blocks specifically, overwriting the other waving mode. these wave off of the air. they wave uniformly
-			if(blockId == BLOCK_AIR_WAVING) worldpos = playerpos + calcMoveLeaves(playerpos + cameraPosition, 0.0040, 0.0064, 0.0043, 0.0035, 0.0037, 0.0041, vec3(1.0,0.2,1.0), vec3(0.5,0.1,0.5))*gl_MultiTexCoord1.y;
-			
-			position = mat3(shadowModelView) * worldpos + shadowModelView[3].xyz;
+			if(mc_Entity.x == BLOCK_AIR_WAVING || mc_Entity.x == BLOCK_CAVE_VINE_BERRIES) worldpos = playerpos + calcMoveLeaves(playerpos + cameraPosition, 0.0040, 0.0064, 0.0043, 0.0035, 0.0037, 0.0041, vec3(1.0,0.2,1.0), vec3(0.5,0.1,0.5))*gl_MultiTexCoord1.y;
 		}
 	#endif
 
-	
+	#ifdef PLANET_CURVATURE
+		float curvature = length(worldpos) / (16*8);
+		worldpos.y -= curvature*curvature * CURVATURE_AMOUNT;
+	#endif
+
+	position = mat3(shadowModelView) * worldpos + shadowModelView[3].xyz;
+
 	#ifdef DISTORT_SHADOWMAP
 		if (entityId == ENTITY_SSS_MEDIUM || entityId == ENTITY_SLIME)
 			position.xyz = position.xyz - normalize(gl_NormalMatrix * gl_Normal) * 0.25;
 
-		gl_Position = BiasShadowProjection(toClipSpace3(position));
+		gl_Position = BiasShadowProjection(toClipSpace4(position));
 	#else
-		gl_Position = toClipSpace3(position);
+		gl_Position = toClipSpace4(position);
 	#endif
- 	
 
-	if (blockId == BLOCK_WATER) gl_Position.w = -1.0;
+	if (mc_Entity.x == BLOCK_WATER) gl_Position.w = -1.0;
 
   	gl_Position.z /= 6.0;
 }

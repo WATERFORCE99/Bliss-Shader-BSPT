@@ -10,7 +10,7 @@ Read the terms of modification and sharing before changing something below pleas
 
 #define SHADOW_MAP_BIAS 0.5
 const float PI = 3.1415927;
-varying vec2 texcoord;
+varying vec3 color;
 uniform mat4 shadowProjectionInverse;
 uniform mat4 shadowProjection;
 uniform mat4 shadowModelViewInverse;
@@ -20,13 +20,10 @@ uniform mat4 gbufferProjectionInverse;
 
 flat varying int water;
 
-
-
-
 #include "/lib/Shadow_Params.glsl"
 
 #define diagonal3(m) vec3((m)[0].x, (m)[1].y, m[2].z)
-#define  projMAD(m, v) (diagonal3(m) * (v) + (m)[3].xyz)
+#define projMAD(m, v) (diagonal3(m) * (v) + (m)[3].xyz)
 
 // uniform float far;
 uniform float dhFarPlane;
@@ -40,8 +37,6 @@ vec4 toClipSpace3(vec3 viewSpacePosition) {
     return vec4(projMAD(gl_ProjectionMatrix, viewSpacePosition),1.0);
 }
 
-
-
 varying float overdrawCull;
 // uniform int renderStage;
 
@@ -50,7 +45,7 @@ void main() {
 
     if(gl_Color.a < 1.0) water = 1;
 
-	texcoord.xy = gl_MultiTexCoord0.xy;
+	color = gl_Color.rgb;
 
 	vec3 position = mat3(gl_ModelViewMatrix) * vec3(gl_Vertex) + gl_ModelViewMatrix[3].xyz;
 	#ifdef DH_OVERDRAW_PREVENTION
@@ -67,4 +62,7 @@ void main() {
 	#endif
 
   	gl_Position.z /= 6.0;
+	#ifdef LPV_SHADOWS
+		gl_Position.xy = gl_Position.xy * 0.8 - 0.2 * gl_Position.w;
+	#endif
 }
