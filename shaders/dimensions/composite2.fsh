@@ -7,7 +7,6 @@ flat varying vec4 lightCol;
 flat varying vec3 averageSkyCol;
 flat varying vec3 averageSkyCol_Clouds;
 
-
 uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;
 
@@ -30,8 +29,6 @@ uniform float sunElevation;
 
 // uniform float far;
 uniform float near;
-uniform float dhFarPlane;
-uniform float dhNearPlane;
 
 uniform mat4 gbufferPreviousModelView;
 uniform vec3 previousCameraPosition;
@@ -61,21 +58,13 @@ uniform float caveDetection;
 
 #include "/lib/DistantHorizons_projections.glsl"
 
-float DH_ld(float dist) {
-    return (2.0 * dhNearPlane) / (dhFarPlane + dhNearPlane - dist * (dhFarPlane - dhNearPlane));
-}
-float DH_inv_ld (float lindepth){
-	return -((2.0*dhNearPlane/lindepth)-dhFarPlane-dhNearPlane)/(dhFarPlane-dhNearPlane);
-}
-
 float linearizeDepthFast(const in float depth, const in float near, const in float far) {
-    return (near * far) / (depth * (near - far) + far);
+	return (near * far) / (depth * (near - far) + far);
 }
 
 #define IS_LPV_ENABLED
 
 #if defined LPV_VL_FOG_ILLUMINATION && defined IS_LPV_ENABLED
-
 	flat varying float exposure;
 
 	#extension GL_ARB_shader_image_load_store: enable
@@ -88,31 +77,6 @@ float linearizeDepthFast(const in float depth, const in float near, const in flo
 	#include "/lib/hsv.glsl"
 	#include "/lib/lpv_common.glsl"
 	#include "/lib/lpv_render.glsl"
-
-	vec3 LPV_FOG_ILLUMINATION(in vec3 playerPos, float dd, float dL){
-		vec3 color = vec3(0.0);
-
-		vec3 lpvPos = GetLpvPosition(playerPos);
-
-        float fadeLength = 10.0; // in blocks
-        vec3 cubicRadius = clamp(	min(((LpvSize3-1.0) - lpvPos)/fadeLength,      lpvPos/fadeLength) ,0.0,1.0);
-        float LpvFadeF = cubicRadius.x*cubicRadius.y*cubicRadius.z;
-
-		if(LpvFadeF > 0.0){
-			// if(length(lpvSample.xyz) > 1e-5){
-
-				vec3 lighting = SampleLpvLinear(lpvPos).rgb * (LPV_VL_FOG_ILLUMINATION_BRIGHTNESS/100.0);
-				// float density = exp(-5.0 * clamp( 1.0 - length(lpvSample.xyz) / 16.0,0.0,1.0)) * (LPV_VL_FOG_ILLUMINATION_BRIGHTNESS/100.0) * LpvFadeF;
-				float density = exp(-5.0 * (1.0-length(lighting.xyz)))  * LpvFadeF;
-				// float density = (1-exp(-1.0-clamp(length(lighting.rgb),0.0,1.0),25) )* LpvFadeF;
-
-				// float density = 0.01 * LpvFadeF;
-
-				color = lighting - lighting * exp(-density*dd*dL);
-			// }
-		}
-		return color;
-	}
 #endif
 
 float invLinZ (float lindepth){
@@ -131,13 +95,8 @@ float invLinZ (float lindepth){
 
 	flat varying vec3 refractedSunVec;
 
-	#ifdef Daily_Weather
-		flat varying vec4 dailyWeatherParams0;
-		flat varying vec4 dailyWeatherParams1;
-	#else
-		vec4 dailyWeatherParams0 = vec4(CloudLayer0_coverage, CloudLayer1_coverage, CloudLayer2_coverage, 0.0);
-		vec4 dailyWeatherParams1 = vec4(CloudLayer0_density, CloudLayer1_density, CloudLayer2_density, 0.0);
-	#endif
+	flat in vec4 dailyWeatherParams0;
+	flat in vec4 dailyWeatherParams1;
 
 	// uniform int dhRenderDistance;
 	#define TIMEOFDAYFOG
@@ -224,14 +183,13 @@ vec4 waterVolumetrics(vec3 rayStart, vec3 rayEnd, float rayLength, vec2 dither, 
 	vec3 vL = vec3(0.0);
 
 	// float distanceFromWaterSurface = -(normalize(dVWorld).y + (cameraPosition.y - waterEnteredAltitude)/(waterEnteredAltitude/2)) * 0.5 + 0.5;
-    // distanceFromWaterSurface = clamp(distanceFromWaterSurface, 0.0,1.0);
-    // distanceFromWaterSurface = exp(-7.0*distanceFromWaterSurface*distanceFromWaterSurface);
+	// distanceFromWaterSurface = clamp(distanceFromWaterSurface, 0.0,1.0);
+	// distanceFromWaterSurface = exp(-7.0*distanceFromWaterSurface*distanceFromWaterSurface);
 
 	// float distanceFromWaterSurface2 = normalize(dVWorld).y  + (cameraPosition.y - waterEnteredAltitude)/waterEnteredAltitude;
-    // distanceFromWaterSurface2 = clamp(-distanceFromWaterSurface2,0.0,1.0);
+	// distanceFromWaterSurface2 = clamp(-distanceFromWaterSurface2,0.0,1.0);
 
-    // distanceFromWaterSurface2 = exp(-7*pow(distanceFromWaterSurface2,1.5));
-
+	// distanceFromWaterSurface2 = exp(-7*pow(distanceFromWaterSurface2,1.5));
 	
 	#ifdef OVERWORLD_SHADER
 		float lowlightlevel  = clamp(eyeBrightnessSmooth.y/240.0,0.1,1.0);
@@ -288,19 +246,16 @@ vec4 waterVolumetrics(vec3 rayStart, vec3 rayEnd, float rayLength, vec2 dither, 
 			#endif
 		#endif
 
-
 		float bubble = exp2(-10.0 * clamp(1.0 - length(d*dVWorld) / 16.0, 0.0,1.0));
 		// float caustics = mix(max(max(waterCaustics(progressW, WsunVec), phase*0.5) * mix(0.5, 200.0, bubble), phase), 1.0, lowlightlevel);
 		// float caustics = max(max(waterCaustics(progressW, WsunVec), phase*0.5) * mix(0.5, 200.0, bubble), phase);
 		float caustics = max(max(waterCaustics(progressW, WsunVec), phase*0.5) * mix(0.5, 1.5, bubble), phase) ;//* abs(WsunVec.y);
-
 
 		vec3 sunAbsorbance = exp(-waterCoefs * (distanceFromWaterSurface/abs(WsunVec.y)));
 		vec3 WaterAbsorbance = exp(-waterCoefs * distanceFromWaterSurface);
 
 		vec3 Directlight = lightSource * sh * phase * caustics * sunAbsorbance;
 		vec3 Indirectlight = ambient * WaterAbsorbance;
-
 
 		vec3 light = (Indirectlight + Directlight) * scatterCoef;
 		
@@ -327,8 +282,8 @@ float fogPhase2(float lightPoint){
 
 //encoding by jodie
 float encodeVec2(vec2 a){
-    const vec2 constant1 = vec2( 1., 256.) / 65535.;
-    vec2 temp = floor( a * 255. );
+	const vec2 constant1 = vec2( 1., 256.) / 65535.;
+	vec2 temp = floor( a * 255. );
 	return temp.x*constant1.x+temp.y*constant1.y;
 }
 
@@ -336,22 +291,9 @@ uniform int framemod8;
 #include "/lib/TAA_jitter.glsl"
 
 float convertHandDepth(float depth) {
-    float ndcDepth = depth * 2.0 - 1.0;
-    ndcDepth /= MC_HAND_DEPTH;
-    return ndcDepth * 0.5 + 0.5;
-}
-
-vec3 alterCoords(in vec3 coords, bool lighting){
-
-	float theDistance = length(coords + (lighting ? vec3(0.0) : cameraPosition));
-
-	coords.x = max(coords.x,0.0);
-
-	coords.y = coords.y;
-
-	coords.z = coords.z/3;
-	
-	return coords;
+	float ndcDepth = depth * 2.0 - 1.0;
+	ndcDepth /= MC_HAND_DEPTH;
+	return ndcDepth * 0.5 + 0.5;
 }
 
 vec4 raymarchTest(
@@ -366,7 +308,7 @@ vec4 raymarchTest(
 	float minHeight = 250.0;
 	float maxHeight = minHeight + 100.0;
 	
-	#if defined DISTANT_HORIZONS
+	#ifdef DISTANT_HORIZONS
 		float maxdist = dhFarPlane - 16.0;
 	#else
 		float maxdist = far*4;
@@ -401,9 +343,7 @@ vec4 raymarchTest(
 	// vec3 rayProgress = rayDirection*dither.x + cameraPosition + (rayDirection / abs(rayDirection.y)) *flip;
 	// float dL = length(rayDirection);
 
-
 	for (int i = 0; i < SAMPLECOUNT; i++) {
-		
 		if(length(rayProgress - cameraPosition) > referenceDistance) break;
 
 		float d = (pow(expFactor, float(i + dither.x)/float(SAMPLECOUNT))/expFactor - 1.0/expFactor)/(1-1.0/expFactor);
@@ -424,7 +364,6 @@ vec4 raymarchTest(
 		totalAbsorbance *= fogVolumeCoeff;
 
 		rayProgress += rayDirection;
-
 	}
 	return vec4(color, totalAbsorbance);
 }
@@ -501,10 +440,10 @@ void main() {
 	#endif
 
 	if (isEyeInWater == 1){
-		// vec3 underWaterFog =  waterVolumetrics(vec3(0.0), viewPos0, length(viewPos0), BN, totEpsilon, scatterCoef, indirectLightColor_dynamic, directLightColor , dot(normalize(viewPos0), normalize(sunVec* lightCol.a ) 	));
+		// vec3 underWaterFog =  waterVolumetrics(vec3(0.0), viewPos0, length(viewPos0), BN, totEpsilon, scatterCoef, indirectLightColor_dynamic, directLightColor , dot(normalize(viewPos0), normalize(sunVec* lightCol.a )));
 		// VolumetricFog = vec4(underWaterFog, 1.0);
 
-		vec4 underWaterFog =  waterVolumetrics(vec3(0.0), viewPos0_water, length(viewPos0_water), BN, totEpsilon, scatterCoef, indirectLightColor_dynamic, directLightColor , dot(normalize(viewPos0_water), normalize(sunVec* lightCol.a ) 	));
+		vec4 underWaterFog =  waterVolumetrics(vec3(0.0), viewPos0_water, length(viewPos0_water), BN, totEpsilon, scatterCoef, indirectLightColor_dynamic, directLightColor , dot(normalize(viewPos0_water), normalize(sunVec* lightCol.a )));
 		
 		// VolumetricFog.rgb = underWaterFog.rgb;
 		VolumetricFog = vec4(underWaterFog.rgb, 1.0);

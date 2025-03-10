@@ -43,16 +43,8 @@ uniform float frameTimeCounter;
 uniform float far;
 uniform float near;
 uniform float farPlane;
-uniform float dhNearPlane;
-uniform float dhFarPlane;
 
-uniform mat4 gbufferModelViewInverse;
-uniform mat4 gbufferModelView;
 uniform mat4 gbufferPreviousModelView;
-uniform mat4 gbufferProjectionInverse;
-uniform mat4 gbufferProjection;
-uniform mat4 gbufferPreviousProjection;
-uniform vec3 cameraPosition;
 uniform vec3 previousCameraPosition;
 
 uniform int hideGUI;
@@ -74,11 +66,9 @@ uniform float caveDetection;
 #endif
 
 #include "/lib/sky_gradient.glsl"
+#include "/lib/projections.glsl"
 
 uniform float eyeAltitude;
-
-#define diagonal3(m) vec3((m)[0].x, (m)[1].y, m[2].z)
-#define projMAD(m, v) (diagonal3(m) * (v) + (m)[3].xyz)
 
 float ld(float depth) {
 	return 1.0 / (zMults.y - depth * zMults.z);		// (-depth * (far - near)) = (2.0 * near)/ld - far - near
@@ -86,13 +76,6 @@ float ld(float depth) {
 
 vec3 toLinear(vec3 sRGB){
 	return sRGB * (sRGB * (sRGB * 0.305306011 + 0.682171111) + 0.012522878);
-}
-
-vec3 toScreenSpace(vec3 p) {
-	vec4 iProjDiag = vec4(gbufferProjectionInverse[0].x, gbufferProjectionInverse[1].y, gbufferProjectionInverse[2].zw);
-	vec3 playerPos = p * 2. - 1.;
-	vec4 fragposition = iProjDiag * playerPos.xyzz + gbufferProjectionInverse[3];
-	return fragposition.xyz / fragposition.w;
 }
 
 #include "/lib/DistantHorizons_projections.glsl"
@@ -103,14 +86,6 @@ vec4 blueNoise(vec2 coord){
 
 vec3 normVec (vec3 vec){
 	return vec*inversesqrt(dot(vec,vec));
-}
-
-float DH_ld(float dist) {
-	return (2.0 * dhNearPlane) / (dhFarPlane + dhNearPlane - dist * (dhFarPlane - dhNearPlane));
-}
-
-float DH_inv_ld (float lindepth){
-	return -((2.0*dhNearPlane/lindepth)-dhFarPlane-dhNearPlane)/(dhFarPlane-dhNearPlane);
 }
 
 float linearizeDepthFast(const in float depth, const in float near, const in float far) {
@@ -130,20 +105,6 @@ vec3 decode (vec2 encn){
 	n.z = 1.0 - n.x - n.y;
 	n.xy = n.z <= 0.0 ? (1.0 - n.yx) * sign(encn) : encn;
 	return clamp(normalize(n.xyz),-1.0,1.0);
-}
-
-vec3 worldToView(vec3 worldPos) {
-	vec4 pos = vec4(worldPos, 0.0);
-	pos = gbufferModelView * pos;
-	return pos.xyz;
-}
-
-vec3 viewToWorld(vec3 viewPosition) {
-	vec4 pos;
-	pos.xyz = viewPosition;
-	pos.w = 0.0;
-	pos = gbufferModelViewInverse * pos;
-	return pos.xyz;
 }
 
 vec3 doRefractionEffect(inout vec2 texcoord, vec2 normal, float linearDistance, bool isReflectiveEntity){
@@ -196,7 +157,6 @@ vec3 doRefractionEffect(inout vec2 texcoord, vec2 normal, float linearDistance, 
 		//// BLUE
 		refractedUV = clamp(texcoord - ((UVNormal - abberationOffset) + directionalSmudge)*refractionMult ,0.0,1.0);
 		color.b = texelFetch2D(colortex3, ivec2(refractedUV/texelSize),0).b;
-  
   #else
 		refractedUV = clamp(texcoord - (UVNormal + directionalSmudge)*refractionMult,0,1);
 		color = texture2D(colortex3, refractedUV).rgb;
@@ -211,8 +171,7 @@ vec3 toClipSpace3Prev(vec3 viewSpacePosition) {
 	return projMAD(gbufferPreviousProjection, viewSpacePosition) / -viewSpacePosition.z * 0.5 + 0.5;
 }
 
-vec3 closestToCamera5taps(vec2 texcoord, sampler2D depth)
-{
+vec3 closestToCamera5taps(vec2 texcoord, sampler2D depth){
 	vec2 du = vec2(texelSize.x*2., 0.0);
 	vec2 dv = vec2(0.0, texelSize.y*2.);
 
@@ -252,20 +211,20 @@ vec3 toScreenSpace_DH_special(vec3 POS, bool depthCheck ) {
 	vec4 iProjDiag = vec4(0.0);
 
 	#ifdef DISTANT_HORIZONS
-    	if (depthCheck) {
+    		if(depthCheck) {
 			iProjDiag = vec4(dhProjectionInverse[0].x, dhProjectionInverse[1].y, dhProjectionInverse[2].zw);
 
-    		feetPlayerPos = POS * 2.0 - 1.0;
-    		viewPos = iProjDiag * feetPlayerPos.xyzz + dhProjectionInverse[3];
+			feetPlayerPos = POS * 2.0 - 1.0;
+			viewPos = iProjDiag * feetPlayerPos.xyzz + dhProjectionInverse[3];
 			viewPos.xyz /= viewPos.w;
 
 		} else {
 	#endif
-			iProjDiag = vec4(gbufferProjectionInverse[0].x, gbufferProjectionInverse[1].y, gbufferProjectionInverse[2].zw);
+		iProjDiag = vec4(gbufferProjectionInverse[0].x, gbufferProjectionInverse[1].y, gbufferProjectionInverse[2].zw);
 
-    		feetPlayerPos = POS * 2.0 - 1.0;
-    		viewPos = iProjDiag * feetPlayerPos.xyzz + gbufferProjectionInverse[3];
-			viewPos.xyz /= viewPos.w;
+		feetPlayerPos = POS * 2.0 - 1.0;
+		viewPos = iProjDiag * feetPlayerPos.xyzz + gbufferProjectionInverse[3];
+		viewPos.xyz /= viewPos.w;
 			
 	#ifdef DISTANT_HORIZONS
 		}
@@ -279,7 +238,6 @@ vec4 VLTemporalFiltering(vec3 viewPos, bool depthCheck, out float DEBUG){
 	vec2 texcoord = gl_FragCoord.xy*texelSize;
 
 	vec2 VLtexCoord = texcoord * VL_RENDER_RESOLUTION;
-  
 
 	// vec3 closestToCamera = closestToCamera5taps(texcoord, depthtex0);
 	// vec3 viewPos_5tap = toScreenSpace(closestToCamera);
@@ -434,7 +392,7 @@ void main() {
   ////// --------------- BLEND TRANSLUCENT GBUFFERS 
   //////////// and do border fog on opaque and translucents
   
-  	#if defined BorderFog
+  	#ifdef BorderFog
 		#ifdef DISTANT_HORIZONS
 			float fog = smoothstep(1.0, 0.0, min(max(1.0 - linearDistance_cylinder / dhRenderDistance,0.0)*3.0,1.0)   );
 		#else
@@ -493,7 +451,6 @@ void main() {
 	}
 #endif
 
-
 ////// --------------- underwater fog
 	if (isEyeInWater == 1){
 		// float dirtAmount = Dirt_Amount;
@@ -520,7 +477,7 @@ void main() {
 
 	bloomyFogMult *= temporallyFilteredVL.a;
   
-	#if defined IS_IRIS
+	#ifdef IS_IRIS
 		color *= min(temporallyFilteredVL.a + (1-nametagbackground),1.0);
 		color += temporallyFilteredVL.rgb * nametagbackground;
 	#else
@@ -566,7 +523,7 @@ void main() {
 			bloomyFogMult = 1.0;
 		}
 
-		#if defined OVERWORLD_SHADER
+		#ifdef OVERWORLD_SHADER
 			if(hideGUI == 1) color.rgb = skyCloudsFromTex(playerPos_normalized, colortex4).rgb/1200.0;
 		#else
 			if(hideGUI == 1) color.rgb = volumetricsFromTex(playerPos_normalized, colortex4, 0.0).rgb/1200.0;

@@ -13,7 +13,7 @@ void main() {
 	gl_Position = ftransform();
 	texcoord = gl_MultiTexCoord0.xy;
 
-	tempOffsets = hammersley(frameCounter%10000, 10000);
+	tempOffsets = Hammersley(frameCounter%10000);
 
 	#ifdef TAA_UPSCALING
 		gl_Position.xy = (gl_Position.xy*0.5+0.5)*RENDER_SCALE*2.0-1.0;

@@ -910,11 +910,9 @@ void main() {
                 mixWeight = 1.0;
                 break;
             case BLOCK_NETHER_PORTAL:
-                // lightColor = vec3(0.502, 0.165, 0.831);
-                // tintColor = vec3(0.502, 0.165, 0.831);
-                lightColor = vec3(NETHER_PORTAL_R, NETHER_PORTAL_G, NETHER_PORTAL_B);
-                tintColor = vec3(NETHER_PORTAL_R, NETHER_PORTAL_G, NETHER_PORTAL_B);
-                lightRange = NETHER_PORTAL_RANGE;
+                lightColor = vec3(0.502, 0.165, 0.831);
+                tintColor = vec3(0.502, 0.165, 0.831);
+                lightRange = 7.0;
                 mixWeight = 1.0;
                 break;
             case BLOCK_SLIME:

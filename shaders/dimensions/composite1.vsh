@@ -6,11 +6,8 @@
 	flat varying float Flashing;
 #endif
 
-#ifdef Daily_Weather
-	flat varying vec4 dailyWeatherParams0;
-	flat varying vec4 dailyWeatherParams1;
-#endif
-
+flat out vec4 dailyWeatherParams0;
+flat out vec4 dailyWeatherParams1;
 
 flat varying vec3 WsunVec;
 flat varying vec3 WmoonVec;
@@ -75,9 +72,12 @@ void main() {
 
 	exposure = texelFetch2D(colortex4,ivec2(10,37),0).r;
 	
-	#if defined Daily_Weather
-			dailyWeatherParams0 = vec4(texelFetch2D(colortex4,ivec2(1,1),0).rgb / 1500.0, 0.0);
-			dailyWeatherParams1 = vec4(texelFetch2D(colortex4,ivec2(2,1),0).rgb / 1500.0, 0.0);
+	#ifdef Daily_Weather
+		dailyWeatherParams0 = vec4(texelFetch2D(colortex4,ivec2(1,1),0).rgb / 1500.0, 0.0);
+		dailyWeatherParams1 = vec4(texelFetch2D(colortex4,ivec2(2,1),0).rgb / 1500.0, 0.0);
+	#else
+		dailyWeatherParams0 = vec4(CloudLayer0_coverage, CloudLayer1_coverage, CloudLayer2_coverage, 0.0);
+		dailyWeatherParams1 = vec4(CloudLayer0_density, CloudLayer1_density, CloudLayer2_density, 0.0);
 	#endif
 	
 	#ifdef TAA

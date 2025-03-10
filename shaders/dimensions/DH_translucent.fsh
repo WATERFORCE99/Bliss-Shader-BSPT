@@ -4,12 +4,6 @@
 #include "/lib/projections.glsl"
 #include "/lib/util.glsl"
 
-#ifdef OVERWORLD_SHADER
-	#define WATER_SUN_SPECULAR
-#else
-	#undef WATER_SUN_SPECULAR
-#endif
-
 uniform vec2 texelSize;
 // uniform int moonPhase;
 uniform float frameTimeCounter;
@@ -17,18 +11,16 @@ uniform float frameTimeCounter;
 const bool shadowHardwareFiltering = true;
 uniform sampler2DShadow shadow;
 
-#ifdef DISTANT_HORIZONS
-uniform sampler2D dhDepthTex;
-uniform sampler2D dhDepthTex1;
-#endif
 uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;
+#ifdef DISTANT_HORIZONS
+	uniform sampler2D dhDepthTex;
+	uniform sampler2D dhDepthTex1;
+#endif
 
-uniform sampler2D colortex12;
-// uniform sampler2D colortex7;
 uniform sampler2D colortex4;
 uniform sampler2D colortex5;
-
+uniform sampler2D colortex12;
 
 #include "/lib/sky_gradient.glsl"
 #include "/lib/waterBump.glsl"
@@ -44,11 +36,8 @@ varying vec2 lightmapCoords;
 flat varying int isWater;
 
 // uniform float far;
-uniform float dhFarPlane;
-uniform float dhNearPlane;
 
 uniform vec3 previousCameraPosition;
-// uniform vec3 cameraPosition;
 
 // uniform mat4 gbufferModelView;
 uniform mat4 gbufferPreviousModelView;
@@ -64,24 +53,8 @@ flat varying vec4 lightCol;
 flat varying vec3 WsunVec;
 flat varying vec3 WsunVec2;
 
-
-// uniform mat4 dhPreviousProjection;
-// uniform mat4 dhProjectionInverse;
-// uniform mat4 dhProjection;
-
-
 #include "/lib/DistantHorizons_projections.glsl"
 
-vec3 DH_toScreenSpace(vec3 p) {
-	vec4 iProjDiag = vec4(dhProjectionInverse[0].x, dhProjectionInverse[1].y, dhProjectionInverse[2].zw);
-	vec3 feetPlayerPos = p * 2. - 1.;
-	vec4 viewPos = iProjDiag * feetPlayerPos.xyzz + dhProjectionInverse[3];
-	return viewPos.xyz / viewPos.w;
-}
-
-vec3 DH_toClipSpace3(vec3 viewSpacePosition) {
-	return projMAD(dhProjection, viewSpacePosition) / -viewSpacePosition.z * 0.5 + 0.5;
-}
 uniform float near;
 float invLinZ (float lindepth){
 	return -((2.0*near/lindepth)-far-near)/(far-near);
@@ -90,36 +63,16 @@ float ld(float dist) {
 	return (2.0 * near) / (far + near - dist * (far - near));
 }
 
-// float DH_ld(float dist) {
-	// return (2.0 * dhNearPlane) / (dhFarPlane + dhNearPlane - dist * (dhFarPlane - dhNearPlane));
-// }
-// float DH_invLinZ (float lindepth){
-	// return -((2.0*dhNearPlane/lindepth)-dhFarPlane-dhNearPlane)/(dhFarPlane-dhNearPlane);
-// }
-
-float DH_ld(float dist) {
-	return (2.0 * dhNearPlane) / (dhFarPlane + dhNearPlane - dist * (dhFarPlane - dhNearPlane));
-}
-float DH_inv_ld (float lindepth){
-	return -((2.0*dhNearPlane/lindepth)-dhFarPlane-dhNearPlane)/(dhFarPlane-dhNearPlane);
-}
-
 float linearizeDepthFast(const in float depth, const in float near, const in float far) {
 	return (near * far) / (depth * (near - far) + far);
 }
-
 
 uniform int isEyeInWater;
 uniform float rainStrength;
 
 #ifdef OVERWORLD_SHADER
-	#ifdef Daily_Weather
-		flat varying vec4 dailyWeatherParams0;
-		flat varying vec4 dailyWeatherParams1;
-	#else
-		vec4 dailyWeatherParams0 = vec4(CloudLayer0_coverage, CloudLayer1_coverage, CloudLayer2_coverage, 0.0);
-		vec4 dailyWeatherParams1 = vec4(CloudLayer0_density, CloudLayer1_density, CloudLayer2_density, 0.0);
-	#endif
+	flat in vec4 dailyWeatherParams0;
+	flat in vec4 dailyWeatherParams1;
 
 	#define CLOUDSHADOWSONLY
 	#include "/lib/volumetricClouds.glsl"
@@ -187,18 +140,6 @@ vec3 rayTrace(vec3 dir, vec3 position,float dither, float fresnel, bool inwater)
 	return vec3(1.1);
 }
 
-vec3 viewToWorld(vec3 viewPos) {
-	vec4 pos;
-	pos.xyz = viewPos;
-	pos.w = 0.0;
-	pos = gbufferModelViewInverse * pos;
-	return pos.xyz;
-}
-vec3 worldToView(vec3 worldPos) {
-	vec4 pos = vec4(worldPos, 0.0);
-	pos = gbufferModelView * pos;
-	return pos.xyz;
-}
 vec4 encode (vec3 n, vec2 lightmaps){
 	n.xy = n.xy / dot(abs(n), vec3(1.0));
 	n.xy = n.z <= 0.0 ? (1.0 - abs(n.yx)) * sign(n.xy) : n.xy;

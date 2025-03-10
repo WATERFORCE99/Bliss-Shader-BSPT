@@ -1,4 +1,5 @@
 #include "/lib/settings.glsl"
+#include "/lib/DistantHorizons_projections.glsl"
 
 uniform sampler2D colortex4;
 uniform sampler2D colortex1;
@@ -19,15 +20,6 @@ float linZ(float depth) {
     return (2.0 * near) / (far + near - depth * (far - near));
 }
 
-uniform float dhFarPlane;
-uniform float dhNearPlane;
-float DH_ld(float dist) {
-    return (2.0 * dhNearPlane) / (dhFarPlane + dhNearPlane - dist * (dhFarPlane - dhNearPlane));
-}
-float DH_invLinZ (float lindepth){
-	return -((2.0*dhNearPlane/lindepth)-dhFarPlane-dhNearPlane)/(dhFarPlane-dhNearPlane);
-}
-
 float linearizeDepthFast(const in float depth, const in float near, const in float far) {
     return (near * far) / (depth * (near - far) + far);
 }
@@ -42,6 +34,7 @@ vec2 decodeVec2(float a){
     const float constant2 = 256. / 255.;
     return fract( a * constant1 ) * constant2 ;
 }
+
 //////////////////////////////VOID MAIN//////////////////////////////
 //////////////////////////////VOID MAIN//////////////////////////////
 //////////////////////////////VOID MAIN//////////////////////////////

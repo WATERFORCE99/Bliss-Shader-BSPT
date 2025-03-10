@@ -1,9 +1,5 @@
 #include "/lib/settings.glsl"
 
-// #if defined END_SHADER || defined NETHER_SHADER
-	// #undef IS_LPV_ENABLED
-// #endif
-
 #ifdef IS_LPV_ENABLED
 	#extension GL_EXT_shader_image_load_store: enable
 	#extension GL_ARB_shading_language_packing: enable
@@ -11,12 +7,12 @@
 
 #include "/lib/res_params.glsl"
 
-varying vec4 lmtexcoord;
-varying vec4 color;
-flat varying float exposure;
+in vec4 lmtexcoord;
+in vec4 color;
+flat in float exposure;
 
 #ifdef LINES
-	flat varying int SELECTION_BOX;
+	flat in int SELECTION_BOX;
 #endif
 
 #ifdef OVERWORLD_SHADER
@@ -29,10 +25,10 @@ flat varying float exposure;
 		uniform sampler2DShadow shadowtex1;
 	#endif
 
-	flat varying vec3 WsunVec;
+	flat in vec3 WsunVec;
 
-	flat varying vec3 averageSkyCol_Clouds;
-	flat varying vec4 lightCol;
+	flat in vec3 averageSkyCol_Clouds;
+	flat in vec4 lightCol;
 #endif
 
 uniform int isEyeInWater;
@@ -55,26 +51,16 @@ uniform ivec2 eyeBrightnessSmooth;
 uniform float rainStrength;
 uniform float waterEnteredAltitude;
 
-
 flat varying float HELD_ITEM_BRIGHTNESS;
-
-uniform mat4 gbufferPreviousModelView;
-uniform vec3 previousCameraPosition;
 
 #include "/lib/util.glsl"
 #include "/lib/projections.glsl"
 
 #ifdef OVERWORLD_SHADER
-	#ifdef Daily_Weather
-		flat varying vec4 dailyWeatherParams0;
-		flat varying vec4 dailyWeatherParams1;
-	#else
-		vec4 dailyWeatherParams0 = vec4(CloudLayer0_coverage, CloudLayer1_coverage, CloudLayer2_coverage, 0.0);
-		vec4 dailyWeatherParams1 = vec4(CloudLayer0_density, CloudLayer1_density, CloudLayer2_density, 0.0);
-	#endif
+	flat in vec4 dailyWeatherParams0;
+	flat in vec4 dailyWeatherParams1;
 
 	#define CLOUDSHADOWSONLY
-	
 	#include "/lib/volumetricClouds.glsl"
 #endif
 
@@ -94,12 +80,8 @@ vec3 toLinear(vec3 sRGB){
 	return sRGB * (sRGB * (sRGB * 0.305306011 + 0.682171111) + 0.012522878);
 }
 
-// #define diagonal3(m) vec3((m)[0].x, (m)[1].y, m[2].z)
-
 uniform int framemod8;
-
 #include "/lib/TAA_jitter.glsl"
-
 
 //Mie phase function
 float phaseg(float x, float g){
@@ -117,7 +99,6 @@ float encodeVec2(float x,float y){
 	return encodeVec2(vec2(x,y));
 }
 
-
 // #undef BASIC_SHADOW_FILTER
 #ifdef OVERWORLD_SHADER
 	float ComputeShadowMap(inout vec3 directLightColor, vec3 playerPos, float maxDistFade){
@@ -129,11 +110,10 @@ float encodeVec2(float x,float y){
 		projectedShadowPosition = diagonal3(shadowProjection) * projectedShadowPosition + shadowProjection[3].xyz;
 
 		// un-distort
+		float distortFactor = 1.0;
 		#ifdef DISTORT_SHADOWMAP
-			float distortFactor = calcDistort(projectedShadowPosition.xy);
+			distortFactor = calcDistort(projectedShadowPosition.xy);
 			projectedShadowPosition.xy *= distortFactor;
-		#else
-			float distortFactor = 1.0;
 		#endif
 
 		// hamburger
@@ -168,13 +148,10 @@ float encodeVec2(float x,float y){
 			// make it such that full alpha areas that arent in a shadow have a value of 1.0 instead of 0.0
 			translucentTint += mix(translucentShadow.rgb, vec3(1.0),  opaqueShadow*shadowDepthDiff);
 
-		#else
-			shadowmap += shadow2D(shadow, projectedShadowPosition).x;
-		#endif
-
-		#ifdef TRANSLUCENT_COLORED_SHADOWS
 			// tint the lightsource color with the translucent shadow color
 			directLightColor *= mix(vec3(1.0), translucentTint.rgb, maxDistFade);
+		#else
+			shadowmap += shadow2D(shadow, projectedShadowPosition).x;
 		#endif
 
 		return mix(1.0, shadowmap, maxDistFade);
@@ -326,6 +303,7 @@ void main() {
 	vec3 viewPos = toScreenSpace(gl_FragCoord.xyz*vec3(texelSize/RENDER_SCALE,1.0)-vec3(vec2(tempOffset)*texelSize*0.5,0.0));
 	vec3 feetPlayerPos = mat3(gbufferModelViewInverse) * viewPos;
 	vec3 feetPlayerPos_normalized = normalize(feetPlayerPos);
+	vec3 worldPos = feetPlayerPos + cameraPosition;
 
 	vec4 TEXTURE = texture2D(texture, lmtexcoord.xy)*color;
 	
@@ -347,9 +325,9 @@ void main() {
 		#else
 			vec3 playerCamPos = cameraPosition;
 		#endif
-		// lightmap.x = max(lightmap.x, HELD_ITEM_BRIGHTNESS * clamp( pow(max(1.0-length((feetPlayerPos+cameraPosition) - playerCamPos)/HANDHELD_LIGHT_RANGE,0.0),1.5),0.0,1.0));
+
 		if(HELD_ITEM_BRIGHTNESS > 0.0){ 
-			float pointLight = clamp(1.0-length((feetPlayerPos+cameraPosition)-playerCamPos)/HANDHELD_LIGHT_RANGE,0.0,1.0);
+			float pointLight = clamp(1.0-length(worldPos-playerCamPos)/HANDHELD_LIGHT_RANGE,0.0,1.0);
 			lightmap.x = mix(lightmap.x, HELD_ITEM_BRIGHTNESS, pointLight*pointLight);
 		}
 
@@ -394,7 +372,7 @@ void main() {
 			Shadows = mix(LM_shadowMapFallback, Shadows, shadowMapFalloff2);
 
 			#ifdef CLOUDS_SHADOWS	
-				Shadows *= GetCloudShadow(feetPlayerPos+cameraPosition, WsunVec);
+				Shadows *= GetCloudShadow(worldPos, WsunVec);
 			#endif
 
 			if(isEyeInWater == 1){
@@ -447,7 +425,6 @@ void main() {
 		if(TEXTURE.a < 0.7 && TEXTURE.a > 0.2) gl_FragData[0] *= clamp(1.0 - length(feetPlayerPos) / 100.0 ,0.0,1.0);
 
 		gl_FragData[0].rgb *= 0.1;
-
 	#endif
 #endif
 }

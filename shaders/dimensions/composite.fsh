@@ -5,7 +5,6 @@
 	#undef DISTANT_HORIZONS
 #endif
 
-
 flat varying vec3 WsunVec;
 flat varying vec2 TAA_Offset;
 
@@ -52,16 +51,8 @@ uniform float viewHeight;
 
 // uniform float far;
 uniform float near;
-uniform float dhFarPlane;
-uniform float dhNearPlane;
 
 #include "/lib/projections.glsl"
-
-vec3 worldToView(vec3 worldPos) {
-	vec4 pos = vec4(worldPos, 0.0);
-	pos = gbufferModelView * pos;
-	return pos.xyz;
-}
 
 vec2 tapLocation(int sampleNumber,int nb, float nbRot,float jitter,float distort){
 	float alpha = (sampleNumber+jitter)/nb;
@@ -104,16 +95,7 @@ vec4 blueNoise(vec2 coord){
 	return texelFetch2D(colortex6, ivec2(coord)%512 , 0) ;
 }
 
-vec3 viewToWorld(vec3 viewPos) {
-	vec4 pos;
-	pos.xyz = viewPos;
-	pos.w = 0.0;
-	pos = gbufferModelViewInverse * pos;
-	return pos.xyz;
-}
-
 #include "/lib/Shadow_Params.glsl"
-
 
 vec2 SpiralSample(
 	int samples, int totalSamples, float rotation, float Xi
@@ -155,13 +137,6 @@ vec2 CleanSample(
 }
 
 #include "/lib/DistantHorizons_projections.glsl"
-
-float DH_ld(float dist) {
-	return (2.0 * dhNearPlane) / (dhFarPlane + dhNearPlane - dist * (dhFarPlane - dhNearPlane));
-}
-float DH_inv_ld (float lindepth){
-	return -((2.0*dhNearPlane/lindepth)-dhFarPlane-dhNearPlane)/(dhFarPlane-dhNearPlane);
-}
 
 float linearizeDepthFast(const in float depth, const in float near, const in float far) {
 	return (near * far) / (depth * (near - far) + far);

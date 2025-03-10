@@ -31,8 +31,6 @@ uniform vec3 sunVec;
 uniform float sunElevation;
 
 // uniform float far;
-uniform float dhFarPlane;
-uniform float dhNearPlane;
 uniform float near;
 
 uniform float frameTimeCounter;
@@ -62,12 +60,6 @@ uniform vec3 previousCameraPosition;
 
 #include "/lib/DistantHorizons_projections.glsl"
 
-float DH_ld(float dist) {
-	return (2.0 * near) / (dhFarPlane + dhNearPlane - dist * (dhFarPlane - dhNearPlane));
-}
-float DH_inv_ld (float lindepth){
-	return -((2.0*dhNearPlane/lindepth)-dhFarPlane-dhNearPlane)/(dhFarPlane-dhNearPlane);
-}
 
 float linearizeDepthFast(const in float depth, const in float near, const in float far) {
 	return (near * far) / (depth * (near - far) + far);
@@ -85,15 +77,9 @@ float linearizeDepthFast(const in float depth, const in float near, const in flo
 	#endif
 
 	flat varying vec3 refractedSunVec;
-
-	#ifdef Daily_Weather
-		flat varying vec4 dailyWeatherParams0;
-		flat varying vec4 dailyWeatherParams1;
-	#else
-		vec4 dailyWeatherParams0 = vec4(CloudLayer0_coverage, CloudLayer1_coverage, CloudLayer2_coverage, 0.0);
-		vec4 dailyWeatherParams1 = vec4(CloudLayer0_density, CloudLayer1_density, CloudLayer2_density, 0.0);
-	#endif
-
+	
+	flat in vec4 dailyWeatherParams0;
+	flat in vec4 dailyWeatherParams1;
 
 	#define TIMEOFDAYFOG
 	#include "/lib/lightning_stuff.glsl"
@@ -252,9 +238,7 @@ vec4 waterVolumetrics( vec3 rayStart, vec3 rayEnd, float estEndDepth, float estS
 				// sh = shadow2D( shadow, pos).x;
 
 				#ifdef LPV_SHADOWS
-
 					pos.xy *= 0.8;
-
 				#endif
 
 				#ifdef TRANSLUCENT_COLORED_SHADOWS

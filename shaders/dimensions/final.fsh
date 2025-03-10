@@ -12,13 +12,15 @@ uniform sampler2D depthtex2;
 	uniform sampler2D dhDepthTex0;
 #endif
 
-flat in vec3 WsunVec;
-flat in vec4 dailyWeatherParams0;
-flat in vec4 dailyWeatherParams1;
+#ifdef OVERWORLD_SHADER
+	flat in vec3 WsunVec;
+	flat in vec4 dailyWeatherParams0;
+	flat in vec4 dailyWeatherParams1;
 
-uniform float rainStrength;
-#define CLOUDSHADOWSONLY
-#include "/lib/volumetricClouds.glsl"
+	uniform float rainStrength;
+	#define CLOUDSHADOWSONLY
+	#include "/lib/volumetricClouds.glsl"
+#endif
 
 in vec2 texcoord;
 
@@ -136,8 +138,24 @@ float doVignette(in vec2 texcoord, in float noise){
 	return mix(1.0, vignette, VIGNETTE_STRENGTH);
 }
 
-void main() {
+float cloudSunVis(vec3 playerPos, vec3 sunDir){
+	float density = 0.0;
+	#ifdef CloudLayer0
+		vec3 pos0 = playerPos + sunDir / abs(sunDir.y) * max((CloudLayer0_height + 50.0) - playerPos.y, 0.0);
+		density += getCloudShape(SMALLCUMULUS_LAYER, 0, pos0, CloudLayer0_height, CloudLayer0_height + 100.0) * dailyWeatherParams1.x;
+	#endif
+	#ifdef CloudLayer1
+		vec3 pos1 = playerPos + sunDir / abs(sunDir.y) * max((CloudLayer1_height + 100.0) - playerPos.y, 0.0);
+		density += getCloudShape(LARGECUMULUS_LAYER, 0, pos1, CloudLayer1_height, CloudLayer1_height + 200.0) * dailyWeatherParams1.y;
+	#endif
+	#ifdef CloudLayer2
+		vec3 pos2 = playerPos + sunDir / abs(sunDir.y) * max((CloudLayer2_height + 2.5) - playerPos.y, 0.0);
+		density += getCloudShape(ALTOSTRATUS_LAYER, 0, pos2, CloudLayer2_height, CloudLayer2_height + 5.0) * dailyWeatherParams1.z;
+	#endif
+	return clamp(1.0 - density * 32.0, 0.0, 1.0);
+}
 
+void main() {
 	float noise = blueNoise();
 
 	vec3 COLOR = texture2D(colortex7,texcoord).rgb;
@@ -153,28 +171,31 @@ void main() {
 		COLOR *= doVignette(texcoord, noise);
 	#endif
 
-	#ifdef LENS_FLARE
-		vec4 sunClipPos = gbufferProjection * gbufferModelView * vec4(WsunVec, 1.0);
-		vec3 sunNDC = sunClipPos.xyz / sunClipPos.w;
-		vec2 sunPos = sunNDC.xy * 0.5 + 0.5;
+	#ifdef OVERWORLD_SHADER
+		#ifdef LENS_FLARE
+			if(isEyeInWater == 0){
+				vec4 sunClipPos = gbufferProjection * gbufferModelView * vec4(WsunVec, 1.0);
+				vec3 sunNDC = sunClipPos.xyz / sunClipPos.w;
+				vec2 sunPos = sunNDC.xy * 0.5 + 0.5;
 
-		float dayTime = step(0.0, WsunVec.y);
-		float screenVis = smoothstep(0.5, 0.45, abs(sunPos.x - 0.5)) * smoothstep(0.5, 0.45, abs(sunPos.y - 0.5));
-		float depthVis = step(1.0, texture2D(depthtex0, sunPos).x);
-		#ifdef DISTANT_HORIZONS
-			depthVis *= step(1.0, texture2D(dhDepthTex0, sunPos).x);
+				float isDay = step(0.0, WsunVec.y);
+				float screenVis = smoothstep(0.5, 0.45, abs(sunPos.x - 0.5)) * smoothstep(0.5, 0.45, abs(sunPos.y - 0.5));
+				float depthVis = step(1.0, texture2D(depthtex0, sunPos).x);
+				#ifdef DISTANT_HORIZONS
+					depthVis *= step(1.0, texture2D(dhDepthTex0, sunPos).x);
+				#endif
+
+				float cloudVis = 1.0;
+				#if defined VOLUMETRIC_CLOUDS && (defined CloudLayer0 || defined CloudLayer1 || defined CloudLayer2)
+					cloudVis = cloudSunVis(cameraPosition, WsunVec);
+				#endif
+
+				float sunVis = screenVis * depthVis * cloudVis * isDay;
+
+				vec3 lf = lensflare(texcoord, sunPos) * sunVis;
+				COLOR += lf;
+			}
 		#endif
-
-		float cloudVis = 1.0;
-		#if defined VOLUMETRIC_CLOUDS && (defined CloudLayer0 || defined CloudLayer1 || defined CloudLayer2)
-			float cloudShadow = GetCloudShadow(cameraPosition, WsunVec);
-			cloudVis = step(1.0, cloudShadow);
-		#endif
-
-		float sunVis = screenVis * depthVis * cloudVis * dayTime;
-
-		vec3 lf = lensflare(texcoord, sunPos) * sunVis;
-		COLOR += lf;
 	#endif
 
 	#if defined LOW_HEALTH_EFFECT || defined DAMAGE_TAKEN_EFFECT || defined WATER_ON_CAMERA_EFFECT  

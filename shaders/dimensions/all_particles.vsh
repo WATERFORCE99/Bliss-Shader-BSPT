@@ -9,28 +9,24 @@ Read the terms of modification and sharing before changing something below pleas
 !! DO NOT REMOVE !!
 */
 
-varying vec4 lmtexcoord;
-varying vec4 color;
+out vec4 color;
 uniform sampler2D colortex4;
 
-flat varying float exposure;
+out vec4 lmtexcoord;
+flat out float exposure;
 
 #ifdef LINES
-	flat varying int SELECTION_BOX;
+	flat out int SELECTION_BOX;
 #endif
 
 #ifdef OVERWORLD_SHADER
-	flat varying vec3 averageSkyCol_Clouds;
-	flat varying vec4 lightCol;
-	flat varying vec3 WsunVec;
+	flat out vec3 averageSkyCol_Clouds;
+	flat out vec4 lightCol;
+	flat out vec3 WsunVec;
 
-	#ifdef Daily_Weather
-		flat varying vec4 dailyWeatherParams0;
-		flat varying vec4 dailyWeatherParams1;
-	#endif
-
+	flat out vec4 dailyWeatherParams0;
+	flat out vec4 dailyWeatherParams1;
 #endif
-	
 
 uniform vec3 sunPosition;
 uniform float sunElevation;
@@ -88,13 +84,11 @@ void main() {
 		normalMat = vec4(normalize(gl_NormalMatrix * gl_Normal), 1.0);
 	#endif
 
-
 	HELD_ITEM_BRIGHTNESS = 0.0;
 
 	#ifdef Hand_Held_lights
 		if(heldItemId > 999 || heldItemId2 > 999) HELD_ITEM_BRIGHTNESS = 0.9;
 	#endif
-
 
 	#ifdef WEATHER
 		vec3 position = mat3(gl_ModelViewMatrix) * vec3(gl_Vertex) + gl_ModelViewMatrix[3].xyz;
@@ -122,7 +116,6 @@ void main() {
 		#endif
 	#endif
 
-
 	color = gl_Color;
 	
 	exposure = texelFetch2D(colortex4,ivec2(10,37),0).r;
@@ -140,9 +133,13 @@ void main() {
 		averageSkyCol_Clouds = texelFetch2D(colortex4,ivec2(0,37),0).rgb;
 	
 		WsunVec = lightCol.a * normalize(mat3(gbufferModelViewInverse) * sunPosition);
-		#if defined Daily_Weather
+
+		#ifdef Daily_Weather
 			dailyWeatherParams0 = vec4(texelFetch2D(colortex4,ivec2(1,1),0).rgb / 1500.0, 0.0);
 			dailyWeatherParams1 = vec4(texelFetch2D(colortex4,ivec2(2,1),0).rgb / 1500.0, 0.0);
+		#else
+			dailyWeatherParams0 = vec4(CloudLayer0_coverage, CloudLayer1_coverage, CloudLayer2_coverage, 0.0);
+			dailyWeatherParams1 = vec4(CloudLayer0_density, CloudLayer1_density, CloudLayer2_density, 0.0);
 		#endif
 	#endif
 }

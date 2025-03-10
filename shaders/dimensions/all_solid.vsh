@@ -21,7 +21,6 @@ Read the terms of modification and sharing before changing something below pleas
 	#define MC_NORMAL_MAP
 #endif
 
-
 varying vec4 color;
 varying float VanillaAO;
 
@@ -54,7 +53,6 @@ uniform int heldItemId;
 uniform int heldItemId2;
 flat varying float HELD_ITEM_BRIGHTNESS;
 
-
 flat varying int NameTags;
 
 uniform int frameCounter;
@@ -72,17 +70,13 @@ flat varying int LIGHTNING;
 flat varying int PORTAL;
 flat varying int SIGN;
 
-// in vec3 at_velocity;
-// out vec3 velocity;
-
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
 uniform vec3 cameraPosition;
 uniform vec2 texelSize;
+
 uniform int framemod8;
-
 #include "/lib/TAA_jitter.glsl"
-
 							
 #define diagonal3(m) vec3((m)[0].x, (m)[1].y, m[2].z)
 #define projMAD(m, v) (diagonal3(m) * (v) + (m)[3].xyz)
@@ -115,7 +109,6 @@ vec3 calcMoveLeaves(in vec3 pos, in float f0, in float f1, in float f2, in float
 
 #define SEASONS_VSH
 #include "/lib/climate_settings.glsl"
-
 
 uniform sampler2D noisetex;//depth
 float densityAtPos(in vec3 pos) {
@@ -175,10 +168,8 @@ void main() {
 	vtexcoord.xy    = sign(texcoordminusmid)*0.5+0.5;
 	// #endif
 
-
 	vec2 lmcoord = gl_MultiTexCoord1.xy / 240.0; 
 	lmtexcoord.zw = lmcoord;
-
 
 	#ifdef MC_NORMAL_MAP
 		vec3 alterTangent = at_tangent.rgb;
@@ -187,13 +178,12 @@ void main() {
 	#endif
 
 	normalMat = vec4(normalize(gl_NormalMatrix * gl_Normal), 1.0);
-	
+
 	FlatNormals = normalMat.xyz;
 
 	blockID = mc_Entity.x ;
 
 	if(blockID == BLOCK_GROUND_WAVING_VERTICAL || blockID == BLOCK_GRASS_SHORT || blockID == BLOCK_GRASS_TALL_LOWER || blockID == BLOCK_GRASS_TALL_UPPER ) normalMat.a = 0.60;
-
 
 	PORTAL = 0;
 	SIGN = 0;
@@ -203,7 +193,7 @@ void main() {
 
 		if(blockEntityId == BLOCK_END_PORTAL || blockEntityId == 187) PORTAL = 1;
 	#endif
-	
+
 	NameTags = 0;
 
 	#ifdef ENTITIES
@@ -211,18 +201,18 @@ void main() {
 		// disallow POM to work on item frames.
 		if(entityId == ENTITY_ITEM_FRAME) SIGN = 1;
 
-
 		// try and single out nametag text and then discard nametag background
 		// if( dot(gl_Color.rgb, vec3(1.0/3.0)) < 1.0) NameTags = 1;
 		// if(gl_Color.a < 1.0) NameTags = 1;
 		// if(gl_Color.a >= 0.24 && gl_Color.a <= 0.25 ) gl_Position = vec4(10,10,10,1);
 		if(entityId == ENTITY_SSS_MEDIUM || entityId == ENTITY_SSS_WEAK || entityId == ENTITY_PLAYER || entityId == 2468) normalMat.a = 0.45;
-	
+
 	#endif
 
 	if(mc_Entity.x == BLOCK_AIR_WAVING) normalMat.a = 0.55;
 
     /////// ----- EMISSIVE STUFF ----- ///////
+
 		EMISSIVE = 0.0;
 		LIGHTNING = 0;
 	// if(NameTags > 0) EMISSIVE = 0.9;
@@ -234,7 +224,7 @@ void main() {
 
 	// normal block lightsources		
 	if(mc_Entity.x >= 100 && mc_Entity.x < 300) EMISSIVE = 0.5;
-	
+
 	// special cases light lightning and beacon beams...	
 	#ifdef ENTITIES
 		if(entityId == ENTITY_LIGHTNING){
@@ -244,100 +234,101 @@ void main() {
 	#endif
 
     /////// ----- SSS STUFF ----- ///////
-		SSSAMOUNT = 0.0;
 
-#ifdef WORLD
-    /////// ----- SSS ON BLOCKS ----- ///////
-	// strong
-	if (
-		mc_Entity.x == BLOCK_GROUND_WAVING || mc_Entity.x == BLOCK_GROUND_WAVING_VERTICAL || mc_Entity.x == BLOCK_AIR_WAVING ||
-		mc_Entity.x == BLOCK_GRASS_SHORT || mc_Entity.x == BLOCK_GRASS_TALL_UPPER || mc_Entity.x == BLOCK_GRASS_TALL_LOWER ||
-		mc_Entity.x == BLOCK_SSS_STRONG || mc_Entity.x == BLOCK_SAPLING 
-		/*|| (mc_Entity.x >= 410 && mc_Entity.x <= 415) || (mc_Entity.x >= 402 && mc_Entity.x <= 405) THIS IS FOR MCME NEW TREES.*/
-	) {
-		SSSAMOUNT = 1.0;
-	}
+	SSSAMOUNT = 0.0;
 
-	// medium
-	if (
-		mc_Entity.x == BLOCK_SSS_WEAK || mc_Entity.x == BLOCK_SSS_WEAK_2 ||
-		mc_Entity.x == BLOCK_GLOW_LICHEN || mc_Entity.x == BLOCK_SNOW_LAYERS || mc_Entity.x == BLOCK_CARPET ||
-		mc_Entity.x == BLOCK_AMETHYST_BUD_MEDIUM || mc_Entity.x == BLOCK_AMETHYST_BUD_LARGE || mc_Entity.x == BLOCK_AMETHYST_CLUSTER ||
-		mc_Entity.x == BLOCK_BAMBOO || mc_Entity.x == BLOCK_SAPLING || mc_Entity.x == BLOCK_VINE
-	) {
-		SSSAMOUNT = 0.5;
-	}
-	
-	// low
-	#ifdef MISC_BLOCK_SSS
-		if(mc_Entity.x == BLOCK_SSS_WEIRD || mc_Entity.x == BLOCK_GRASS) SSSAMOUNT = 0.1;
-	#endif
+	#ifdef WORLD
+	/////// ----- SSS ON BLOCKS ----- ///////
 
-	#ifdef ENTITIES
-		#ifdef MOB_SSS
-		    /////// ----- SSS ON MOBS----- ///////
-			// strong
-			if(entityId == ENTITY_SSS_MEDIUM) SSSAMOUNT = 0.75;
-	
-			// medium
-	
-			// low
-			if(entityId == ENTITY_SSS_WEAK || entityId == ENTITY_PLAYER) SSSAMOUNT = 0.4;
-		#endif
-	#endif
-
-	#ifdef BLOCKENTITIES
-	    /////// ----- SSS ON BLOCK ENTITIES----- ///////
 		// strong
+		if (
+			mc_Entity.x == BLOCK_GROUND_WAVING || mc_Entity.x == BLOCK_GROUND_WAVING_VERTICAL || mc_Entity.x == BLOCK_AIR_WAVING ||
+			mc_Entity.x == BLOCK_GRASS_SHORT || mc_Entity.x == BLOCK_GRASS_TALL_UPPER || mc_Entity.x == BLOCK_GRASS_TALL_LOWER ||
+			mc_Entity.x == BLOCK_SSS_STRONG || mc_Entity.x == BLOCK_SAPLING 
+			/*|| (mc_Entity.x >= 410 && mc_Entity.x <= 415) || (mc_Entity.x >= 402 && mc_Entity.x <= 405) THIS IS FOR MCME NEW TREES.*/
+		){
+			SSSAMOUNT = 1.0;
+		}
 
 		// medium
-		if(blockEntityId == BLOCK_SSS_WEAK_3) SSSAMOUNT = 0.4;
+		if (
+			mc_Entity.x == BLOCK_SSS_WEAK || mc_Entity.x == BLOCK_SSS_WEAK_2 ||
+			mc_Entity.x == BLOCK_GLOW_LICHEN || mc_Entity.x == BLOCK_SNOW_LAYERS || mc_Entity.x == BLOCK_CARPET ||
+			mc_Entity.x == BLOCK_AMETHYST_BUD_MEDIUM || mc_Entity.x == BLOCK_AMETHYST_BUD_LARGE || mc_Entity.x == BLOCK_AMETHYST_CLUSTER ||
+			mc_Entity.x == BLOCK_BAMBOO || mc_Entity.x == BLOCK_SAPLING || mc_Entity.x == BLOCK_VINE
+		){
+			SSSAMOUNT = 0.5;
+		}
 
 		// low
+		#ifdef MISC_BLOCK_SSS
+			if(mc_Entity.x == BLOCK_SSS_WEIRD || mc_Entity.x == BLOCK_GRASS) SSSAMOUNT = 0.1;
+		#endif
 
-	#endif
-
-   	vec3 worldpos = mat3(gbufferModelViewInverse) * position + gbufferModelViewInverse[3].xyz;
-
-	#ifdef WAVY_PLANTS
-		// also use normal, so up/down facing geometry does not get detatched from its model parts.
-		bool InterpolateFromBase = gl_MultiTexCoord0.t < max(mc_midTexCoord.t, abs(viewToWorld(FlatNormals).y));
-		if((
-			// these wave off of the ground. the area connected to the ground does not wave.
-			(InterpolateFromBase && (mc_Entity.x == BLOCK_GRASS_TALL_LOWER || mc_Entity.x == BLOCK_GRASS_SHORT || mc_Entity.x == BLOCK_SAPLING || mc_Entity.x == BLOCK_GROUND_WAVING_VERTICAL))
-
-			// these wave off of the ceiling. the area connected to the ceiling does not wave.
-			|| (!InterpolateFromBase && (mc_Entity.x == BLOCK_VINE_OTHER))
-
-			// these wave off of the air. they wave uniformly
-			|| (mc_Entity.x == BLOCK_GRASS_TALL_UPPER || mc_Entity.x == BLOCK_AIR_WAVING)
-
-			#ifndef RP_MODEL_FIX
-				|| (InterpolateFromBase && (mc_Entity.x == BLOCK_GROUND_WAVING)) || (mc_Entity.x == BLOCK_CAVE_VINE_BERRIES)
-			#endif
-
-		) && length(position.xyz) < 64.0) {
-
-			vec3 UnalteredWorldpos = worldpos;
-
-			// apply displacement for waving plant blocks
-			worldpos += calcMovePlants(worldpos + cameraPosition) * max(lmtexcoord.w,0.5);
-
-			// apply displacement for waving leaf blocks specifically, overwriting the other waving mode. these wave off of the air. they wave uniformly
-			if(mc_Entity.x == BLOCK_AIR_WAVING || mc_Entity.x == BLOCK_CAVE_VINE_BERRIES) worldpos = UnalteredWorldpos + calcMoveLeaves(worldpos + cameraPosition, 0.0040, 0.0064, 0.0043, 0.0035, 0.0037, 0.0041, vec3(1.0,0.2,1.0), vec3(0.5,0.1,0.5))*lmtexcoord.w;
-
-		}
-	#endif
+		#ifdef ENTITIES
+			#ifdef MOB_SSS
+	/////// ----- SSS ON MOBS----- ///////
+				// strong
+				if(entityId == ENTITY_SSS_MEDIUM) SSSAMOUNT = 0.75;
 	
-	#ifdef PLANET_CURVATURE
-		float curvature = length(worldpos) / (16*8);
-		worldpos.y -= curvature*curvature * CURVATURE_AMOUNT;
+				// medium
+	
+				// low
+				if(entityId == ENTITY_SSS_WEAK || entityId == ENTITY_PLAYER) SSSAMOUNT = 0.4;
+			#endif
+		#endif
+
+		#ifdef BLOCKENTITIES
+	 /////// ----- SSS ON BLOCK ENTITIES----- ///////
+			// strong
+
+			// medium
+			if(blockEntityId == BLOCK_SSS_WEAK_3) SSSAMOUNT = 0.4;
+
+			// low
+
+		#endif
+
+   		vec3 worldpos = mat3(gbufferModelViewInverse) * position + gbufferModelViewInverse[3].xyz;
+
+		#ifdef WAVY_PLANTS
+			// also use normal, so up/down facing geometry does not get detatched from its model parts.
+			bool InterpolateFromBase = gl_MultiTexCoord0.t < max(mc_midTexCoord.t, abs(viewToWorld(FlatNormals).y));
+			if((
+				// these wave off of the ground. the area connected to the ground does not wave.
+				(InterpolateFromBase && (mc_Entity.x == BLOCK_GRASS_TALL_LOWER || mc_Entity.x == BLOCK_GRASS_SHORT || mc_Entity.x == BLOCK_SAPLING || mc_Entity.x == BLOCK_GROUND_WAVING_VERTICAL))
+
+				// these wave off of the ceiling. the area connected to the ceiling does not wave.
+				|| (!InterpolateFromBase && (mc_Entity.x == BLOCK_VINE_OTHER))
+
+				// these wave off of the air. they wave uniformly
+				|| (mc_Entity.x == BLOCK_GRASS_TALL_UPPER || mc_Entity.x == BLOCK_AIR_WAVING)
+
+				#ifndef RP_MODEL_FIX
+					|| (InterpolateFromBase && (mc_Entity.x == BLOCK_GROUND_WAVING)) || (mc_Entity.x == BLOCK_CAVE_VINE_BERRIES)
+				#endif
+
+			) && length(position) < 64.0){
+
+				vec3 UnalteredWorldpos = worldpos;
+
+				// apply displacement for waving plant blocks
+				worldpos += calcMovePlants(worldpos + cameraPosition) * max(lmtexcoord.w,0.5);
+
+				// apply displacement for waving leaf blocks specifically, overwriting the other waving mode. these wave off of the air. they wave uniformly
+				if(mc_Entity.x == BLOCK_AIR_WAVING || mc_Entity.x == BLOCK_CAVE_VINE_BERRIES) worldpos = UnalteredWorldpos + calcMoveLeaves(worldpos + cameraPosition, 0.0040, 0.0064, 0.0043, 0.0035, 0.0037, 0.0041, vec3(1.0,0.2,1.0), vec3(0.5,0.1,0.5))*lmtexcoord.w;
+			}
+		#endif
+
+		#ifdef PLANET_CURVATURE
+			float curvature = length(worldpos) / (16*8);
+			worldpos.y -= curvature*curvature * CURVATURE_AMOUNT;
+		#endif
+
+		position = mat3(gbufferModelView) * worldpos + gbufferModelView[3].xyz;
+
+		gl_Position = toClipSpace3(position);
 	#endif
-
-	position = mat3(gbufferModelView) * worldpos + gbufferModelView[3].xyz;
-
-	gl_Position = toClipSpace3(position);
-#endif
 
 	#if defined Seasons && defined WORLD && !defined ENTITIES && !defined BLOCKENTITIES && !defined HAND
 		YearCycleColor(color.rgb, gl_Color.rgb, mc_Entity.x == BLOCK_AIR_WAVING, true);
@@ -350,7 +341,6 @@ void main() {
 	#ifdef TAA
 		gl_Position.xy += offsets[framemod8] * gl_Position.w*texelSize;
 	#endif
-
 
 	#if DOF_QUALITY == 5
 		vec2 jitter = clamp(jitter_offsets[frameCounter % 64], -1.0, 1.0);

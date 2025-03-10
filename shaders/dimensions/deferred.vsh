@@ -23,10 +23,9 @@ flat varying float rodExposure;
 flat varying float avgL2;
 flat varying float centerDepth;
 
-#ifdef Daily_Weather
-	flat varying vec4 dailyWeatherParams0;
-	flat varying vec4 dailyWeatherParams1;
-#endif
+flat out vec4 dailyWeatherParams0;
+flat out vec4 dailyWeatherParams1;
+
 uniform int hideGUI;
 flat varying vec4 CurrentFrame_dailyWeatherParams0;
 flat varying vec4 CurrentFrame_dailyWeatherParams1;
@@ -183,7 +182,6 @@ void main() {
 	#else
 		int dayCounter = int(mod(worldDay, 10));
 	#endif
-	
 
 	vec4 weatherParameters_A[10] = vec4[](
 		vec4(DAY0_l0_coverage, DAY0_l1_coverage, DAY0_l2_coverage, DAY0_ufog_density),
@@ -240,14 +238,14 @@ void main() {
 		// CurrentFrame_dailyWeatherParams1 = vec4(0.1,0.5,0.0,0.0);
 	// }
 
-	#if defined Daily_Weather
-		dailyWeatherParams0 = vec4(sqrt(texelFetch2D(colortex4,ivec2(1,1),0).rgb/ 1500.0), 0.0);
-		dailyWeatherParams1 = vec4(texelFetch2D(colortex4,ivec2(2,1),0).rgb / 1500.0, 0.0);
+	dailyWeatherParams0 = vec4(sqrt(texelFetch2D(colortex4,ivec2(1,1),0).rgb/ 1500.0), 0.0);
+	dailyWeatherParams1 = vec4(texelFetch2D(colortex4,ivec2(2,1),0).rgb / 1500.0, 0.0);
 		
-		dailyWeatherParams0.a = texelFetch2D(colortex4,ivec2(3,1),0).x/1500.0;
-		dailyWeatherParams1.a = texelFetch2D(colortex4,ivec2(3,1),0).y/1500.0;
-	#endif
-
+	dailyWeatherParams0.a = texelFetch2D(colortex4,ivec2(3,1),0).x/1500.0;
+	dailyWeatherParams1.a = texelFetch2D(colortex4,ivec2(3,1),0).y/1500.0;
+#else
+	dailyWeatherParams0 = vec4(CloudLayer0_coverage, CloudLayer1_coverage, CloudLayer2_coverage, 0.0);
+	dailyWeatherParams1 = vec4(CloudLayer0_density, CloudLayer1_density, CloudLayer2_density, 0.0);
 #endif
 
 //////////////////////////////
@@ -286,7 +284,6 @@ void main() {
 
 	avgL2 = clamp(mix(avgB,texelFetch2D(colortex4,ivec2(10,37),0).b,0.985),0.00003051757,65000.0);
 	float targetrodExposure = max(0.012/log2(avgL2+1.002)-0.1,0.0)*1.2;
-
 
 	exposure = max(targetExposure, 0.0);
 	// exposure = mix(0.0, 1.0, min(targetExposure,1.0));

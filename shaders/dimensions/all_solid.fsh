@@ -6,6 +6,8 @@
 #include "/lib/items.glsl"
 #include "/lib/util.glsl"
 #include "/lib/projections.glsl"
+
+varying vec4 lmtexcoord;
 #include "/lib/ripples.glsl"
 
 flat varying int NameTags;
@@ -17,7 +19,6 @@ flat varying int NameTags;
 #ifdef POM
 	#define MC_NORMAL_MAP
 #endif
-
 
 varying float VanillaAO;
 
@@ -43,12 +44,8 @@ vec2 dcdy = dFdy(vtexcoord.st*vtexcoordam.pq)*exp2(Texture_MipMap_Bias);
 
 varying vec4 color;
 
-uniform float far;
-
-
 uniform float wetness;
 varying vec4 normalMat;
-
 
 #ifdef MC_NORMAL_MAP
 	uniform sampler2D normals;
@@ -56,29 +53,25 @@ varying vec4 normalMat;
 	varying vec3 FlatNormals;
 #endif
 
-
 uniform sampler2D specular;
-
 uniform sampler2D texture;
 uniform sampler2D colortex1;//albedo(rgb),material(alpha) RGBA16
-uniform float frameTimeCounter;
 uniform sampler2D depthtex0;
 uniform float alphaTestRef;
+uniform float frameTimeCounter;
 
 uniform vec4 entityColor;
 
 // in vec3 velocity;
 
 flat varying float blockID;
-
+flat varying int PORTAL;
+flat varying int SIGN;
 flat varying float SSSAMOUNT;
 flat varying float EMISSIVE;
 flat varying int LIGHTNING;
-flat varying int PORTAL;
-flat varying int SIGN;
 
 flat varying float HELD_ITEM_BRIGHTNESS;
-
 
 mat3 inverseMatrix(mat3 m) {
 	float a00 = m[0][0], a01 = m[0][1], a02 = m[0][2];
@@ -96,19 +89,6 @@ mat3 inverseMatrix(mat3 m) {
 				b21, (-a21 * a00 + a01 * a20), (a11 * a00 - a01 * a10)) / det;
 }
 
-vec3 viewToWorld(vec3 viewPosition) {
-	vec4 pos;
-	pos.xyz = viewPosition;
-	pos.w = 0.0;
-	pos = gbufferModelViewInverse * pos;
-	return pos.xyz;
-}
-vec3 worldToView(vec3 worldPos) {
-	vec4 pos = vec4(worldPos, 0.0);
-	pos = gbufferModelView * pos;
-	return pos.xyz;
-}
-
 vec4 encode (vec3 n, vec2 lightmaps){
 	n.xy = n.xy / dot(abs(n), vec3(1.0));
 	n.xy = n.z <= 0.0 ? (1.0 - abs(n.yx)) * sign(n.xy) : n.xy;
@@ -123,8 +103,9 @@ float encodeVec2(vec2 a){
 	vec2 temp = floor( a * 255. );
 	return temp.x*constant1.x+temp.y*constant1.y;
 }
+
 float encodeVec2(float x,float y){
-    return encodeVec2(vec2(x,y));
+	return encodeVec2(vec2(x,y));
 }
 
 #ifdef MC_NORMAL_MAP
@@ -148,7 +129,6 @@ vec3 toLinear(vec3 sRGB){
 	return sRGB * (sRGB * (sRGB * 0.305306011 + 0.682171111) + 0.012522878);
 }
 
-
 const vec2[8] offsets = vec2[8](vec2(1./8.,-3./8.),
 							vec2(-1.,3.)/8.,
 							vec2(5.0,1.)/8.,
@@ -158,14 +138,12 @@ const vec2[8] offsets = vec2[8](vec2(1./8.,-3./8.),
 							vec2(3,7.)/8.,
 							vec2(7.,-7.)/8.);
 
-
+uniform float far;
 uniform float near;
-
 
 float ld(float dist) {
 	return (2.0 * near) / (far + near - dist * (far - near));
 }
-
 
 vec4 readNoise(in vec2 coord){
 	// return texture2D(noisetex,coord*vtexcoordam.pq+vtexcoord.st);
@@ -176,6 +154,7 @@ float bias(){
 	// return (Texture_MipMap_Bias + (blueNoise()-0.5)*0.5) - (1.0-RENDER_SCALE.x) * 2.0;
 	return Texture_MipMap_Bias - (1.0-RENDER_SCALE.x) * 2.0;
 }
+
 vec4 texture2D_POMSwitch(
 	sampler2D sampler, 
 	vec2 lightmapCoord,
@@ -217,7 +196,6 @@ void main() {
 	#endif
 
 	bool ifPOM = false;
-
 	#ifdef POM
 		ifPOM = true;
 	#endif
@@ -266,9 +244,7 @@ void main() {
 
 		Puddle_shape = clamp(lightmap - exp(-15.0 * pow(texture2D(noisetex, worldPos.xz * (0.020 * Puddle_Size)).b,5.0)),0.0,1.0);
 		Puddle_shape *= clamp(viewToWorld(normal).y*0.5+0.5,0.0,1.0) * isRain;
-
 	#endif
-
 	
 	vec2 adjustedTexCoord = lmtexcoord.xy;
 
@@ -290,7 +266,6 @@ void main() {
 
 		gl_FragDepth = gl_FragCoord.z;
 		if (falloff > 0.0) {
-
 			float depthmap = readNormal(vtexcoord.st).a;
 			float used_POM_DEPTH = 1.0;
 			float pomdepth = POM_DEPTH*falloff;
@@ -336,7 +311,7 @@ void main() {
 
 	float textureLOD = bias();
 	vec4 Albedo = texture2D_POMSwitch(texture, adjustedTexCoord.xy, vec4(dcdx,dcdy), ifPOM, textureLOD) * color;
-	#if defined HAND
+	#ifdef HAND
 		if (Albedo.a < 0.1) discard;
 	#endif
 
@@ -356,7 +331,7 @@ void main() {
 			correctedViewVec.xy = mix(correctedViewVec.xy, vec2(-viewVec.y, viewVec.x), clamp(-worldSpaceNormal.x,0,1)); 
 			correctedViewVec.xy = mix(correctedViewVec.xy, vec2(-viewVec.y, viewVec.x), clamp(-worldSpaceNormal.z,0,1));
 			correctedViewVec.z = mix(correctedViewVec.z, -correctedViewVec.z, clamp(length(vec3(worldSpaceNormal.xz, clamp(-worldSpaceNormal.y,0,1))),0,1)); 
-		
+
 			vec2 correctedWorldPos = worldPos.xz;
 			correctedWorldPos = mix(correctedWorldPos, vec2(-playerPos.x,playerPos.z) + vec2(-cameraPosition.x,cameraPosition.z), clamp(-worldSpaceNormal.y,0,1));
 			correctedWorldPos = mix(correctedWorldPos, vec2( playerPos.z,playerPos.y) + vec2( cameraPosition.z,cameraPosition.y), clamp( worldSpaceNormal.x,0,1));
@@ -364,20 +339,19 @@ void main() {
 			correctedWorldPos = mix(correctedWorldPos, vec2( playerPos.x,playerPos.y) + vec2( cameraPosition.x,cameraPosition.y), clamp(-worldSpaceNormal.z,0,1));
 			correctedWorldPos = mix(correctedWorldPos, vec2(-playerPos.x,playerPos.y) + vec2(-cameraPosition.x,cameraPosition.y), clamp( worldSpaceNormal.z,0,1));
 			vec2 rayDir = ((correctedViewVec.xy) / -correctedViewVec.z) / steps * 5.0 ;
-	
+
 			vec2 uv = correctedWorldPos + rayDir * blueNoise();
 			uv += rayDir * 10.0;
 			vec2 animation = vec2(frameTimeCounter, -frameTimeCounter)*0.01;
-		
+
 			for (int i = 0; i < int(steps); i++) {
-			
 				float verticalGradient = (i + blueNoise())/steps ;
 				float verticalGradient2 = exp(-7*(1-verticalGradient*verticalGradient));
-		
+
 				float density = max(max(verticalGradient - texture2D(noisetex, uv/256.0 + animation.xy).b*0.5,0.0) - (1.0-texture2D(noisetex, uv/32.0 + animation.xx).r) * (0.4 + 0.1 * (texture2D(noisetex, uv/10.0 - animation.yy).b)),0.0);
-		
+
 				float volumeCoeff = exp(-density*(i+1));
-			
+
 				vec3 lighting =  vec3(0.5,0.75,1.0) * 0.1 * exp(-10*density) + vec3(END_FOG_R, END_FOG_G, END_FOG_B) * verticalGradient2 * 2.0;
 				color += (lighting - lighting * volumeCoeff) * absorbance;;
 				absorbance *= volumeCoeff;
@@ -393,7 +367,6 @@ void main() {
 	#ifdef WhiteWorld
 		Albedo.rgb = vec3(0.5);
 	#endif
-
 		
 	#ifdef AEROCHROME_MODE
 		float gray = dot(Albedo.rgb, vec3(0.2, 1.0, 0.07));
@@ -436,10 +409,11 @@ void main() {
 			Albedo.a = 1.0;
 		}
 	#endif
+
 	#if defined PARTICLE_RENDERING_FIX && (defined ENTITIES || defined BLOCKENTITIES)
 		gl_FragData[3] = vec4(0.0);
 	#endif
-	
+
 	//////////////////////////////// 				////////////////////////////////
 	////////////////////////////////	NORMAL	////////////////////////////////
 	//////////////////////////////// 				//////////////////////////////// 
@@ -454,6 +428,7 @@ void main() {
 		float Heightmap = 1.0 - NormalTex.w;
 		NormalTex.xy = NormalTex.xy * 2.0-1.0;
 		NormalTex.z = sqrt(max(1.0 - dot(NormalTex.xy, NormalTex.xy), 0.0));
+		NormalTex.xyz = mix(vec3(0,0,1), NormalTex.xyz, MATERIAL_NORMAL_STRENGTH);
 
 		#ifdef GROUND_RIPPLES
 			vec3 rippleNormal = drawRipples(worldPos.xz * 10.0, frameTimeCounter * 2.0) * applyRipple * 0.1 * clamp(1.0 - length(playerPos) / 16.0, 0.0, 1.0);
@@ -462,11 +437,11 @@ void main() {
 
 		normal = applyBump(tbnMatrix, NormalTex.xyz, 1.0-Puddle_shape);
 	#endif
-	
+
 	//////////////////////////////// 				////////////////////////////////
 	////////////////////////////////	SPECULAR	////////////////////////////////
 	//////////////////////////////// 				//////////////////////////////// 
-	
+
 	#ifdef WORLD
 		vec4 SpecularTex = texture2D_POMSwitch(specular, adjustedTexCoord.xy, vec4(dcdx,dcdy), ifPOM,textureLOD);
 
@@ -499,26 +474,20 @@ void main() {
 			gl_FragData[1].a = SpecularTex.a;
 		#endif
 
-	#ifdef FANCY_END_PORTAL
-		#if defined WORLD && !defined ENTITIES && !defined HAND
-			if(PORTAL > 0) gl_FragData[1].a = endPortalEmission;
+		#ifdef FANCY_END_PORTAL
+			#if defined WORLD && !defined ENTITIES && !defined HAND
+				if(PORTAL > 0) gl_FragData[1].a = endPortalEmission;
+			#endif
 		#endif
-	#endif
 
 		#if SSS_TYPE == 0
 			gl_FragData[1].b = 0.0;
-		#endif
-
-		#if SSS_TYPE == 1
+		#elif SSS_TYPE == 1
 			gl_FragData[1].b = SSSAMOUNT;
-		#endif
-
-		#if SSS_TYPE == 2
+		#elif SSS_TYPE == 2
 			gl_FragData[1].b = SpecularTex.b;
 			if(SpecularTex.b < 65.0/255.0) gl_FragData[1].b = SSSAMOUNT;
-		#endif
-
-		#if SSS_TYPE == 3		
+		#elif SSS_TYPE == 3		
 			gl_FragData[1].b = SpecularTex.b;
 		#endif
 	#endif

@@ -25,11 +25,8 @@ flat varying float exposure;
 	flat varying vec4 lightCol;
 	flat varying vec3 WsunVec;
 
-	#ifdef Daily_Weather
-		flat varying vec4 dailyWeatherParams0;
-		flat varying vec4 dailyWeatherParams1;
-	#endif
-
+	flat out vec4 dailyWeatherParams0;
+	flat out vec4 dailyWeatherParams1;
 #endif
 
 varying vec4 normalMat;
@@ -53,7 +50,6 @@ flat varying int glass;
 attribute vec4 at_tangent;
 attribute vec4 mc_Entity;
 
-
 uniform vec3 sunPosition;
 uniform vec3 moonPosition;
 uniform vec3 cameraPosition;
@@ -75,9 +71,7 @@ flat varying float HELD_ITEM_BRIGHTNESS;
 
 uniform vec2 texelSize;
 uniform int framemod8;
-
 #include "/lib/TAA_jitter.glsl"
-
 
 #define diagonal3(m) vec3((m)[0].x, (m)[1].y, m[2].z)
 #define projMAD(m, v) (diagonal3(m) * (v) + (m)[3].xyz)
@@ -198,7 +192,6 @@ void main() {
 	// viewVector = (gl_ModelViewMatrix * gl_Vertex).xyz;
 	viewVector = normalize(tbnMatrix * viewVector);
 
-
 	color = vec4(gl_Color.rgb, 1.0);
 	exposure = texelFetch2D(colortex4,ivec2(10,37),0).r;
 
@@ -216,13 +209,14 @@ void main() {
 		if(dot(-moonVec, WsunVec) < 0.9999) WmoonVec = -moonVec;
 
 		WsunVec = mix(WmoonVec, WsunVec, clamp(lightCol.a,0,1));
-
 	
-		#if defined Daily_Weather
+		#ifdef Daily_Weather
 			dailyWeatherParams0 = vec4(texelFetch2D(colortex4,ivec2(1,1),0).rgb / 1500.0, 0.0);
 			dailyWeatherParams1 = vec4(texelFetch2D(colortex4,ivec2(2,1),0).rgb / 1500.0, 0.0);
+		#else
+			dailyWeatherParams0 = vec4(CloudLayer0_coverage, CloudLayer1_coverage, CloudLayer2_coverage, 0.0);
+			dailyWeatherParams1 = vec4(CloudLayer0_density, CloudLayer1_density, CloudLayer2_density, 0.0);
 		#endif
-
 	#endif
 
 	#ifdef TAA_UPSCALING
@@ -231,7 +225,7 @@ void main() {
 	#ifdef TAA
 		#if defined ENTITIES && defined IS_IRIS
 		// remove jitter for nametags lol
-			if (entityId != 1600) gl_Position.xy += offsets[framemod8] * gl_Position.w*texelSize;
+			if(entityId != 1600) gl_Position.xy += offsets[framemod8] * gl_Position.w*texelSize;
 		#else
 			gl_Position.xy += offsets[framemod8] * gl_Position.w*texelSize;
 		#endif

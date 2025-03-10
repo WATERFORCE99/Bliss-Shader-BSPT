@@ -36,16 +36,6 @@ float encodeVec2(float x,float y){
 	return encodeVec2(vec2(x,y));
 }
 
-uniform mat4 gbufferModelViewInverse;
-
-vec3 viewToWorld(vec3 viewPos) {
-	vec4 pos;
-	pos.xyz = viewPos;
-	pos.w = 0.0;
-	pos = gbufferModelViewInverse * pos;
-	return pos.xyz;
-}
-
 //////////////////////////////VOID MAIN//////////////////////////////
 //////////////////////////////VOID MAIN//////////////////////////////
 //////////////////////////////VOID MAIN//////////////////////////////

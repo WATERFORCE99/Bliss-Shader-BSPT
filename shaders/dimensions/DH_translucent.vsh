@@ -13,9 +13,9 @@ uniform sampler2D colortex4;
 flat varying vec3 averageSkyCol_Clouds;
 flat varying vec4 lightCol;
 
-#if defined OVERWORLD_SHADER && defined Daily_Weather
-		flat varying vec4 dailyWeatherParams0;
-		flat varying vec4 dailyWeatherParams1;
+#ifdef OVERWORLD_SHADER
+	flat out vec4 dailyWeatherParams0;
+	flat out vec4 dailyWeatherParams1;
 #endif
 
 varying mat4 normalmatrix;
@@ -98,11 +98,15 @@ void main() {
 
 	averageSkyCol_Clouds = texelFetch2D(colortex4,ivec2(0,37),0).rgb;
 	
-	#if defined OVERWORLD_SHADER && defined Daily_Weather
+	#ifdef OVERWORLD_SHADER
+		#ifdef Daily_Weather
 			dailyWeatherParams0 = vec4((texelFetch2D(colortex4,ivec2(1,1),0).rgb/150.0)/2.0, 0.0);
 			dailyWeatherParams1 = vec4((texelFetch2D(colortex4,ivec2(2,1),0).rgb/150.0)/2.0, 0.0);
+		#else
+			dailyWeatherParams0 = vec4(CloudLayer0_coverage, CloudLayer1_coverage, CloudLayer2_coverage, 0.0);
+			dailyWeatherParams1 = vec4(CloudLayer0_density, CloudLayer1_density, CloudLayer2_density, 0.0);
+		#endif
 	#endif
-
 
 	WsunVec = lightCol.a * normalize(mat3(gbufferModelViewInverse) * sunPosition);
 	WsunVec2 = lightCol.a * normalize(sunPosition);

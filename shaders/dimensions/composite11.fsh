@@ -1,5 +1,4 @@
 #include "/lib/settings.glsl"
-
 #include "/lib/res_params.glsl"
 
 

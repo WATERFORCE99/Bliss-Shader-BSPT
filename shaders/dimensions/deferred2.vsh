@@ -3,10 +3,8 @@
 
 // uniform int dhRenderDistance;
 
-	#ifdef Daily_Weather
-		flat varying vec4 dailyWeatherParams0;
-		flat varying vec4 dailyWeatherParams1;
-	#endif
+flat out vec4 dailyWeatherParams0;
+flat out vec4 dailyWeatherParams1;
 
 flat varying vec3 averageSkyCol;
 flat varying vec3 sunColor;
@@ -34,6 +32,9 @@ void main() {
 	#ifdef Daily_Weather
 		dailyWeatherParams0 = vec4(texelFetch2D(colortex4,ivec2(1,1),0).rgb / 1500.0, 0.0);
 		dailyWeatherParams1 = vec4(texelFetch2D(colortex4,ivec2(2,1),0).rgb / 1500.0, 0.0);
+	#else
+		dailyWeatherParams0 = vec4(CloudLayer0_coverage, CloudLayer1_coverage, CloudLayer2_coverage, 0.0);
+		dailyWeatherParams1 = vec4(CloudLayer0_density, CloudLayer1_density, CloudLayer2_density, 0.0);
 	#endif
 
 	averageSkyCol = texelFetch2D(colortex4,ivec2(1,37),0).rgb;
@@ -43,11 +44,10 @@ void main() {
 	// sunColor = texelFetch2D(colortex4,ivec2(8,37),0).rgb;
 	// moonColor = texelFetch2D(colortex4,ivec2(9,37),0).rgb;
 
-
 	WsunVec = normalize(mat3(gbufferModelViewInverse) * sunPosition);// * (float(sunElevation > 1e-5)*2.0-1.0);
 	// WsunVec = normalize(LightDir);
 
-	tempOffsets = hammersley(frameCounter%10000, 10000);
+	tempOffsets = Hammersley(frameCounter%10000);
 	#ifdef TAA_UPSCALING
 		gl_Position.xy = (gl_Position.xy*0.5+0.5)*RENDER_SCALE*2.0-1.0;
 	#endif

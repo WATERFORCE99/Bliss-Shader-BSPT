@@ -4,7 +4,7 @@
 
 /*
 const int colortex0Format = RGBA16F;				// low res clouds (deferred->composite2) + low res VL (composite5->composite15)
-const int colortex1Format = RGBA16;					// terrain gbuffer (gbuffer->composite2)
+const int colortex1Format = RGBA16;				// terrain gbuffer (gbuffer->composite2)
 const int colortex2Format = RGBA16F;				// forward + transparencies (gbuffer->composite4)
 const int colortex3Format = R11F_G11F_B10F;			// frame buffer + bloom (deferred6->final)
 const int colortex4Format = RGBA16F;				// light values and skyboxes (everything)
@@ -17,8 +17,8 @@ const int colortex11Format = RGBA16; 				// unchanged translucents albedo, alpha
 const int colortex12Format = RGBA16F;				// DISTANT HORIZONS + VANILLA MIXED DEPTHs
 
 const int colortex13Format = RGBA16F;				// low res VL (composite5->composite15)
-const int colortex14Format = RGBA16;					// rg = SSAO and SS-SSS. a = skylightmap for translucents.
-const int colortex15Format = RGBA8;					// flat normals and vanilla AO
+const int colortex14Format = RGBA16;				// rg = SSAO and SS-SSS. a = skylightmap for translucents.
+const int colortex15Format = RGBA8;				// flat normals and vanilla AO
 */
 
 //no need to clear the buffers, saves a few fps
@@ -39,7 +39,6 @@ const bool colortex13Clear = false;
 const bool colortex14Clear = true;
 const bool colortex15Clear = false;
 
-
 #ifdef SCREENSHOT_MODE
 	/*
 	const int colortex5Format = RGBA32F;			//TAA buffer (everything)
@@ -49,7 +48,6 @@ const bool colortex15Clear = false;
 	const int colortex5Format = RGBA16F;			//TAA buffer (everything)
 	*/
 #endif
-
 
 varying vec2 texcoord;
 flat varying float tempOffsets;
@@ -78,14 +76,13 @@ uniform int hideGUI;
 
 #include "/lib/projections.glsl"
 
-
 uniform int framemod8;
 #include "/lib/TAA_jitter.glsl"
 
 vec2 decodeVec2(float a){
-    const vec2 constant1 = 65535. / vec2( 256., 65536.);
-    const float constant2 = 256. / 255.;
-    return fract( a * constant1 ) * constant2 ;
+	const vec2 constant1 = 65535. / vec2( 256., 65536.);
+	const float constant2 = 256. / 255.;
+	return fract( a * constant1 ) * constant2 ;
 }
 
 float interleaved_gradientNoise(){
@@ -105,7 +102,7 @@ vec4 fp10Dither(vec4 color ,float dither){
 }
 
 vec3 toClipSpace3Prev(vec3 viewSpacePosition){
-    return projMAD(gbufferPreviousProjection, viewSpacePosition) / -viewSpacePosition.z * 0.5 + 0.5;
+	return projMAD(gbufferPreviousProjection, viewSpacePosition) / -viewSpacePosition.z * 0.5 + 0.5;
 }
 
 vec3 tonemap(vec3 col){
@@ -133,30 +130,15 @@ float convertHandDepth2( float depth){
 #endif
 uniform float near;
 uniform float far;
-uniform float dhFarPlane;
-uniform float dhNearPlane;
 
 #include "/lib/DistantHorizons_projections.glsl"
-
 
 float ld(float dist) {
 	return (2.0 * near) / (far + near - dist * (far - near));
 }
 
-float DH_ld(float dist) {
-	return (2.0 * dhNearPlane) / (dhFarPlane + dhNearPlane - dist * (dhFarPlane - dhNearPlane));
-}
-
-float DH_inv_ld (float lindepth){
-	return -((2.0*dhNearPlane/lindepth)-dhFarPlane-dhNearPlane)/(dhFarPlane-dhNearPlane);
-}
-
 float linearizeDepthFast(const in float depth, const in float near, const in float far) {
 	return (near * far) / (depth * (near - far) + far);
-}
-
-float invertlinearDepthFast(const in float depth, const in float near, const in float far) {
-	return ((2.0*near/depth)-far-near)/(far-near);
 }
 
 vec3 toClipSpace3Prev_DH( vec3 viewSpacePosition, bool depthCheck ) {
@@ -358,7 +340,6 @@ vec4 computeTAA(vec2 texcoord, bool hand){
 		
 		colMin = 0.5 * (colMin + min(col0,min(col5,min(col6,min(col7,col8)))));
 		colMax = 0.5 * (colMax + max(col0,max(col5,max(col6,max(col7,col8)))));
-
 	#endif
 	
 	#ifdef DAMAGE_TAKEN_EFFECT
@@ -395,7 +376,6 @@ vec4 computeTAA(vec2 texcoord, bool hand){
 
 	return vec4(finalResult, 1.0);
 }
-
 
 void main() {
 /* DRAWBUFFERS:5 */
