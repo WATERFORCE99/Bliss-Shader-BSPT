@@ -17,6 +17,11 @@ screen.Sky=天空配置
 	option.MOONPHASE_BASED_MOONLIGHT=月相亮度水平
 	option.STAR_DENSITY=星星密度
 	option.STAR_ROTATION_MULT=星星旋转速度
+	option.RAINBOW=彩虹类型
+		value.RAINBOW.0=关
+		value.RAINBOW.1=真实
+		value.RAINBOW.2=全天
+	option.RAINBOW_STRENGTH=彩虹强度
 
 screen.Sky_coefficients=天空系数
 	option.Sky_Brightness=天空亮度
@@ -313,26 +318,27 @@ screen.Filtering=阴影过滤配置
 	option.Max_Filter_Depth=最大过滤深度
 
 screen.LPV=FloodFill - §c需要使用Iris加载器§r
-	option.LPV_ENABLED=启用LPV
+	option.LPV_ENABLED=启用 LPV
 	option.LPV_SIZE=LPV 规模
 		value.LPV_SIZE.6=小 [64]
 		value.LPV_SIZE.7=中 [128]
 		value.LPV_SIZE.8=大 [256]
+	option.LPV_BLOCKLIGHT_SCALE=LPV 光照距离
 	option.LPV_SATURATION=光照饱和度
 		suffix.LPV_SATURATION=%
 	option.LPV_TINT_SATURATION=透光饱和度
 		suffix.LPV_TINT_SATURATION=%
-	option.LPV_NORMAL_STRENGTH=法线强度
+	option.LPV_NORMAL_STRENGTH=LPV 法线强度
 		suffix.LPV_NORMAL_STRENGTH=%
 		value.LPV_NORMAL_STRENGTH.0=关闭
 	option.LPV_ENTITY_LIGHTS=实体光源
 	option.LPV_REDSTONE_LIGHTS=红石光源
 	option.LPV_COLORED_CANDLES=彩色蜡烛
 	option.LPV_NOSHADOW_HACK=Iris版本 <= 1.7.0 修复
-	option.LPV_RANGE=LPV距离
-	option.LPV_VL_FOG_ILLUMINATION=LPV泛光体积雾
-	option.LPV_VL_FOG_ILLUMINATION_BRIGHTNESS=LPV泛光体积雾亮度
+	option.LPV_VL_FOG_ILLUMINATION=LPV 泛光体积雾
+	option.LPV_VL_FOG_ILLUMINATION_BRIGHTNESS=LPV 泛光体积雾亮度
 		suffix.LPV_VL_FOG_ILLUMINATION_BRIGHTNESS=%
+	option.VANILLA_LIGHTMAP_MASK=原版 LPV 光照
 
 screen.BLOCK_SHADOWS=路径追踪阴影
 	option.LPV_SHADOWS=LPV阴影
@@ -348,6 +354,11 @@ screen.Fog=雾气配置
 	option.Haze_amount=大气雾霾密度
 	option.BorderFog=区块边界雾
 	option.FOG_START_HEIGHT=雾气起始高度
+
+screen.Fog_Color=雾气颜色
+	option.fog_coefficientMieR=雾气米氏系数 - 红色比重
+	option.fog_coefficientMieG=雾气米氏系数 - 绿色比重
+	option.fog_coefficientMieB=雾气米氏系数 - 蓝色比重
 
 screen.TOD_fog = 全天雾气
 	option.TOD_Fog_mult = 全局雾气密度倍率
@@ -426,7 +437,6 @@ screen.Seasons = 季节配置
 		value.Start_Season.1 = 秋季
 		value.Start_Season.2 = 冬季
 		value.Start_Season.3 = 春季
-	option.Snowy_Winter = 冬季降雪
 screen.Summer_colors = 夏季颜色
 	option.Summer_R = 植被红色比重
 	option.Summer_G = 植被绿色比重
@@ -525,6 +535,8 @@ screen.TAA_OPTIONS = 抗锯齿配置
 	option.CHROMATIC_ABERRATION_STRENGTH = 色差强度
 	option.VIGNETTE = 相机暗角
 	option.VIGNETTE_STRENGTH = 相机暗角强度
+	option.LENS_FLARE = 镜头光晕
+	option.LENS_FLARE_STRENGTH = 镜头光晕强度
 
 screen.Resource_Pack_Support = 资源包配置
 screen.Reflections = 高光反射
@@ -539,6 +551,9 @@ screen.Reflections = 高光反射
 	option.Roughness_Threshold = 粗糙度反射阀值
 	option.Sun_specular_Strength = 太阳反射强度
 	option.reflection_quality = 反射质量
+	option.MATERIAL_WETNESS_TYPE = 潮湿反射模式
+		value.MATERIAL_WETNESS_TYPE.0 = 自适应
+		value.MATERIAL_WETNESS_TYPE.1 = 统一
 
 screen.Emissives = 发光效果
 	option.Emissive_Brightness = 发光倍率
@@ -563,26 +578,26 @@ screen.Subsurface_Scattering = 次表面散射
 		value.SSS_TYPE.2 = 硬编码 + LabSSS
 		value.SSS_TYPE.3 = 仅 LabSSS
 
-screen.POM = 视差遮蔽映射/POM
-	option.POM = 视差
-	option.MAX_ITERATIONS = 视差质量
-	option.POM_DEPTH = 视差深度
-	option.MAX_DIST = 视差最大距离
-	option.Adaptive_Step_length = 动态质量
+screen.POM=视差遮蔽映射/POM
+	option.POM=视差
+	option.MAX_ITERATIONS=视差质量
+	option.POM_DEPTH=视差深度
+	option.MAX_DIST=视差最大距离
+	option.Adaptive_Step_length=动态质量
 
-screen.Porosity = 孔隙率/水坑
-	option.Porosity = 孔隙率
-	option.Puddles = 水坑
-	option.Puddle_Size = 水坑尺寸倍率
+screen.Porosity=孔隙率/水坑
+	option.Porosity=孔隙率
+	option.Puddles=水坑
+	option.Puddle_Size=水坑尺寸倍率
 
-	option.MATERIAL_AO = 材质环境光遮蔽
+	option.MATERIAL_AO=材质环境光遮蔽
+	option.MATERIAL_NORMAL_STRENGTH=材质法线强度
 
 	option.RESOURCEPACK_SKY = 资源包天空
 		value.RESOURCEPACK_SKY.0 = 完整光影天空
 		value.RESOURCEPACK_SKY.1 = 资源包天空 + 光影日月
 		value.RESOURCEPACK_SKY.2 = 完整资源包天空
 		value.RESOURCEPACK_SKY.3 = 光影天空 + 资源包日月
-	option.NORMAL_STRENGTH = 法线强度
 
 	option.DOF_QUALITY=景深 DOF
 		value.DOF_QUALITY.-1=关闭
@@ -626,17 +641,12 @@ screen.Aerochrome_Mode=Aerochrome 模式
 	option.AEROCHROME_PINKNESS=Aerochrome 模式 红色: 粉色 比例
 	option.AEROCHROME_WOOL_ENABLED=Aerochrome 模式作用于羊毛
 
-screen.Colorful_Nether_Portal=多彩的下界传送门
-	option.NETHER_PORTAL_RANGE=下界传送门光照距离
-	option.NETHER_PORTAL_R=下界传送门光照红色比重
-	option.NETHER_PORTAL_G=下界传送门光照绿色比重
-	option.NETHER_PORTAL_B=下界传送门光照蓝色比重
-
 	option.FANCY_END_PORTAL=华丽的末地传送门
 
 screen.COLOR=色调映射/色彩配置
 	option.TONEMAP=色调映射配置
 	option.USE_ACES_COLORSPACE_APPROXIMATION=启用 ACES 色彩空间的近似值拟合
+	option.WF99_AGX_PRESET=WF99的AGX预设方案
 	option.SATURATION=饱和度
 	option.CROSSTALK=光照干扰
 
@@ -762,6 +772,7 @@ option.moon_illuminance.comment=配置月亮的亮度.
 option.MOONPHASE_BASED_MOONLIGHT.comment=开启此选项以根据月相调整每晚的月光亮度.
 option.STAR_DENSITY.comment=配置夜晚星星的密度.
 option.STAR_ROTATION_MULT.comment=配置夜晚星星移动的速度.
+option.RAINBOW.comment=使用此选项以循环彩虹类型. 真实或全天模式下的彩虹特性均遵循真实的自然规律, 在特定的太阳角度下将不可见. 使用真实模式以令彩虹仅在雨后出现.
 
 option.Sky_Brightness.comment=配置天空的亮度.
 
@@ -810,7 +821,6 @@ option.AO_Strength.comment=配置由 SSAO, GTAO 渲染的环境光遮蔽强度.
 option.GI_Strength.comment=配置由 RTGI, SSGI 渲染的光线反射强度.
 option.RAY_COUNT.comment=配置光线追踪使用的光线数量, 更高的光线数量有助于提升光照准确度, 降低暗部噪点水平.
 option.STEPS.comment=配置计算每次光照间的间隔, 更高的步进将以视觉效果为代价提高运行性能.
-option.HQ_SSGI.comment=开启此选项以使用 SSR 模式计算光线追踪. §a性能开销很高.
 option.SKY_CONTRIBUTION_IN_SSRT.comment=开启此选项使来自天空的直接光源介入光线追踪的计算. §a性能开销较高.
 option.AO_in_sunlight.comment=配置由太阳产生的环境光遮蔽效果.
 option.UseQuarterResDepth.comment=开启此选项以使用1/4的分辨率深度作为光线追踪的采样, 有助于提高性能. §a性能开销很低.
@@ -835,7 +845,7 @@ option.shadowDistance.comment=配置阴影可渲染的最大距离.
 option.OPTIMIZED_SHADOW_DISTANCE.comment=开启此选项使阴影仅在围绕以玩家为中心的球体中渲染以提升性能, 最大渲染区块由渲染距离进行限制. §a性能开销很低.
 option.entityShadowDistanceMul.comment=配置实体阴影的可见距离.
 
-option.BASIC_SHADOW_FILTER.comment=开启此选项以启用基础影音过滤器.
+option.BASIC_SHADOW_FILTER.comment=开启此选项以启用基础阴影过滤器.
 option.SHADOW_FILTER_SAMPLE_COUNT.comment=配置基础阴影过滤器质量. 过滤器仅用于软化阴影.
 option.Min_Shadow_Filter_Radius.comment=配置基础阴影过滤器的最小作用半径.
 option.Variable_Penumbra_Shadows.comment=开启此选项使阴影离投射它的地方距离越远越柔和. 用于渲染更高质量的阴影和次表面散射. §a性能开销中等.
@@ -843,18 +853,19 @@ option.VPS_Search_Samples.comment=配置可变半阴影过滤器质量.
 option.Max_Shadow_Filter_Radius.comment=配置基础阴影过滤器的最大作用半径.
 option.Max_Filter_Depth.comment=配置阴影过滤器的作用深度. 用于调整阴影的柔和程度.
 
-option.LPV_ENABLED.comment=开启此选项以启用LPV的所有功能. §a性能开销较高.
+option.LPV_ENABLED.comment=开启此选项以启用 LPV 的所有功能. §a性能开销较高.
 option.LPV_SIZE.comment=配置由方块产生的彩色光照的体积规模.
+option.LPV_BLOCKLIGHT_SCALE.comment=配置由方块产生的彩色光照的照明范围.
 option.LPV_SATURATION.comment=配置彩色光照的强度.
 option.LPV_TINT_SATURATION.comment=配置彩色光照穿过半透明方块后映射的色调强度.
 option.LPV_NORMAL_STRENGTH.comment=配置影响光照方向的表面法线规模.
 option.LPV_ENTITY_LIGHTS.comment=开启此选项以允许实体产生彩色光照. §a性能开销中等.
 option.LPV_REDSTONE_LIGHTS.comment=开启此选项以允许红石方块产生彩色光照. §a性能开销中等.
 option.LPV_COLORED_CANDLES.comment=开启此选项以允许彩色蜡烛产生对应的彩色光照. §a性能开销中等.
-option.LPV_NOSHADOW_HACK.comment=开启此选项以允许Floodfill在下界及末地中生效, 但禁止了实体及掉落物的彩色光照效果. §a仅在Iris版本低于 1.7.0 时开启! 
-option.LPV_RANGE.comment=配置彩色光照的最大距离.
+option.LPV_NOSHADOW_HACK.comment=开启此选项以允许 Floodfill 在下界及末地中生效, 但禁止了实体及掉落物的彩色光照效果. §a仅在Iris版本低于 1.7.0 时开启! 
 option.LPV_VL_FOG_ILLUMINATION.comment=开启此选项以允许彩色光照点亮光源周围的空气. §a性能开销较高.
 option.LPV_VL_FOG_ILLUMINATION_BRIGHTNESS.comment=配置泛光雾亮度.
+option.VANILLA_LIGHTMAP_MASK.comment=开启此选项以使用原版风格的 LPV 光照, 将会禁用部分 LPV 特效.
 
 option.LPV_SHADOWS.comment=开启此选项以允许使用LPV计算阴影. 用于生成更精确的阴影. §a性能开销很高.
 option.LPV_SHADOWS_LIGHT_COUNT.comment=配置LPV计算阴影使用的光线数量.
@@ -922,7 +933,7 @@ option.CURVATURE_AMOUNT.comment=配置地表弯曲的程度. 弯曲的地表可�
 option.SHARPENING.comment=配置自适应对比度锐化作用于图像的强度. 用以降低因抗锯齿和升分辨率产生的细节损失.
 option.BLOOM_STRENGTH.comment=配置作用于图像的泛光强度.
 
-option.SCREENSHOT_MODE.comment=开启此选项将自动禁用影响图像质量的后处理效果并强化色彩范围. §a性能开销较高.
+option.SCREENSHOT_MODE.comment=开启此选项将启用多帧画面积累. 用以输出含有更少噪点的高质量图像. §a性能开销较高.
 option.TAA.comment=配置与时间性抗锯齿相关的功能.
 option.RESPONSIVE_TAA.comment=开启此选项以使用近似时间性抗锯齿. 用以以损失图像质量为代价大幅提升性能. §a性能开销很低.
 option.BLEND_FACTOR.comment=配置历史帧使用比重. 更高的数值意味着依赖更少的历史帧, 将为图像带来更多噪点与潜在的闪烁. 反之则依赖更多的历史帧, 将会造成图像的涂抹感.
@@ -940,6 +951,8 @@ option.CHROMATIC_ABERRATION.comment=开启此选项以启用应用于图像两�
 option.CHROMATIC_ABERRATION_STRENGTH.comment=配置色差效果的强度.
 option.VIGNETTE.comment=开启此选项以启用相机暗角效果. §a性能开销很低.
 option.VIGNETTE_STRENGTH.comment=配置相机暗角效果强度.
+option.LENS_FLARE.comment=开启此选项以启用镜头光晕效果. §a性能开销较低.
+option.LENS_FLARE_STRENGTH=配置镜头光晕效果的强度.
 
 option.DEFERRED_SPECULAR.comment=WIP选项
 option.FORWARD_SPECULAR.comment=WIP选项
@@ -952,6 +965,7 @@ option.FORWARD_ROUGH_REFLECTION.comment=WIP选项
 option.Roughness_Threshold.comment=配置反射的粗糙度阈值. 粗糙度达到阈值后不渲染除了太阳反射外的所有反射. 有助于提升性能.
 option.Sun_specular_Strength.comment=配置材质反射太阳光的强度.
 option.reflection_quality.comment=配置屏幕空间反射质量.
+option.MATERIAL_WETNESS_TYPE.comment=配置材质在雨天的反射模式. 使用自适应模式以令材质根据其粗糙度自动调整潮湿反射率.
 
 option.Emissive_Brightness.comment=配置方块发光量或自发光强度.
 option.Emissive_Curve.comment=配置自发光纹理达到最高亮度的容易程度/速度.
@@ -977,10 +991,9 @@ option.Puddles.comment=开启此选项以启用雨天水坑.
 option.Puddle_Size.comment=配置水坑尺寸的缩放倍率.
 
 option.MATERIAL_AO.comment=开启此选项以使材质法线作用与环境光遮蔽效果.
+option.MATERIAL_NORMAL_STRENGTH.comment=配置材质法线的强度水平.
 
-option.RESOURCEPACK_SKY.comment=开启此选项以启用资源包天空支持. 配置设置来使用完整的资源包天空, 或保持光影的日月.
-
-option.NORMAL_STRENGTH.comment=配置材质表面的法线强度. 需要资源包支持.
+option.RESOURCEPACK_SKY.comment=使用此选项以循环资源包天空支持类型. 配置设置来使用完整的资源包天空, 或保持光影的日月.
 
 option.DOF_QUALITY.comment=配置景深的相关功能.
 option.MANUAL_FOCUS.comment=配置手动对焦的距离.
@@ -1001,12 +1014,11 @@ option.AEROCHROME_MODE.comment=开启此选项以启用受Chrome浏览器启发�
 option.AEROCHROME_PINKNESS.comment=配置 Aerochrome 模式的颜色. 数值越高越接近粉色, 反之越接近红色.
 option.AEROCHROME_WOOL_ENABLED.comment=开启此选项以使羊毛方块也受 Aerochrome 模式影响.
 
-option.NETHER_PORTAL_RANGE.comment=配置下界传送门的光照距离.
-
 option.FANCY_END_PORTAL.comment=开启此选项以启用特殊的末地传送门效果.
 
 option.TONEMAP.comment=配置使用的色调映射方案.
 option.USE_ACES_COLORSPACE_APPROXIMATION.comment=开启此选项以启用 ACES 色彩空间的近似值拟合. 仅在使用 ACES 色调映射时生效.
+option.WF99_AGX_PRESET.comment=开启此选项以启用WF99风格的AGX预设. 仅在使用 Tonemap_AGX_Minimal 与 Tonemap_AGX 时生效.
 option.SATURATION.comment=配置图像的整体饱和度.
 option.CROSSTALK.comment=配置图像的光照干扰. 用以减少光照对图像色彩的影响.
 

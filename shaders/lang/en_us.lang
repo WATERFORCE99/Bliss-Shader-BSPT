@@ -17,6 +17,11 @@ screen.Sky=Sky Configuration
 	option.MOONPHASE_BASED_MOONLIGHT=Moonphase Brightness Levels
 	option.STAR_DENSITY=Star Density
 	option.STAR_ROTATION_MULT=Star Rotation Speed
+	option.RAINBOW=Rainbow Type
+		value.RAINBOW.0=OFF
+		value.RAINBOW.1=Realistic
+		value.RAINBOW.2=All time
+	option.RAINBOW_STRENGTH=Rainbow Strength
 
 screen.Sky_coefficients=Sky
 	option.Sky_Brightness=Sky Brightness
@@ -258,7 +263,7 @@ screen.FLASHLIGHT_SETTING=Flashlight Settings
 	option.FLASHLIGHT_BOUNCED_INDIRECT=Flashlight Light Bounce
 	option.FLASHLIGHT_FOG_ILLUMINATION=Flashlight Fog Illumination
 
-screen.Shadows=阴影配置
+screen.Shadows=Shadow Settings
 	option.TRANSLUCENT_COLORED_SHADOWS=Translucent Colored Shadows
 	option.SCREENSPACE_CONTACT_SHADOWS=Screespace Shadows
 	option.RENDER_ENTITY_SHADOWS=Shadows for Entities
@@ -318,21 +323,22 @@ screen.LPV=FloodFill - §cIRIS REQUIRED§r
 		value.LPV_SIZE.6=Small [64]
 		value.LPV_SIZE.7=Medium [128]
 		value.LPV_SIZE.8=Large [256]
+	option.LPV_BLOCKLIGHT_SCALE=LPV Range
 	option.LPV_SATURATION=Light Saturation
 		suffix.LPV_SATURATION=%
 	option.LPV_TINT_SATURATION=Tint Saturation
 		suffix.LPV_TINT_SATURATION=%
-	option.LPV_NORMAL_STRENGTH=Normal Strength
+	option.LPV_NORMAL_STRENGTH=LPV Normal Strength
 		suffix.LPV_NORMAL_STRENGTH=%
 		value.LPV_NORMAL_STRENGTH.0=OFF
 	option.LPV_ENTITY_LIGHTS=Entity Lights
 	option.LPV_REDSTONE_LIGHTS=Redstone Lights
 	option.LPV_COLORED_CANDLES=Colored Candles
 	option.LPV_NOSHADOW_HACK=Iris <= 1.7.0 Fix
-	option.LPV_RANGE=LPV Range
 	option.LPV_VL_FOG_ILLUMINATION=Fog Light Propagation
 	option.LPV_VL_FOG_ILLUMINATION_BRIGHTNESS=Fog Light Propagation Brightness
 		suffix.LPV_VL_FOG_ILLUMINATION_BRIGHTNESS=%
+	option.VANILLA_LIGHTMAP_MASK=Vanilla LPV Lighting
 
 screen.BLOCK_SHADOWS=Block Light Shadow Settings
 	option.LPV_SHADOWS=LPV Shadow
@@ -348,6 +354,11 @@ screen.Fog=Fog Settings
 	option.Haze_amount=Atmospheric Haze Density
 	option.BorderFog=Chunk Border Fog
 	option.FOG_START_HEIGHT=Fog Start Heigt
+
+screen.Fog_Color=Fog Color
+	option.fog_coefficientMieR=Mie R
+	option.fog_coefficientMieG=MieG
+	option.fog_coefficientMieB=MieB
 
 screen.TOD_fog = Time Of Day Fog
 	option.TOD_Fog_mult = Fog Density Multiplier
@@ -525,6 +536,8 @@ screen.TAA_OPTIONS = Anti-Aliasing Settings
 	option.CHROMATIC_ABERRATION_STRENGTH = Chromatic Aberration Strength
 	option.VIGNETTE = Vignette
 	option.VIGNETTE_STRENGTH = Vignette Strength
+	option.LENS_FLARE = Lens Flare
+	option.LENS_FLARE_STRENGTH = Lens Flare Strength
 
 screen.Resource_Pack_Support = Resource Pack Support
 screen.Reflections = Specular Reflections
@@ -539,6 +552,9 @@ screen.Reflections = Specular Reflections
 	option.Roughness_Threshold = Roughness Threshold
 	option.Sun_specular_Strength = Sun Specular Strength
 	option.reflection_quality = Reflection_quality
+	option.MATERIAL_WETNESS_TYPE = Material Wetness Reflection
+		value.MATERIAL_WETNESS_TYPE.0 = Adaptive
+		value.MATERIAL_WETNESS_TYPE.1 = Unified
 
 screen.Emissives = Emissives
 	option.Emissive_Brightness = Emission Multiplier
@@ -576,13 +592,13 @@ screen.Porosity = Porosity / Puddles
 	option.Puddle_Size = Puddle Size Multiplier
 
 	option.MATERIAL_AO = Material Ambient Occlusion
+	option.MATERIAL_NORMAL_STRENGTH = Material Normal Strength
 
 	option.RESOURCEPACK_SKY = Resource Pack Sky
 		value.RESOURCEPACK_SKY.0 = Full Shader Sky
 		value.RESOURCEPACK_SKY.1 = Sky + Shader Sun/Moon
 		value.RESOURCEPACK_SKY.2 = Full Sky
 		value.RESOURCEPACK_SKY.3 = Shader Sky + RP Sun/Moon
-	option.NORMAL_STRENGTH = Material Normal Strength
 
 	option.DOF_QUALITY=Depth Of Field
 		value.DOF_QUALITY.-1=Off
@@ -626,17 +642,12 @@ screen.Aerochrome_Mode=Aerochrome Mode Settings
 	option.AEROCHROME_PINKNESS=Aerochrome Red:Pink Ratio
 	option.AEROCHROME_WOOL_ENABLED=Aerochrome Wool
 
-screen.Colorful_Nether_Portal=Colorful Nether Portal
-	option.NETHER_PORTAL_RANGE=Nether Portal Lit Range
-	option.NETHER_PORTAL_R=Nether Portal R
-	option.NETHER_PORTAL_G=Nether Portal G
-	option.NETHER_PORTAL_B=Nether Portal B
-
 	option.FANCY_END_PORTAL=Fancy End Portal
 
 screen.COLOR=Tone-Map / Color Grading Settings
 	option.TONEMAP=Tone-Map
 	option.USE_ACES_COLORSPACE_APPROXIMATION=ACES Colorspace Approximation
+	option.WF99_AGX_PRESET=Alternative Preset of AGX
 	option.SATURATION=Saturation
 	option.CROSSTALK=Crosstalk
 
@@ -751,116 +762,117 @@ screen.DISTANT_HORIZONS_SETTINGS = §2Distant Horizons §fSettings
 		value.DH_KNOWN_ISSUES.0 = §c Click to Cycle the Page
 		value.DH_KNOWN_ISSUES.1 = §a GTAO and SSGI Disfunctional in DH LOD - Not Supported
 
-	option.DISTANT_HORIZONS_SHADOWMAP = §c(DO NOT USE IF YOU DO NOT KNOW WHAT THIS IS)§r DH shadowmap support
+	option.DISTANT_HORIZONS_SHADOWMAP = DH Shadowmap Support
 	option.TOGGLE_VL_FOG = Toggle Volumetric Fog
 
 ////////////////////////////////// COMMENT //////////////////////////////////
 
-option.sunPathRotation.comment=配置太阳和月亮的角度, 用以投射出更长的阴影.
-option.sun_illuminance.comment=配置太阳的亮度.
-option.moon_illuminance.comment=配置月亮的亮度.
-option.MOONPHASE_BASED_MOONLIGHT.comment=开启此选项以根据月相调整每晚的月光亮度.
-option.STAR_DENSITY.comment=配置夜晚星星的密度.
-option.STAR_ROTATION_MULT.comment=配置夜晚星星移动的速度.
+option.sunPathRotation.comment=Configure the angle of the sun or moon to cast longer shadows.
+option.sun_illuminance.comment=Configure the brightness of the sun.
+option.moon_illuminance.comment=Configure the brightness of the moon.
+option.MOONPHASE_BASED_MOONLIGHT.comment=Toggle to allow the moonlight brightness adjust itself based on the moon phase.
+option.STAR_DENSITY.comment=Configure the density of the starfield.
+option.STAR_ROTATION_MULT.comment=Configure the moving/rotating speed of stars.
+option.RAINBOW.comment=Choose the rainbow Type for belowing settings. Rainbow will always follow the law of nature with both Realistic & All Time, which will make rainbow invisible in specific sun angle. Realistic = Only appears after rain.
 
-option.Sky_Brightness.comment=配置天空的亮度.
+option.Sky_Brightness.comment=Configure the brightness of the skybox.
 
-option.colortype.comment=请根据选择的模式使用对应的颜色调节选项.
-option.Sun_temp.comment=配置太阳的色温. 色温越高颜色将越偏向白色, 反之将越偏向黄色.
-option.Moon_temp.comment=配置月亮的色温. 色温越高颜色将越偏向白色, 反之将越偏向黄色.
+option.colortype.comment=Choose the color type for belowing settings.
+option.Sun_temp.comment=Configure the temperature of the sun. Higher = White. Lower = Yellow.
+option.Moon_temp.comment=Configure the temperature of the moon. Higher = White. Lower = Yellow.
 
-option.AURORA_BRIGHTNESS.comment=配置夜晚极光的亮度.
-option.AURORA_SPEED.comment=配置夜晚极光移动的速度.
-option.AURORA_SNOWY.comment=此选项使极光仅在会下雪的群系生成.
-option.AURORA_STEP.comment=配置极光的质量.
-option.AUR_ENV_OFFSET.comment=配置极光照明对云层/地面的增益系数.
+option.AURORA_BRIGHTNESS.comment=Configure the brightness of the aurora.
+option.AURORA_SPEED.comment=Configure the moving speed of the aurora.
+option.AURORA_SNOWY.comment=Toggle aurora ONLY in snowy biomes.
+option.AURORA_STEP.comment=Configure the quality of the aurora.
+option.AUR_ENV_OFFSET.comment=Configure the contribution of lighting to the ground/cloud from the aurora.
 
-option.Rain_coverage.comment=配置雨天云层覆盖天空的增益系数.
-option.RainFog_amount.comment=配置雨天雾气的密度.
-option.RAIN_VISIBILITY.comment=配置雨雪粒子的尺寸.
-option.WATER_RIPPLES.comment=开启此选项以在雨天应用水面涟漪. §a性能开销中等.
-option.GROUND_RIPPLES.comment=开启此选项以在雨天应用地表涟漪. §a性能开销很高.
-option.LIT_PARTICLE_BRIGHTNESS.comment=配置雨雪粒子受光源影响的水平.
+option.Rain_coverage.comment=Configure how much of the sky the clouds cover during rain.
+option.RainFog_amount.comment=Configure how dense the fog gets during rain.
+option.RAIN_VISIBILITY.comment=Configure the particle size of raindrop/snow.
+option.WATER_RIPPLES.comment=Toggle ripples on water surface during rain.
+option.GROUND_RIPPLES.comment=Toggle ripples on ground surface during rain.
+option.LIT_PARTICLE_BRIGHTNESS.comment=Configure the brightness of raindrop/snow particles lit by lightsources.
 
-option.Daily_Weather.comment=配置可循环的天气系统.
-option.CHOOSE_RANDOM_WEATHER_PROFILE.comment=随机选择以下其中一天的天气配置.
+option.Daily_Weather.comment=Toggle the weather that changes every day.
+option.CHOOSE_RANDOM_WEATHER_PROFILE.comment=Configure the shader to randomly choose the weather from one of the days below. When this is turned off, the shader will choose the day in order.
 
-option.PER_BIOME_ENVIRONMENT.comment=开启此选项将在特定群系应用特殊的环境效果. §a性能开销中等.
+option.PER_BIOME_ENVIRONMENT.comment=Toggle all special environments that only appear in some biomes.
 
-option.SWAMP_ENV.comment=开启此选项以应用沼泽/红树林沼泽的雾气与色彩滤镜.
-option.JUNGLE_ENV.comment=开启此选项以应用丛林/稀树丛林/竹林的雾气与色彩滤镜.
-option.DARKFOREST_ENV.comment=开启此选项以应用黑森林/苍白之圆的雾气与色彩滤镜.
-option.SNOWY_ENV.comment=开启此选项以应用寒冷群系的雾气与色彩滤镜.
+option.SWAMP_ENV.comment=Toggle the special environment in Swamp biome and its variants.
+option.JUNGLE_ENV.comment=Toggle the special environment in Jungle biome and its variants.
+option.DARKFOREST_ENV.comment=Toggle the special environment in Dark Forest biome and its variants.
+option.SNOWY_ENV.comment=Toggle the special environment in all snowy biome.
 
-option.SNOW_STORMS.comment=开启此选项使寒冷群系在降雪时应用暴风雪特效.
-option.SAND_STORMS.comment=开启此选项使干旱群系在雷雨时应用沙尘暴特效.
+option.SNOW_STORMS.comment=Toggle the snow storm effect in all snowy biome.
+option.SAND_STORMS.comment=Toggle the sand storm effect in all dry biome.
 
-option.WAVY_PLANTS.comment=开启此选项以启用植物摇晃的所有功能. §a性能开销很低.
-option.RP_MODEL_FIX.comment=开启此选项以禁用一些可能含有 3D 模型的植物摇晃. 用以避免一些图像问题.
-option.WAVY_STRENGTH.comment=配置植物摇晃的强度.
-option.WAVY_SPEED.comment=配置植物摇晃的速度.
+option.WAVY_PLANTS.comment=Toggle the plant waving animation.
+option.RP_MODEL_FIX.comment=Toggle to disable specific groups of plant waving animation. Some RPs may contain 3D models for vanilla plants, disable them from waving will avoid some graphic flaws.
+option.WAVY_STRENGTH.comment=Configure the amount the plants wave.
+option.WAVY_SPEED.comment=Configure the speed the plants wave.
 
-option.TORCH_AMOUNT.comment=配置照明的亮度.
+option.TORCH_AMOUNT.comment=Configure the brightness of light from torches or other placed lightsources.
 
-option.ambient_brightness.comment=配置环境光的亮度.
-option.MIN_LIGHT_AMOUNT.comment=配置阴影区域的最小照明亮度.
-option.indirect_effect.comment=配置间接照明类型. 使用RTAO + SSGI 以开启基于屏幕空间的光线追踪.
+option.ambient_brightness.comment=Configure the brightnes of lighting in shaded places.
+option.MIN_LIGHT_AMOUNT.comment=Configure the minimum amount of light that can be in shaded places.
+option.indirect_effect.comment=Toggle different types of effects to make lighting in shaded places higher quality. Use RTAO + (HQ) SSGI to get raytrace and global illumination in screen space.
 
-option.AO_Strength.comment=配置由 SSAO, GTAO 渲染的环境光遮蔽强度.
-option.GI_Strength.comment=配置由 RTGI, SSGI 渲染的光线反射强度.
-option.RAY_COUNT.comment=配置光线追踪使用的光线数量, 更高的光线数量有助于提升光照准确度, 降低暗部噪点水平.
-option.STEPS.comment=配置计算每次光照间的间隔, 更高的步进将以视觉效果为代价提高运行性能.
-option.HQ_SSGI.comment=开启此选项以使用 SSR 模式计算光线追踪. §a性能开销很高.
-option.SKY_CONTRIBUTION_IN_SSRT.comment=开启此选项使来自天空的直接光源介入光线追踪的计算. §a性能开销较高.
-option.AO_in_sunlight.comment=配置由太阳产生的环境光遮蔽效果.
-option.UseQuarterResDepth.comment=开启此选项以使用1/4的分辨率深度作为光线追踪的采样, 有助于提高性能. §a性能开销很低.
-option.Hand_Held_lights.comment=开启此选项以使用手持光源. §a性能开销较低.
-option.HANDHELD_LIGHT_RANGE.comment=配置手持光源的照明距离.
+option.AO_Strength.comment= Configure the strength of the ambient occlusion created by SSAO, GTAO.
+option.GI_Strength.comment=Configure the strength of the global illumination created by RTAO + (HQ) SSGI.
+option.RAY_COUNT.comment=Configure the ray count that involves in ray tracing, higher value will result a less noisy graphic.
+option.STEPS.comment=Configure the step size for ray tracing, higher values will boost performance at the expense of ray tracing quality.
+option.SKY_CONTRIBUTION_IN_SSRT.comment=Toggle to take the entire sky and fog into account to create high quality lighting for shaded areas for RTAO. This may introduce more noise.
+option.AO_in_sunlight.comment=Toggle the ambient occlusion created by the sun.
+option.UseQuarterResDepth.comment=Toggle 1/4 resolution depth instead of full to improve performance.
+option.Hand_Held_lights.comment=Toggle the hand held light.
+option.HANDHELD_LIGHT_RANGE.comment=Configure the light range of hand held light.
 
-option.FLASHLIGHT.comment=开启此选项以使用手持光源. §a手持光源无法与手电筒同时使用.
-option.FLASHLIGHT_RANGE.comment=配置手电筒的照明距离.
-option.FLASHLIGHT_BRIGHTNESS_MULT.comment=配置手电筒的照明亮度.
-option.FLASHLIGHT_BRIGHTNESS_FALLOFF.comment=配置手电筒的照明亮度梯度淡出的容易程度/速度.
-option.FLASHLIGHT_SPECULAR.comment=开启此选项以使手电筒照明能够产生高光反射.
-option.FLASHLIGHT_SIZE.comment=配置手电筒照明光斑的尺寸.
-option.FLASHLIGHT_BOUNCED_INDIRECT.comment=开启此选项以允许手电筒光线反弹.
-option.FLASHLIGHT_FOG_ILLUMINATION.comment=开启此选项以允许手电筒照明能够点亮雾气.
+option.FLASHLIGHT.comment=Toggle the flashlight. Can't work with hand held light simultaneously.
+option.FLASHLIGHT_RANGE.comment=Configure the light range of the flashlight.
+option.FLASHLIGHT_BRIGHTNESS_MULT.comment=Configure the brightness of the flashlight.
+option.FLASHLIGHT_BRIGHTNESS_FALLOFF.comment=Configure how quickly the flashlight brightness reaches its brightest part.
+option.FLASHLIGHT_SPECULAR.comment=Toggle the specular reflection from the flashlight.
+option.FLASHLIGHT_SIZE.comment=Configure the size of the flashlight.
+option.FLASHLIGHT_BOUNCED_INDIRECT.comment=Toggle bounced light from the flashlight.
+option.FLASHLIGHT_FOG_ILLUMINATION.comment=Toggle fog illuminination by the flashlight.
 
-option.TRANSLUCENT_COLORED_SHADOWS.comment=开启此选项以使像染色玻璃等半透明方块对穿过的光线染色. §a性能开销中等.
-option.SCREENSPACE_CONTACT_SHADOWS.comment=开启此选项以为远处物体补充小范围的阴影, 并为近处部分阴影区域添加细节. §a性能开销中等.
-option.RENDER_ENTITY_SHADOWS.comment=开启此选项以为所有类型实体渲染阴影, 例如怪物, 箱子, 或者告示牌. §a性能开销中等.
-option.RENDER_PLAYER_SHADOWS.comment=开启此选项以为所有玩家渲染阴影. §a性能开销较低.
-option.shadowMapResolution.comment=配置来自直接光照所产生的阴影质量.
-option.shadowDistance.comment=配置阴影可渲染的最大距离.
-option.OPTIMIZED_SHADOW_DISTANCE.comment=开启此选项使阴影仅在围绕以玩家为中心的球体中渲染以提升性能, 最大渲染区块由渲染距离进行限制. §a性能开销很低.
-option.entityShadowDistanceMul.comment=配置实体阴影的可见距离.
+option.TRANSLUCENT_COLORED_SHADOWS.comment=Toggle translucent things like stained glass to color the sunlight as it passes through it.
+option.SCREENSPACE_CONTACT_SHADOWS.comment=Toggle shadows for things far away and on small details nearby.
+option.RENDER_ENTITY_SHADOWS.comment=Toggle shadows on all types of entities like mobs, chests, banners or signs.
+option.RENDER_PLAYER_SHADOWS.comment=Toggle shadows on all players.
+option.shadowMapResolution.comment=Configure the quality of shadows from the sun casted by things in the world.
+option.shadowDistance.comment=Configure the maximum distance the shadowmap can render. The distance is not measured linearly in chunks when set to un-optimized.
+option.OPTIMIZED_SHADOW_DISTANCE.comment=Render the shadows only in a sphere around the player, limited to a max distance in chunks. Un-optimized does not render the shadows in a sphere and is not locked to chunks; it can cover alot more area with the same distance settings. The distance is not measured in chunks when set to un-optimized.
+option.entityShadowDistanceMul.comment=Configure how far shadows should work for entities. It will keep entity shadows while improved performance in high entity areas.
 
-option.BASIC_SHADOW_FILTER.comment=开启此选项以启用基础影音过滤器.
-option.SHADOW_FILTER_SAMPLE_COUNT.comment=配置基础阴影过滤器质量. 过滤器仅用于软化阴影.
-option.Min_Shadow_Filter_Radius.comment=配置基础阴影过滤器的最小作用半径.
-option.Variable_Penumbra_Shadows.comment=开启此选项使阴影离投射它的地方距离越远越柔和. 用于渲染更高质量的阴影和次表面散射. §a性能开销中等.
-option.VPS_Search_Samples.comment=配置可变半阴影过滤器质量.
-option.Max_Shadow_Filter_Radius.comment=配置基础阴影过滤器的最大作用半径.
-option.Max_Filter_Depth.comment=配置阴影过滤器的作用深度. 用于调整阴影的柔和程度.
+option.BASIC_SHADOW_FILTER.comment=Toggle basic shadow filter.
+option.SHADOW_FILTER_SAMPLE_COUNT.comment=Configure the quality of the basic shadow filter. The filter is only used for soften the shadows.
+option.Min_Shadow_Filter_Radius.comment=Configure the maximum softness of the basic shadow filter.
+option.Variable_Penumbra_Shadows.comment=Toggle adaptive shadow soften strength bases on distance from what casted it. This effect is used to create higher quality shadows and Sub-surface scattering.
+option.VPS_Search_Samples.comment=Configure the quality of the variable penumbra shadow filter.
+option.Max_Shadow_Filter_Radius.comment=Configure the maximum softness the shadows can get when far away from what casted it.
+option.Max_Filter_Depth.comment=Configure the size of the sun. Larger sun will make shadows get softer closer to what casts them.
 
-option.LPV_ENABLED.comment=开启此选项以启用LPV的所有功能. §a性能开销较高.
-option.LPV_SIZE.comment=配置由方块产生的彩色光照的体积规模.
-option.LPV_SATURATION.comment=配置彩色光照的强度.
-option.LPV_TINT_SATURATION.comment=配置彩色光照穿过半透明方块后映射的色调强度.
-option.LPV_NORMAL_STRENGTH.comment=配置影响光照方向的表面法线规模.
-option.LPV_ENTITY_LIGHTS.comment=开启此选项以允许实体产生彩色光照. §a性能开销中等.
-option.LPV_REDSTONE_LIGHTS.comment=开启此选项以允许红石方块产生彩色光照. §a性能开销中等.
-option.LPV_COLORED_CANDLES.comment=开启此选项以允许彩色蜡烛产生对应的彩色光照. §a性能开销中等.
-option.LPV_NOSHADOW_HACK.comment=开启此选项以允许Floodfill在下界及末地中生效, 但禁止了实体及掉落物的彩色光照效果. §a仅在Iris版本低于 1.7.0 时开启! 
-option.LPV_RANGE.comment=配置彩色光照的最大距离.
-option.LPV_VL_FOG_ILLUMINATION.comment=开启此选项以允许彩色光照点亮光源周围的空气. §a性能开销较高.
-option.LPV_VL_FOG_ILLUMINATION_BRIGHTNESS.comment=配置泛光雾亮度.
+option.LPV_ENABLED.comment=Toggle the LPV floodfill lighting.
+option.LPV_SIZE.comment=Configures the size (in blocks) of the volume for colored lighting.
+option.LPV_BLOCKLIGHT_SCALE.comment=Configure the scale of colored lighting.
+option.LPV_SATURATION.comment=Configures the intensity of colored lighting.
+option.LPV_TINT_SATURATION.comment=Configures the intensity of tinting by translucent blocks on colored lighting.
+option.LPV_NORMAL_STRENGTH.comment=Configure the amount surface normals will affect lighting direction.
+option.LPV_ENTITY_LIGHTS.comment=Toggle entities' contribution to colored lighting.
+option.LPV_REDSTONE_LIGHTS.comment=Toggle redstone blocks' contribution to colored lighting.
+option.LPV_COLORED_CANDLES.comment=Toggle colored candles' emission to match colored lighting.
+option.LPV_NOSHADOW_HACK.comment=Fix for Iris 1.7.0 and lower! Allows floodfill to work in Nether & End, but disables entity & dropped item lights.
+option.LPV_VL_FOG_ILLUMINATION.comment=Toggle the air illumination of colored lighting.
+option.LPV_VL_FOG_ILLUMINATION_BRIGHTNESS.comment=Configure the brightness of lit up fog.
+option.VANILLA_LIGHTMAP_MASK.comment=Toggle the vanilla like LPV lighting by disabling effects.
 
-option.LPV_SHADOWS.comment=开启此选项以允许使用LPV计算阴影. 用于生成更精确的阴影. §a性能开销很高.
-option.LPV_SHADOWS_LIGHT_COUNT.comment=配置LPV计算阴影使用的光线数量.
-option.LPV_COLOR_SHADOWS.comment=开启此选项以允许光源的颜色作用于阴影. §a性能开销中等.
-option.LPV_SHADOWS_LIGHT_MULT.comment=配置LPV阴影的亮度.
-option.LPV_HAND_SHADOWS.comment=开启此选项以允许LPV计算第一人称下手部的阴影. §a性能开销中等.
+option.LPV_SHADOWS.comment=Toggle the LPV based shadowmap.
+option.LPV_SHADOWS_LIGHT_COUNT.comment=Configure the ray count that involves in LPV shadows.
+option.LPV_COLOR_SHADOWS.comment=Toggle LPV colored shadow.
+option.LPV_SHADOWS_LIGHT_MULT.comment=Configure the brightness in LPV shadowed areas.
+option.LPV_HAND_SHADOWS.comment=Toggle the LPV shadow for hands.
 
 option.VL_RENDER_RESOLUTION.comment=配置体积雾渲染分辨率.
 option.VL_SAMPLES.comment=配置体积雾采样质量.
@@ -940,18 +952,21 @@ option.CHROMATIC_ABERRATION.comment=开启此选项以启用应用于图像两�
 option.CHROMATIC_ABERRATION_STRENGTH.comment=配置色差效果的强度.
 option.VIGNETTE.comment=开启此选项以启用相机暗角效果. §a性能开销很低.
 option.VIGNETTE_STRENGTH.comment=配置相机暗角效果强度.
+option.LENS_FLARE.comment = Toggle lens flare.
+option.LENS_FLARE_STRENGTH.comment = Configure the strength of lens flare.
 
-option.DEFERRED_SPECULAR.comment=WIP选项
-option.FORWARD_SPECULAR.comment=WIP选项
-option.DEFERRED_ENVIORNMENT_REFLECTION.comment=WIP选项
-option.FORWARD_ENVIORNMENT_REFLECTION.comment=WIP选项
-option.DEFERRED_BACKGROUND_REFLECTION.comment=WIP选项
-option.FORWARD_BACKGROUND_REFLECTION.comment=WIP选项
-option.DEFERRED_ROUGH_REFLECTION.comment=WIP选项
-option.FORWARD_ROUGH_REFLECTION.comment=WIP选项
+option.DEFERRED_SPECULAR.comment=[WIP]
+option.FORWARD_SPECULAR.comment=[WIP]
+option.DEFERRED_ENVIORNMENT_REFLECTION.comment=[WIP]
+option.FORWARD_ENVIORNMENT_REFLECTION.comment=[WIP]
+option.DEFERRED_BACKGROUND_REFLECTION.comment=[WIP]
+option.FORWARD_BACKGROUND_REFLECTION.comment=[WIP]
+option.DEFERRED_ROUGH_REFLECTION.comment=[WIP]
+option.FORWARD_ROUGH_REFLECTION.comment=[WIP]
 option.Roughness_Threshold.comment=配置反射的粗糙度阈值. 粗糙度达到阈值后不渲染除了太阳反射外的所有反射. 有助于提升性能.
 option.Sun_specular_Strength.comment=配置材质反射太阳光的强度.
 option.reflection_quality.comment=配置屏幕空间反射质量.
+option.MATERIAL_WETNESS_TYPE.comment = Configure how reflective material will be while rain. Use Adaptive will allow material to decide the reflectiveness base on its roughness.
 
 option.Emissive_Brightness.comment=配置方块发光量或自发光强度.
 option.Emissive_Curve.comment=配置自发光纹理达到最高亮度的容易程度/速度.
@@ -976,11 +991,10 @@ option.Porosity.comment=开启此选项以启用由光影决定的材质孔隙�
 option.Puddles.comment=开启此选项以启用雨天水坑.
 option.Puddle_Size.comment=配置水坑尺寸的缩放倍率.
 
-option.MATERIAL_AO.comment=开启此选项以使材质法线作用与环境光遮蔽效果.
+option.MATERIAL_AO.comment=Toggle the ambient occlusion for material normal.
+option.MATERIAL_NORMAL_STRENGTH.comment=Configure the strength of material normal.
 
 option.RESOURCEPACK_SKY.comment=开启此选项以启用资源包天空支持. 配置设置来使用完整的资源包天空, 或保持光影的日月.
-
-option.NORMAL_STRENGTH.comment=配置材质表面的法线强度. 需要资源包支持.
 
 option.DOF_QUALITY.comment=配置景深的相关功能.
 option.MANUAL_FOCUS.comment=配置手动对焦的距离.
@@ -1001,12 +1015,11 @@ option.AEROCHROME_MODE.comment=开启此选项以启用受Chrome浏览器启发�
 option.AEROCHROME_PINKNESS.comment=配置 Aerochrome 模式的颜色. 数值越高越接近粉色, 反之越接近红色.
 option.AEROCHROME_WOOL_ENABLED.comment=开启此选项以使羊毛方块也受 Aerochrome 模式影响.
 
-option.NETHER_PORTAL_RANGE.comment=配置下界传送门的光照距离.
-
 option.FANCY_END_PORTAL.comment=开启此选项以启用特殊的末地传送门效果.
 
 option.TONEMAP.comment=配置使用的色调映射方案.
 option.USE_ACES_COLORSPACE_APPROXIMATION.comment=开启此选项以启用 ACES 色彩空间的近似值拟合. 仅在使用 ACES 色调映射时生效.
+option.WF99_AGX_PRESET.comment=Toggle the alternative preset of AGX tone-map by WF99. Only work with Tonemap_AGX_Minimal & Tonemap_AGX.
 option.SATURATION.comment=配置图像的整体饱和度.
 option.CROSSTALK.comment=配置图像的光照干扰. 用以减少光照对图像色彩的影响.
 
@@ -1058,4 +1071,5 @@ option.DH_NOISE_TEXTURE.comment=开启此选项以在 DH 区块内使用特殊�
 
 option.DH_KNOWN_ISSUES.comment=点击以循环已知问题.
 
+option.DISTANT_HORIZONS_SHADOWMAP.comment=§c DO NOT USE IF YOU DO NOT KNOW WHAT THIS IS
 option.TOGGLE_VL_FOG.comment=配置 DH 区块的体积雾密度.
