@@ -219,7 +219,6 @@ vec4 GetVolumetricFog(
 		return vec4(0.0,0.0,0.0,1.0);
 	#endif
 
-
 	/// -------------  RAYMARCHING STUFF ------------- \\\
 
 	vec3 wpos = mat3(gbufferModelViewInverse) * viewPosition + gbufferModelViewInverse[3].xyz;

@@ -50,6 +50,7 @@ float phaseRayleigh(float cosTheta) {
 	const vec2 mul_add = vec2(0.1, 0.28) / acos(-1.0);
 	return cosTheta * mul_add.x + mul_add.y; // optimized version from [Elek09], divided by 4 pi for energy conservation
 }
+
 float fogPhase(float lightPoint){
 	float linear = clamp(-lightPoint*0.5+0.5,0.0,1.0);
 	float linear2 = 1.0 - clamp(lightPoint,0.0,1.0);
@@ -61,10 +62,12 @@ float fogPhase(float lightPoint){
 
 	return exponential;
 }
+
 float phaseCloudFog(float x, float g){
-    float gg = g * g;
-    return (gg * -0.25 + 0.25) * pow(-2.0 * (g * x) + (gg + 1.0), -1.5) / 3.14;
+	float gg = g * g;
+	return (gg * -0.25 + 0.25) * pow(-2.0 * (g * x) + (gg + 1.0), -1.5) / 3.14;
 }
+
 uniform ivec2 eyeBrightness;
 vec4 GetVolumetricFog(
 	in vec3 viewPosition,
@@ -122,7 +125,6 @@ vec4 GetVolumetricFog(
 	vec3 totalAbsorbance = vec3(1.0);
 
 	float fogAbsorbance = 1.0;
-	// float atmosphereAbsorbance = 1.0;
 	vec3 atmosphereAbsorbance = vec3(1.0);
 
 	float SdotV = dot(mat3(gbufferModelView) * sunVector, normalize(viewPosition));
@@ -154,7 +156,7 @@ vec4 GetVolumetricFog(
 	#endif
 
 	#if defined LPV_VL_FOG_ILLUMINATION && defined EXCLUDE_WRITE_TO_LUT
-    	float TorchBrightness_autoAdjust = mix(1.0, 30.0,  clamp(exp(-10.0*exposure),0.0,1.0)) / 5.0;
+    		float TorchBrightness_autoAdjust = mix(1.0, 30.0,  clamp(exp(-10.0*exposure),0.0,1.0)) / 5.0;
 	#endif
 
 	float inACave = 1.0 - caveDetection;
@@ -174,36 +176,36 @@ vec4 GetVolumetricFog(
 		//------------------------------------
 		//------ SAMPLE SHADOWS FOR FOG EFFECTS
 		//------------------------------------
-			#ifdef DISTORT_SHADOWMAP
-				float distortFactor = calcDistort(progress.xy);
+		#ifdef DISTORT_SHADOWMAP
+			float distortFactor = calcDistort(progress.xy);
+		#else
+			float distortFactor = 1.0;
+		#endif
+		vec3 shadowPos = vec3(progress.xy*distortFactor, progress.z);
+
+		vec3 sh = vec3(1.0);
+		if (abs(shadowPos.x) < 1.0-0.5/2048. && abs(shadowPos.y) < 1.0-0.5/2048){
+			shadowPos = shadowPos*vec3(0.5,0.5,0.5/6.0)+0.5;
+
+			#ifdef LPV_SHADOWS
+				shadowPos.xy *= 0.8;
+			#endif
+
+			#ifdef TRANSLUCENT_COLORED_SHADOWS
+				sh = vec3(shadow2D(shadowtex0, shadowPos).x);
+
+				if(shadow2D(shadowtex1, shadowPos).x > shadowPos.z && sh.x < 1.0){
+					vec4 translucentShadow = texture2D(shadowcolor0, shadowPos.xy);
+					if(translucentShadow.a < 0.9) sh = normalize(translucentShadow.rgb+0.0001);
+				}
 			#else
-				float distortFactor = 1.0;
+				sh = vec3(shadow2D(shadow, shadowPos).x);
 			#endif
-			vec3 shadowPos = vec3(progress.xy*distortFactor, progress.z);
+		}
 
-			vec3 sh = vec3(1.0);
-			if (abs(shadowPos.x) < 1.0-0.5/2048. && abs(shadowPos.y) < 1.0-0.5/2048){
-				shadowPos = shadowPos*vec3(0.5,0.5,0.5/6.0)+0.5;
-
-				#ifdef LPV_SHADOWS
-						shadowPos.xy *= 0.8;
-				#endif
-
-				#ifdef TRANSLUCENT_COLORED_SHADOWS
-					sh = vec3(shadow2D(shadowtex0, shadowPos).x);
-
-					if(shadow2D(shadowtex1, shadowPos).x > shadowPos.z && sh.x < 1.0){
-						vec4 translucentShadow = texture2D(shadowcolor0, shadowPos.xy);
-						if(translucentShadow.a < 0.9) sh = normalize(translucentShadow.rgb+0.0001);
-					}
-				#else
-					sh = vec3(shadow2D(shadow, shadowPos).x);
-				#endif
-			}
-
-			#ifdef VL_CLOUDS_SHADOWS
-				sh *= GetCloudShadow(progressW, sunVector);
-			#endif
+		#ifdef VL_CLOUDS_SHADOWS
+			sh *= GetCloudShadow(progressW, sunVector);
+		#endif
 
 		#ifdef PER_BIOME_ENVIRONMENT
 			float maxDistance = inBiome * min(max(1.0 -  length(d*dVWorld.xz)/(32*8),0.0)*2.0,1.0);
@@ -215,74 +217,76 @@ vec4 GetVolumetricFog(
 		//------------------------------------
 		//------ MAIN FOG EFFECT
 		//------------------------------------
-			float fogDensity = densityVol;
-			float fogVolumeCoeff = exp(-fogDensity*dd*dL); // this is like beer-lambert law or something
+		float fogDensity = densityVol;
+		float fogVolumeCoeff = exp(-fogDensity*dd*dL); // this is like beer-lambert law or something
 
-			#ifdef PER_BIOME_ENVIRONMENT
-				vec3 indirectLight = mix(skyLightPhased, biomeIndirect, maxDistance);
-				vec3 DirectLight = mix(LightSourcePhased, biomeDirect, maxDistance) * sh;
-			#else
-				vec3 indirectLight = skyLightPhased;
-				vec3 DirectLight = LightSourcePhased * sh;
-			#endif
+		#ifdef PER_BIOME_ENVIRONMENT
+			vec3 indirectLight = mix(skyLightPhased, biomeIndirect, maxDistance);
+			vec3 DirectLight = mix(LightSourcePhased, biomeDirect, maxDistance) * sh;
+		#else
+			vec3 indirectLight = skyLightPhased;
+			vec3 DirectLight = LightSourcePhased * sh;
+		#endif
 
-			vec3 Lightning = Iris_Lightningflash_VLfog(progressW-cameraPosition, lightningBoltPosition.xyz);
-			vec3 lighting = DirectLight + indirectLight;// * (lightLevelZero*0.99 + 0.01) + Lightning;
-			
-			color += (lighting - lighting * fogVolumeCoeff) * totalAbsorbance;
+		vec3 Lightning = Iris_Lightningflash_VLfog(progressW-cameraPosition, lightningBoltPosition.xyz);
+		vec3 lighting = DirectLight + indirectLight;// * (lightLevelZero*0.99 + 0.01) + Lightning;
 
-			#if defined FLASHLIGHT && defined FLASHLIGHT_FOG_ILLUMINATION
-				vec3 shiftedViewPos = mat3(gbufferModelView)*(progressW-cameraPosition) + vec3(-0.25, 0.2, 0.0);
-				vec3 shiftedPlayerPos = mat3(gbufferModelViewInverse) * shiftedViewPos;
-				vec2 scaledViewPos = shiftedViewPos.xy / max(-shiftedViewPos.z - 0.5, 1e-7);
-				float linearDistance = length(shiftedPlayerPos);
-				float shiftedLinearDistance = length(scaledViewPos);
+		color += (lighting - lighting * fogVolumeCoeff) * totalAbsorbance;
 
-				float lightFalloff = 1.0 - clamp(1.0-linearDistance/FLASHLIGHT_RANGE, -0.999,1.0);
-				lightFalloff = max(exp(-30.0 * lightFalloff),0.0);
-				float projectedCircle = clamp(1.0 - shiftedLinearDistance*FLASHLIGHT_SIZE,0.0,1.0);
+		#if defined FLASHLIGHT && defined FLASHLIGHT_FOG_ILLUMINATION
+			vec3 shiftedViewPos = mat3(gbufferModelView)*(progressW-cameraPosition) + vec3(-0.25, 0.2, 0.0);
+			vec3 shiftedPlayerPos = mat3(gbufferModelViewInverse) * shiftedViewPos;
+			vec2 scaledViewPos = shiftedViewPos.xy / max(-shiftedViewPos.z - 0.5, 1e-7);
+			float linearDistance = length(shiftedPlayerPos);
+			float shiftedLinearDistance = length(scaledViewPos);
 
-				vec3 flashlightGlow = vec3(FLASHLIGHT_R,FLASHLIGHT_G,FLASHLIGHT_B) * lightFalloff * projectedCircle * 0.5;
+			float lightFalloff = 1.0 - clamp(1.0-linearDistance/FLASHLIGHT_RANGE, -0.999,1.0);
+			lightFalloff = max(exp(-30.0 * lightFalloff),0.0);
+			float projectedCircle = clamp(1.0 - shiftedLinearDistance*FLASHLIGHT_SIZE,0.0,1.0);
 
-				color += (flashlightGlow - flashlightGlow * exp(-max(fogDensity,0.005)*dd*dL)) * totalAbsorbance;
-			#endif
+			vec3 flashlightGlow = vec3(FLASHLIGHT_R,FLASHLIGHT_G,FLASHLIGHT_B) * lightFalloff * projectedCircle * 0.5;
 
-			// kill fog absorbance when in caves.
-			totalAbsorbance *= mix(1.0, fogVolumeCoeff, lightLevelZero);
+			color += (flashlightGlow - flashlightGlow * exp(-max(fogDensity,0.005)*dd*dL)) * totalAbsorbance;
+		#endif
+
+		// kill fog absorbance when in caves.
+		totalAbsorbance *= mix(1.0, fogVolumeCoeff, lightLevelZero);
+
 		//------------------------------------
 		//------ ATMOSPHERE HAZE EFFECT
 		//------------------------------------
-			#if defined CloudLayer0 && defined VOLUMETRIC_CLOUDS
-				float cloudPlaneCutoff = clamp((CloudLayer0_height +  max(eyeAltitude-(CloudLayer0_height-100),0)) - progressW.y,0.0,1.0);
-			#else
-				float cloudPlaneCutoff = 1.0;
-			#endif
-			// maximum range for atmosphere haze, basically.
-			float planetVolume = 1.0 - exp(clamp(1.0 - length(progressW-cameraPosition) / (16*150), 0.0,1.0) * -10);
 
-			// just air
-			vec2 airCoef = (exp2(-max(progressW.y-SEA_LEVEL,0.0)/vec2(8.0e3, 1.2e3)*vec2(6.,7.0)) * 192.0 * Haze_amount) * cloudPlaneCutoff * planetVolume;
+		#if defined CloudLayer0 && defined VOLUMETRIC_CLOUDS
+			float cloudPlaneCutoff = clamp((CloudLayer0_height +  max(eyeAltitude-(CloudLayer0_height-100),0)) - progressW.y,0.0,1.0);
+		#else
+			float cloudPlaneCutoff = 1.0;
+		#endif
+		// maximum range for atmosphere haze, basically.
+		float planetVolume = 1.0 - exp(clamp(1.0 - length(progressW-cameraPosition) / (16*150), 0.0,1.0) * -10);
 
-			// Pbr for air, yolo mix between mie and rayleigh for water droplets
-			vec3 rL = rC*airCoef.x;
-			vec3 m =  mC*(airCoef.y+densityVol*300.0);
+		// just air
+		vec2 airCoef = (exp2(-max(progressW.y-SEA_LEVEL,0.0)/vec2(8.0e3, 1.2e3)*vec2(6.,7.0)) * 192.0 * Haze_amount) * cloudPlaneCutoff * planetVolume;
 
-			// calculate the atmosphere haze seperately and purely additive to color, do not contribute to absorbtion.
-			vec3 atmosphereVolumeCoeff = exp(-(rL+m)*dd*dL);
-			// vec3 Atmosphere = LightSourcePhased * sh * (rayL*rL + sunPhase*m) + AveragedAmbientColor * (rL+m);
-			vec3 Atmosphere = (LightSourcePhased * sh * (rayL*rL + sunPhase*m) + AveragedAmbientColor * (rL+m) * (lightLevelZero*0.99 + 0.01)) * inACave;
-			color += (Atmosphere - Atmosphere * atmosphereVolumeCoeff) / (rL+m+1e-6) * atmosphereAbsorbance;
+		// Pbr for air, yolo mix between mie and rayleigh for water droplets
+		vec3 rL = rC*airCoef.x;
+		vec3 m =  mC*(airCoef.y+densityVol*300.0);
+
+		// calculate the atmosphere haze seperately and purely additive to color, do not contribute to absorbtion.
+		vec3 atmosphereVolumeCoeff = exp(-(rL+m)*dd*dL);
+		// vec3 Atmosphere = LightSourcePhased * sh * (rayL*rL + sunPhase*m) + AveragedAmbientColor * (rL+m);
+		vec3 Atmosphere = (LightSourcePhased * sh * (rayL*rL + sunPhase*m) + AveragedAmbientColor * (rL+m) * (lightLevelZero*0.99 + 0.01)) * inACave;
+		color += (Atmosphere - Atmosphere * atmosphereVolumeCoeff) / (rL+m+1e-6) * atmosphereAbsorbance;
 			
-			// finalsceneColor = sceneColor * totalAbsorbance;
+		// finalsceneColor = sceneColor * totalAbsorbance;
 			
-			atmosphereAbsorbance *= atmosphereVolumeCoeff*fogVolumeCoeff;
+		atmosphereAbsorbance *= atmosphereVolumeCoeff*fogVolumeCoeff;
 
 		//------------------------------------
 		//------ LPV FOG EFFECT
 		//------------------------------------
-			#if defined LPV_VL_FOG_ILLUMINATION && defined EXCLUDE_WRITE_TO_LUT 
-				color += LPV_FOG_ILLUMINATION(progressW-cameraPosition, dd, dL) * totalAbsorbance;
-			#endif
+		#if defined LPV_VL_FOG_ILLUMINATION && defined EXCLUDE_WRITE_TO_LUT 
+			color += LPV_FOG_ILLUMINATION(progressW-cameraPosition, dd, dL) * totalAbsorbance;
+		#endif
 	}
 
 	// sceneColor = finalsceneColor;

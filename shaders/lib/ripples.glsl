@@ -2,7 +2,6 @@
 
 uniform float rainStrength;
 uniform float noPuddleAreas;
-varying vec4 lmtexcoord;
 
 float lightmap = clamp((lmtexcoord.w-0.9) * 10.0,0.,1.);
 float isRain = rainStrength * noPuddleAreas;

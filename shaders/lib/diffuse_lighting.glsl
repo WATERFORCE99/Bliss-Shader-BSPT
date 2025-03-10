@@ -21,7 +21,6 @@ uniform float nightVision;
 			float falloff = pow(1.0 - lightDist / lightRange, 3.0);
 			lightFinal = lightColor * NoL * max(falloff, 0.0);
 		}
-
 		return lightFinal;
 	}
 
@@ -145,7 +144,7 @@ vec3 doBlockLightLighting(
 					#endif
 					int face = 0;
 					vec3 dir = playerPos - lightPos;
-					float d = dot(-normalWorld, normalize(dir-0.1));
+					float d = dot(-normalWorld, normalize(dir));
 					if (d > 0) {
 						uint blockData = texelFetch(texBlockData, int(blockId), 0).r;
 						vec4 lightColorRange = unpackUnorm4x8(blockData);

@@ -51,3 +51,17 @@ vec3 toShadowSpaceProjected(vec3 p3){
 	p3 = diagonal3(shadowProjection) * p3 + shadowProjection[3].xyz;
 	return p3;
 }
+
+vec3 viewToWorld(vec3 viewPos) {
+	vec4 pos;
+	pos.xyz = viewPos;
+	pos.w = 0.0;
+	pos = gbufferModelViewInverse * pos;
+	return pos.xyz;
+}
+
+vec3 worldToView(vec3 worldPos) {
+	vec4 pos = vec4(worldPos, 0.0);
+	pos = gbufferModelView * pos;
+	return pos.xyz;
+}

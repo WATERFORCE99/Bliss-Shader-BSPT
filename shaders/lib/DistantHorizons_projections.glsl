@@ -3,9 +3,21 @@
 uniform mat4 dhPreviousProjection;
 uniform mat4 dhProjectionInverse;
 uniform mat4 dhProjection;
+uniform float dhFarPlane;
+uniform float dhNearPlane;
+
+vec3 DH_toScreenSpace(vec3 p) {
+	vec4 iProjDiag = vec4(dhProjectionInverse[0].x, dhProjectionInverse[1].y, dhProjectionInverse[2].zw);
+	vec3 feetPlayerPos = p * 2. - 1.;
+	vec4 viewPos = iProjDiag * feetPlayerPos.xyzz + dhProjectionInverse[3];
+	return viewPos.xyz / viewPos.w;
+}
+
+vec3 DH_toClipSpace3(vec3 viewSpacePosition) {
+	return projMAD(dhProjection, viewSpacePosition) / -viewSpacePosition.z * 0.5 + 0.5;
+}
 
 vec3 toScreenSpace_DH( vec2 texcoord, float depth, float DHdepth ) {
-
 	vec4 viewPos = vec4(0.0);
 	vec3 feetPlayerPos = vec3(0.0);
 	vec4 iProjDiag = vec4(0.0);
@@ -31,6 +43,7 @@ vec3 toScreenSpace_DH( vec2 texcoord, float depth, float DHdepth ) {
 
 	return viewPos.xyz;
 }
+
 vec3 toClipSpace3_DH( vec3 viewSpacePosition, bool depthCheck ) {
 
 	#ifdef DISTANT_HORIZONS
@@ -59,4 +72,12 @@ mat4 DH_shadowProjectionTweak( in mat4 projection){
 	#else
 		return projection;
 	#endif
+}
+
+float DH_ld(float dist) {
+	return (2.0 * dhNearPlane) / (dhFarPlane + dhNearPlane - dist * (dhFarPlane - dhNearPlane));
+}
+
+float DH_inv_ld (float lindepth){
+	return - ((2.0 * dhNearPlane / lindepth) - dhFarPlane - dhNearPlane) / (dhFarPlane - dhNearPlane);
 }

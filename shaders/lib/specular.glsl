@@ -28,16 +28,6 @@ mat3 CoordBase(vec3 n){
 	return mat3(x,y,n);
 }
 
-vec2 Hammersley(int i, int N) {
-	uint bits = uint(i);
-	bits = (bits << 16u) | (bits >> 16u);
-	bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
-	bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
-	bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
-	bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
-	return vec2(float(i)/float(N), float(bits) * 2.3283064365386963e-10);
-}
-
 float fma(float a,float b,float c){
 	return a * b + c;
 }
@@ -45,9 +35,8 @@ float fma(float a,float b,float c){
 vec3 SampleVNDFGGX(
 	vec3 viewerDirection, // Direction pointing towards the viewer, oriented such that +Z corresponds to the surface normal
 	float alpha, // Roughness parameter along X and Y of the distribution
-	vec2 xy // Pair of uniformly distributed numbers in [0, 1])
-) {
-
+	vec2 xy // Pair of uniformly distributed numbers in [0, 1]
+){
 	// Transform viewer direction to the hemisphere configuration
 	viewerDirection = normalize(vec3( alpha * 0.5 * viewerDirection.xy, viewerDirection.z));
 
@@ -264,8 +253,7 @@ vec3 HCM_F0 [8] = vec3[](
 );
 
 vec3 specularReflections(
-
-	in vec3 viewPos, // toScreenspace(vec3(screenUV, depth)
+	in vec3 viewPos, // toScreenspace(vec3(screenUV, depth))
 	in vec3 playerPos, // normalized
 	in vec3 lightPos, // should be in world space
 	in vec3 noise, // x = bluenoise y = interleaved gradient noise
@@ -320,9 +308,7 @@ vec3 specularReflections(
 		vec3 reflectedVector_L = reflect(playerPos, normal);
 	#endif
 
-
 	float shlickFresnel = shlickFresnelRoughness(dot(-normalize(viewDir), vec3(0.0,0.0,1.0)), roughness);
-
 	#if defined FORWARD_SPECULAR && defined SNELLS_WINDOW
 		if(isEyeInWater == 1) shlickFresnel = mix(shlickFresnel, 1.0, min(max(0.98 - (1.0-shlickFresnel),0.0)/(1-0.98),1.0));
 	#endif
@@ -337,7 +323,7 @@ vec3 specularReflections(
 	vec3 reflectance = isMetal ? hardCodedMetalsF0 : vec3(f0);
 	vec3 F0 = (reflectance + (1.0-reflectance) * shlickFresnel) * metalAlbedoTint;
 
-	#if defined FORWARD_SPECULAR
+	#ifdef FORWARD_SPECULAR
 		reflectanceForAlpha = clamp(dot(F0, vec3(0.3333333)), 0.0,1.0);
 	#endif
 
@@ -383,7 +369,7 @@ vec3 specularReflections(
 		}
 	#endif
 
-	#if defined OVERWORLD_SHADER
+	#ifdef OVERWORLD_SHADER
 		vec3 lightSourceReflection = Sun_specular_Strength * lightColor * GGX(normal, -playerPos, lightPos, roughness, reflectance, metalAlbedoTint);
 		specularReflections += lightSourceReflection;
 	#endif
