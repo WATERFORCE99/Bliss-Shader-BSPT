@@ -4,8 +4,16 @@ Bliss-BSPT is an edited shader based on Bliss-unstable-development by X0nk.<br>
 The original Bliss is a great shader and it's even better when X0nk made unstable development version of it.<br>
 But it's also kinda broken with tons of bugs, so I decided to fix them myself and merge code from FAYER3's blocklight2 fork.<br>
 I called it BSPT which refers to "Block Shadow Path Tracing" at that time, <br>
-but as I start add new stuffs like aurora, ripples and lensflare, improve the performance, the block shadow part becomes less important. <br>
+but as I start add more and more new stuffs, improve the performance, the block shadow part becomes less important. <br>
 So it doesn't matter why it's called BSPT today, I just what to make a ultra Bliss loved by everyone. <br>
+
+### FEATURING:
++ New features like Aurora, Ripples, Lensflare, Rainbow, Ore emission and more.
++ Improvements like detailed cloud, distortion animations, optimized raytracing GI and more.
++ More realistic color & new tonemaps.
++ LPV shadow from Fayer3.
++ Better performance.
++ Bug fix.
 
 ### HOW TO DOWNLOAD:
  - locate the `green "code" button` on this page. this button is NOT in the `releases` page.
