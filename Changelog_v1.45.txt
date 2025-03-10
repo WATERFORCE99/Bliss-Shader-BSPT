@@ -1,0 +1,314 @@
+2025-3-11 v1.45
+1. Add customizable rainbow.
+~ rainbow/ composite1 新增了彩虹
+2. Merge X0nk's latest commit for water.
+~ 整合了X0nk最新的水体更新
+3. Add more eng setting comments. (85% done)
+~ en_us 添加了更多英语设置选项说明
+
+2025-3-10 v1.43
+1. Add material normal strenghth setting.
+~ all_solid 新增材质法线强度设定
+2. Replace hammersley sequence with higher precision one, better than nothing.
+~ util 替换了更高精度的hammersley序列，看不出什么画面区别，但总比没有好
+3. Add more eng setting comments. (75% done)
+~ en_us 添加了更多英语设置选项说明
+
+2025-3-9 v1.42
+1. Cloud occlude will be more accurate and fast for lens flare. Add smooth fade out animation for lensflare.
+~ final 镜头炫光的云层遮挡检测现在变得更精准，效率也更高，添加了淡出动画
+2. Add more eng setting comments. (65% done)
+~ en_us 添加了更多英语设置选项说明
+3. Fix an flaw of LPV shadow. (thank you 195p2)
+~ composite1 修复了一个LPV阴影的问题，感谢195p2（discord）
+4. Fix unfunctional LPV RANGE.
+~ lpv_render 修复了LPV光照距离无效的问题
+5. Remove few unused settings, restore few hided settings.
+~ settings 移除部分失效选项，新增部分原本不可见选项
+6. Restore fog color, vanilla LPV lighting option.
+~ settings 新增雾气颜色，原版LPV光照选项
+
+2025-3-8 v1.41
+1. Optimize the code and translations.
+~ xxx/ zh_cn/ en_us 优化代码与翻译
+2. Make an option for people who want the full wet reflectiveness.
+~ composite 1 添加雨天潮湿度的自定义选项
+3. Make lensflare invisible underwater, disable lensflare in other dimensions.
+~ final 使镜头炫光在水下禁用，在其他维度禁用镜头炫光
+4. Remove colorful nether portal functions as it's crap.
+~ setup 移除多彩的下界传送门功能
+
+2025-3-7 v1.4
+1. Add lensflare and sun glare effect.
+~ lensflare/ final 新增镜头炫光与更美观的太阳
+
+2025-3-5 v1.39
+1. Reduce periodic motion of water distortion.
+~ gameplay_effect 降低水下失真运动效果的周期性
+2. Adjust biome tint water.
+~ fogBehindTranslucent_pass 调整群系水体色调
+3. Improve setting menu.
+~ settings/ shader 优化设置菜单
+4. Simplified the code.
+~ xxx 简化代码
+5. Add new tonemap.
+~ color transforms 添加新的tonemap预设
+
+2025-3-4 v1.38
+1. Improve RT perf & quality
+~ indirect_lighting 优化光追性能及质量
+2. Improve CHS/ENG lang quality.
+~ zh_cn/ us_en 优化简中/英语质量
+3. Fix an issue with translucent colored shadow.
+~ composite 1 修复了一个有关彩色阴影的bug
+4. Improve TAA quality
+~ composite5.vsh/ deferred2.vsh 提升了TAA的质量
+
+2025-2-27 v1.36
+1. Merge flashlight & DH TAA jitter update from X0nk.
+~ xxx 整合X0nk的最新更新，内容包括手电筒功能与DH下的抖动TAA实现
+2. Fix tiny issue with POM & make flashlight working under RTGI/SSGI.
+~ all_particle/ composite1 修复了视差的细微问题，并使手电筒在RTGI/SSGI下也能正常工作
+
+2025-2-26 v1.35
+1. Improve rain and snow code to make them easier to be seen.
+~ all_particle 优化雨雪可见度
+2. Improve ripple perf.
+~ all_translucent/ all_solid/ ripples 优化涟漪性能
+3. Make night vision affect other dimensions.
+~ deferred.fsh 使夜视效果在其他维度也能生效
+
+2025-2-25 v1.34
+1. Improve CHS lang quality.
+~ zh_cn 优化简中翻译质量
+2. Few optimizations to the code, may improve shader load speed.
+~ xxx 优化代码，加快光影载入速度
+3. Fix some stupid mistake I made early.
+~ fogBehindTranslucent_pass 修复了一些愚蠢的错误
+4. Delete abandoned code, code arrangements.
+~ composite 1/ settings/ shaders/ lang 删除无效代码，整理代码
+
+2025-2-23 v1.33
+1. Make ground ripple an optional setting. Not recommend to use.
+~ all_translucent/ all_solid/ ripples 新增地表涟漪（不推荐开启）
+2. Improve SSPT perf.
+~ indirect_lighting 优化光追性能（+2~3fps）
+3. Make all daily weather params work as offset to make this function less crap.
+~ deferred.vsh 将周期循环的天气更改为对原云雾设置的补偿，使其重新变得可用
+4. Remove unavailable options, improve setting layout.
+~settings/ shaders 移除无效选项，优化设置界面布局.
+
+2025-2-21 v1.32
+1. Improve code utilizaion to improve perf.
+~ all_translucent/ all_solid/ ripples 优化代码共用以微微提升性能
+2. Improve GTAO visual quality.
+~ Photon_GTAO 优化GTAO表现使其不再鸡肋
+3. Improve wavy plants code.
+~ all_solid/ shadow.vsh 优化摇晃植物代码
+4. Improve fancy end portal color to match the end fog color.
+~ all_solid 将华丽的末地传送门颜色与末地烟雾颜色绑定
+
+2025-2-20 v1.31
+1. Improve ripple shade and water wave offset code implement.
+~ all_translucent 优化涟漪的形状，改良了雨天水波补偿的应用方式
+2. Improve the surface wetness calculation.
+~ composite1 改良了雨天材质表面光滑度的计算方式
+3. Fix a rare mistake with gameplay effect.
+~ gameplay_effect 修复了一个关于游玩效果的代码语法错误
+4. Remove more abandoned code and settings.
+~ shaders/ settings/ zh_cn 移除更多无效代码与设置
+
+2025-2-18 v1.3
+1. Improve ripple shape & perf, add ripple settings.
+~ ripples/ all_translucent 优化涟漪形状及过渡，提升性能，加入涟漪设置选项
+2. Slightly adjust raindrop size implement.
+~ composite3 调整了雨滴大小应用于代码的方式
+3. Water wave will be bigger and faster while rain.
+~ all_translucent 使雨天水波的强度与速度都会增加.
+4. Discriptions for all options done (CHS) (ENG later).
+~ zh_cn 为所有选项增加描述（中文）
+
+2025-2-16 v1.29
+1. Improve the shape & shadow of cloud.
+~ volumetricClouds 改良了体积云的外形与阴影表现
+2. Remove abandoned code and settings, readding setting that still functional.
+~ shaders/ settings 移除了无效代码与设置，还原了个别仍具功能的选项
+3. Add WIP ripples while rain, still need to be improved.
+~ ripples/ all_translucent 新增雨天水面涟漪，仍需要进一步优化
+
+2025-2-14 v1.27
+1. Add extra erosion and density to v cloud to make cloud fancier.
+~ volumetricClouds 添加更多侵蚀效果与层数使体积云更具细节，外形更蓬松，并尽可能保持性能
+2. Improve the water distortion effect.
+~ gameplay_effect 优化相机覆水效果
+3. Slightly improve how aurora light react to cloud.
+~ deferred.vsh 稍稍调整了极光颜色对云层的影响
+
+2025-2-13 v1.25
+1. Add a simple low-pass denoise to skylight ssrt.
+~ indirect_lighting 为天空光SSRT补偿增加了低通滤波处理降低噪点
+2. Adjust block specular while rain, may tweak as futher feedback.
+~ composite1 调整了雨天方块反光的强度，会根据反馈进一步修改
+3. Fix rainfog missing.
+~ shaders 修复了雨雾消失的问题
+4. Fix ore emission issue.
+~ all_solid 修复了硬编码发光矿物的问题，改进了代码
+
+2025-2-10 v1.24
+1. Add moving effect on underwater distortion.
+~ gameplay_effect 为水下失真增加动态效果
+2. Greatly optimize the code of hq ssgi to improve pref and fix an issue.
+~ indirect_lighting 再次优化光线追踪代码，大幅提高高质量ssgi性能并修复了一个微小错误（+3fps），微微提升rtgi/ssgi性能（+0.5fps）
+3. Optimize code related to emissive ore.
+~ all_solid.fsh 简化了发光矿物的代码
+4. Fix an issue with rain puddle.
+~ shaders 修复了关于下雨群系判断的重大错误
+
+2025-2-9 v1.23
+1. Upload the whole shader to github.
+将项目上传至Github
+2. Tweak the light contribution of the aurora.
+~ deferred.fsh/vsh 调整极光的照明补偿效果
+3. Optimize code for indirect lighting to improve RT perf.
+~ indirect_lighting_effects 优化代码提升光追性能，rtgi/ssgi（+0.5fps），hq ssgi（+1fps）
+4. Fix aurora light setting mistake, delet unused code, overall optimize.
+~ aurora/ settings 修复了极光颜色设置颠倒的问题，删除未使用的代码，微微提升性能
+5. Optimize the layout of setting screen.
+~ shaders 微微优化了设置界面布局
+
+2025-2-7 v1.22
+1. Add aurora with simple control, should be improved in the future.
+~ aurora/composite1/settings/shaders 新增了nimitz的极光，将来会持续优化
+2. Improved the prediction of snowy biome
+~ shaders 改良了群系的识别方案
+3. Fix an error with snowstorm.
+~ shaders 修复了一个关于雪暴的错误
+4. Fix the color of sandstorm.
+~ shaders 修复了沙暴颜色的问题
+5. Add aurora light contribution to sky & cloud & ground
+~ climate_settings/ deferred.fsh.vsh/ aurora/ composite1 新增极光对天空及地面元素的光照补偿
+
+2025-2-6 v1.2 #Critical Update
+1. A new method to simulate ssgi, extremely cheap & goodlooking.
+~ indirect_lighting_effects 全新高效方案以模拟ssgi效果使rtgi性能大幅提高（+4fps）
+2. Fix a code error with ssgi, potentially improve performance.
+~ indirect_lighting_effects 修复了一个ssgi的错误，可能可以提升性能
+3. Rearrange the slider of ray count, fix a mistake in sky brightness.
+~ settings 光线数量选项步进调整，修正一个天空光照选项的错误
+4. Add reflection quality slider.
+~ specular 新增反射质量选项
+5. Fix a mistake in specular reflection, may increase performance.
+~ specular 修复一个高光反射中的错误，可能会提升性能
+6. Fix a tiny mistake in sun scattering.
+~ ROBOBO_sky 修复了一个阳光散射的微小错误
+
+2025-2-5 v1.18
+1. Greatly improve the rtao quality with simplified ssgi code, replace rtao with rtgi.
+~ indirect_lighting_effects 大幅改进rtao效果，将rtao改名为rtgi（-1fps）
+2. Slightly improve the water distortion code, may increase performance slightly. 
+~ gameplay_effects 微微改进水下失真效果代码
+3. Fix an issue with emissive ore.
+~ all_solid 修正了一个发光矿物的问题
+
+2025-2-4 v1.17
+1. Slightly improve ssgi performance by adjust ray steps.
+~ indirect_lighting_effects 在不明显降低画面品质的条件下微微提升高质量ssgi性能（+1fps）
+2. Add options to tweak ray count and steps, slightly improve rtao performance under default settings.
+~ indirect_lighting_effects settings 增添光追自定义选项，默认设置下微微减轻rtao负担
+3. Make cloud brighter, adjust the cloud default settings.
+~ volumetricClouds 使云层更亮，微调默认云层配置
+4. Add fake directional bounced light into rtao.
+~ indirect_lighting_effects 改进rtao视觉效果，加入环境光反弹计算（-1fps）
+5. Add preset profiles in shader setting.
+~ shaders.properties 添加默认配置文件切换
+6. Make lava darker.
+~ setup 调整岩浆/岩浆桶颜色使其不那么晃眼
+
+2025-2-1 v1.15
+1. Improve the code of AGX Tonemap to make it more color precision.
+~ color_transforms 优化AGX Tonemap代码性能并使颜色更精准
+2. New personal tonemap based on AGX_Minimum.
+~ color_transforms 新增AGX_Minimum_WF99 Tonemap，提高真实感
+3. Improve TOD fog.
+~ climate_settings settings 优化TOD雾气使得雾气过渡更平滑
+4. Make sunset fancier.
+~  settings 使太阳在夕阳时更红
+5. Improve the graphic of the end.
+~ end_fog 优化末地雾气使环境更暗
+6. Improve the code of biome tint water.
+优化群系色调水体的实现
+7. Add snowy biome overlay.
+~ overworld_fog 为寒冷群系增加特殊雾气overlay效果
+
+2025-1-30 v1.13
+1. Fix the nether fog option.
+~ nether_fog 修复末地雾气选项失灵的bug
+2. Add nether fog plume color option.
+~ nether_fog 新增下界烟柱颜色选项
+3. Add fancy end portal option.
+~ settings 为末地传送门特效增加配置选项
+4. Add nether portal color option.
+~ setup 新增多彩的下界传送门
+5. Adjust the light of furnance
+~ setup 微微调整了熔炉光照
+6. Tweak the shader default settings.
+~ settings 改进了光影默认配置数值
+
+2025-1-30 v1.12
+Merge with unstable build.
+同步X0nk更新
+1. Add effect of end portal 新增末地传送门特效
+2. Fix overdraw issue of v cloud with TAAU 修复了使用TAAU时体积云过度绘制的问题
+
+2025-1-28 v1.11 ##重大修复
+同步X0nk更新
+1. Fix SSAO perf issue. 优化SSAO性能（提升约20fps）
+2. Fix red aberration bug on water. 修复水面红色色散
+3. Fix SSS on muti-layer entities/ blocks like slime. 优化史莱姆等多层透明实体的反射效果
+4. Adjust SSS on grass. 微微提升草丛SSS效果
+5. Improve water wave normal. 水面法线质量优化
+6. Slightly improve TAA on hand. 优化了第一人称下的TAA效果
+7. Improve the code. 代码优化，精简代码，微微提升性能表现
+
+2025-1-28 v1.09
+1. Improve star perf. 优化星星性能
+2. Fix vortex configuration issue. 修复末地漩涡选项失灵的bug
+3. Add end lightning options. 新增末地闪电选项
+4. Add new ore emit color options. 新增方块发光颜色选项
+
+2025-1-27 v1.08
+1. Fix a bug with break animation. 修复方块破坏粒子效果不显示的bug
+2. Improve CHS translation. 汉化修正
+3. Revamp the setting screen. 设置界面重做
+
+2025-1-25 v1.07 ##重大修复
+1. Fix biome tint water. 修复群系色调水体bug
+2. Fix a mistake cause stationary star. 修复星星不旋转的bug
+3. Add raindrop size option. 新增雨滴大小配置选项
+4. Add emissive ore code from fayer3. 应用Fayer3矿石发光特效及相关选项
+5. Fix missing AO under rtao/ssgi. 修复了RTAO/SSGI模式下画面失去AO遮罩的bug
+
+2025-1-24 v1.05 #重大更新
+1. Restore water distortion effect. 重新加入水体焦散效果
+2. Improve setting screen. 设置界面布局优化
+同步X0nk更新
+1. Improve underwater effect & perf. 水下特效优化，性能提升
+
+2025-1-22 v1.03
+1. Add star density option. 新增星星密度配置选项
+2. Fix waving bug while using 3d rp by split the group that may contain blocks with 3d model. 拆分植物摇晃选项以解决一些资源包冲突问题
+3. Update CHS/ENG lang file. 中文/英文语言文件更新
+4. Update README README更新
+
+2025-1-22 v1.02
+1. Fix a mistake of rainfog. 雨雾bug修复
+2. Restore porosity & puddle code. 孔隙率/水坑代码回滚
+3. Fix raincloud coverage issue. 修复雨云覆盖率设置选项失灵的bug
+4. Improve setting value. 设置参数拓展
+
+2025-1-21 v1.00 #重大更新
+1. Apply LPV shadow code from fayer3. 应用Fayer3路径追踪阴影代码
+2. Fix raincloud density/coverage bug. 修复雨云覆盖率/密度bug
+3. Update noise texture. 噪声贴图更新，微微优化性能
+4. Improve setting screen. 设置界面重做
+5. Update CHS translation. 汉化更新

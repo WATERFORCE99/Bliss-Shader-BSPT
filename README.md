@@ -13,3 +13,11 @@ So it doesn't matter why it's called BSPT today, I just what to make a ultra Bli
  - once the zip file finishes downloading, install it like a normal shader. you do NOT need to unzip/extract/decompress.
 
 # BSPT contains code from FAYER3's fork. Any re-editing & re-distribution is prohibited. #
+
+### SPECIAL THANKS:
++ Chocapic13, for the base shader
++ X0nk, for the masterpiece of work
++ WoMspace, for spending alot of time creating a DOF overhaul
++ Null, for doing a huge amount of work creating the voxel floodfill colored lighting
++ Emin, and Gri573, for teaching me how to stop alot of light leaking
++ RRe36 and Sixthsurge, for the great ideas to steal
