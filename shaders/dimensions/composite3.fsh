@@ -408,7 +408,7 @@ void main() {
 		#ifdef SKY_GROUND
 			vec3 borderFogColor = skyGroundColor;
 		#else
-			vec3 borderFogColor = skyFromTex(playerPos_normalized, colortex4)/30.0;
+			vec3 borderFogColor = skyFromTex(playerPos_normalized, colortex4)/1200.0 * Sky_Brightness;
 		#endif
 
 		color.rgb = mix(color.rgb, borderFogColor, fog);
@@ -465,7 +465,7 @@ void main() {
 		vec3 transmittance = exp(-totEpsilon * linearDistance);
 		color.rgb *= transmittance;
 
-		vec3 transmittance2 = exp(-totEpsilon * 25.0);
+		vec3 transmittance2 = exp(-totEpsilon * 50.0);
 		float fogfade = 1.0 - max((1.0 - linearDistance / min(far, 16.0*7.0) ),0);
 		color.rgb += (transmittance2 * scatterCoef) * fogfade;
 

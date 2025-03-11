@@ -8,7 +8,6 @@ varying vec4 normals_and_materials;
 varying vec2 lightmapCoords;
 flat varying int isWater;
 
-
 uniform sampler2D colortex4;
 flat varying vec3 averageSkyCol_Clouds;
 flat varying vec4 lightCol;
@@ -44,7 +43,6 @@ uniform int framemod8;
 uniform int framemod4_DH;
 #define DH_TAA_OVERRIDE
 #include "/lib/TAA_jitter.glsl"
-
 
 uniform vec3 cameraPosition;
 #define diagonal3(m) vec3((m)[0].x, (m)[1].y, m[2].z)

@@ -20,7 +20,7 @@ uniform sampler2D depthtex1;
 
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
-// uniform sampler2D colortex4;
+uniform sampler2D colortex4;
 uniform sampler2D colortex6;
 uniform sampler2D colortex7;
 uniform sampler2D colortex11;
@@ -44,6 +44,7 @@ uniform float rainStrength;
 uniform ivec2 eyeBrightnessSmooth;
 uniform float eyeAltitude;
 uniform float caveDetection;
+uniform float nightVision;
 
 uniform mat4 gbufferPreviousModelView;
 uniform vec3 previousCameraPosition;
@@ -60,11 +61,9 @@ uniform vec3 previousCameraPosition;
 
 #include "/lib/DistantHorizons_projections.glsl"
 
-
 float linearizeDepthFast(const in float depth, const in float near, const in float far) {
 	return (near * far) / (depth * (near - far) + far);
 }
-
 
 #ifdef OVERWORLD_SHADER
 	const bool shadowHardwareFiltering = true;
@@ -81,6 +80,7 @@ float linearizeDepthFast(const in float depth, const in float near, const in flo
 	flat in vec4 dailyWeatherParams0;
 	flat in vec4 dailyWeatherParams1;
 
+	#include "/lib/diffuse_lighting.glsl"
 	#define TIMEOFDAYFOG
 	#include "/lib/lightning_stuff.glsl"
 
@@ -102,16 +102,12 @@ float linearizeDepthFast(const in float depth, const in float near, const in flo
 #endif
 
 #ifdef NETHER_SHADER
-	uniform sampler2D colortex4;
 	#include "/lib/nether_fog.glsl"
 #endif
 
 #ifdef END_SHADER
-	uniform sampler2D colortex4;
 	#include "/lib/end_fog.glsl"
 #endif
-
-#include "/lib/diffuse_lighting.glsl"
 
 #define fsign(a)  (clamp((a)*1e35,0.,1.)*2.-1.)
 

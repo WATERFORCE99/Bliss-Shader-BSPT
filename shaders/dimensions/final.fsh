@@ -17,6 +17,7 @@ uniform sampler2D depthtex2;
 	flat in vec4 dailyWeatherParams0;
 	flat in vec4 dailyWeatherParams1;
 
+	uniform sampler2D colortex4;
 	uniform float rainStrength;
 	#define CLOUDSHADOWSONLY
 	#include "/lib/volumetricClouds.glsl"

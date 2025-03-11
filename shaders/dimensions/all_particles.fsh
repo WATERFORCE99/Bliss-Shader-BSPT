@@ -1,4 +1,5 @@
 #include "/lib/settings.glsl"
+#include "/lib/util.glsl"
 
 #ifdef IS_LPV_ENABLED
 	#extension GL_EXT_shader_image_load_store: enable
@@ -9,7 +10,6 @@
 
 in vec4 lmtexcoord;
 in vec4 color;
-flat in float exposure;
 
 #ifdef LINES
 	flat in int SELECTION_BOX;
@@ -50,10 +50,10 @@ uniform vec2 texelSize;
 uniform ivec2 eyeBrightnessSmooth;
 uniform float rainStrength;
 uniform float waterEnteredAltitude;
+uniform float nightVision;
 
 flat varying float HELD_ITEM_BRIGHTNESS;
 
-#include "/lib/util.glsl"
 #include "/lib/projections.glsl"
 
 #ifdef OVERWORLD_SHADER
@@ -103,7 +103,7 @@ float encodeVec2(float x,float y){
 #ifdef OVERWORLD_SHADER
 	float ComputeShadowMap(inout vec3 directLightColor, vec3 playerPos, float maxDistFade){
 
-		if(maxDistFade <= 0.0) return 1.0;
+		// if(maxDistFade <= 0.0) return 1.0;
 
 		// setup shadow projection
 		vec3 projectedShadowPosition = mat3(shadowModelView) * playerPos + shadowModelView[3].xyz;
@@ -154,7 +154,8 @@ float encodeVec2(float x,float y){
 			shadowmap += shadow2D(shadow, projectedShadowPosition).x;
 		#endif
 
-		return mix(1.0, shadowmap, maxDistFade);
+		return shadowmap;
+		// return mix(1.0, shadowmap, maxDistFade);
 	}
 #endif
 
@@ -327,8 +328,8 @@ void main() {
 		#endif
 
 		if(HELD_ITEM_BRIGHTNESS > 0.0){ 
-			float pointLight = clamp(1.0-length(worldPos-playerCamPos)/HANDHELD_LIGHT_RANGE,0.0,1.0);
-			lightmap.x = mix(lightmap.x, HELD_ITEM_BRIGHTNESS, pointLight*pointLight);
+			float pointLight = clamp(1.0 - (length(worldPos-playerCamPos) - 1.0)/HANDHELD_LIGHT_RANGE,0.0,1.0);
+			lightmap.x = mix(lightmap.x, HELD_ITEM_BRIGHTNESS, pointLight * pointLight);
 		}
 
 	#endif
@@ -353,7 +354,6 @@ void main() {
 		vec3 Torch_Color = vec3(TORCH_R,TORCH_G,TORCH_B);
 		vec3 MinimumLightColor = vec3(1.0);
 
-		if(isEyeInWater == 1) MinimumLightColor = vec3(10.0);
 		if(lightmap.x >= 0.9) Torch_Color *= LIT_PARTICLE_BRIGHTNESS;
 
 		#ifdef OVERWORLD_SHADER
@@ -369,7 +369,7 @@ void main() {
 
 			Shadows = ComputeShadowMap(directLightColor, shadowPlayerPos, shadowMapFalloff);
 
-			Shadows = mix(LM_shadowMapFallback, Shadows, shadowMapFalloff2);
+			Shadows *= mix(LM_shadowMapFallback, 1.0, shadowMapFalloff2);
 
 			#ifdef CLOUDS_SHADOWS	
 				Shadows *= GetCloudShadow(worldPos, WsunVec);
@@ -411,12 +411,14 @@ void main() {
 			const vec3 lpvPos = vec3(0.0);
 		#endif
 
-		Indirect_lighting += doBlockLightLighting(vec3(TORCH_R,TORCH_G,TORCH_B), lightmap.x, exposure, feetPlayerPos, lpvPos, mat3(gbufferModelViewInverse)*vec3(0,1,0));
+		Indirect_lighting += doBlockLightLighting(vec3(TORCH_R,TORCH_G,TORCH_B), lightmap.x, feetPlayerPos, lpvPos, mat3(gbufferModelViewInverse)*vec3(0,1,0));
 
 		#ifdef LINES
 			gl_FragData[0].rgb = (Indirect_lighting + Direct_lighting) * toLinear(color.rgb);
 
-			if(SELECTION_BOX > 0) gl_FragData[0].rgba = vec4(toLinear(vec3(SELECT_BOX_COL_R, SELECT_BOX_COL_G, SELECT_BOX_COL_B)), 1.0);
+			#if defined SELECT_BOX && (SELECTION_BOX > 0)
+				gl_FragData[0].rgba = vec4(toLinear(vec3(SELECT_BOX_COL_R, SELECT_BOX_COL_G, SELECT_BOX_COL_B)), 1.0);
+			#endif
 		#else
 			gl_FragData[0].rgb = (Indirect_lighting + Direct_lighting) * Albedo;
 		#endif

@@ -6,7 +6,6 @@
 uniform float frameTimeCounter;
 #include "/lib/Shadow_Params.glsl"
 
-
 flat varying vec3 averageSkyCol_Clouds;
 flat varying vec3 averageSkyCol;
 
@@ -144,10 +143,9 @@ void main() {
 	// vec3 minimumlight =  vec3(0.5,0.75,1.0) * nightVision;
 	// averageSkyCol_Clouds = max(normalize(averageSkyCol_Clouds) * min(luma(averageSkyCol_Clouds) * 3.0,2.5) * (1.0-rainStrength*0.7), minimumlight);
 
-
-	vec3 minimumlight =  vec3(0.004) * MIN_LIGHT_AMOUNT + nightVision * 0.05;
+	vec3 minimumlight = MIN_LIGHT_AMOUNT * vec3(0.01) + nightVision * 0.05;
 	averageSkyCol_Clouds = max(normalize(averageSkyCol_Clouds + 1e-6) * min(luma(averageSkyCol_Clouds) * 3.0,2.5),0.0);
-	averageSkyCol = max(averageSkyCol * PLANET_GROUND_BRIGHTNESS,0.0) + max(minimumlight, 0.004);
+	averageSkyCol = max(averageSkyCol * PLANET_GROUND_BRIGHTNESS,0.0) + minimumlight;
 
 ////////////////////////////////////////
 /// --- SUNLIGHT/MOONLIGHT STUFF --- ///

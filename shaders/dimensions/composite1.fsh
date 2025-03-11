@@ -101,6 +101,7 @@ uniform float frameTimeCounter;
 uniform float rainStrength;
 uniform int isEyeInWater;
 uniform ivec2 eyeBrightnessSmooth;
+uniform float nightVision;
 
 uniform vec3 sunVec;
 flat varying vec3 WsunVec;
@@ -354,12 +355,9 @@ float SSRT_FlashLight_Shadows(vec3 viewPos, bool depthCheck, vec3 lightDir, floa
 void Emission(
 	inout vec3 Lighting,
 	vec3 Albedo,
-	float Emission,
-	float exposure
+	float Emission
 ){
-	// float autoBrightnessAdjust = mix(5.0, 100.0, clamp(exp(-10.0*exposure),0.0,1.0));
-	if( Emission < 254.5/255.0) Lighting = mix(Lighting, Albedo * 5.0 * Emissive_Brightness, pow(Emission, Emissive_Curve)); // old method.... idk why
-	// if( Emission < 254.5/255.0 ) Lighting += (Albedo * Emissive_Brightness) * pow(Emission, Emissive_Curve);
+	if( Emission < 254.5/255.0) Lighting = mix(Lighting, Albedo * 5.0 * Emissive_Brightness, pow(Emission, Emissive_Curve));
 }
 
 #include "/lib/indirect_lighting_effects.glsl"
@@ -508,7 +506,8 @@ vec4 BilateralUpscale_VLFOG(sampler2D tex, sampler2D depth, vec2 coord, float re
 
 		tShadow += tShadowAccum / samples;
 		tintedSunlight *= translucentTint.rgb / samples;
-		return mix(directLightColor, shadowColor.rgb / samples, maxDistFade);
+		return shadowColor.rgb / samples;
+		// return mix(directLightColor, shadowColor.rgb / samples, maxDistFade);
 	}
 #endif
 
@@ -800,10 +799,6 @@ void main() {
 		#endif
 		Absorbtion = exp(-totEpsilon * max(Vdiff, minimumAbsorbance));
 
-		// brighten up the fully absorbed parts of water when night vision activates.
-		// if( nightVision > 0.0 ) Absorbtion += exp( -50.0 * totEpsilon) * 50.0 * 7.0 * nightVision;
-		// if( nightVision > 0.0 ) Absorbtion += exp( -30.0 * totEpsilon) * 10.0 * nightVision * 10.0;
-
 		// things to note about sunlight in water
 		// sunlight gets absorbed by water on the way down to the floor, and on the way back up to your eye. im gonna ingore the latter part lol
 		// based on the angle of the sun, sunlight will travel through more/less water to reach the same spot. scale absorbtion depth accordingly
@@ -822,10 +817,11 @@ void main() {
 
 		DirectLightColor *= sunlightAbsorbtion;
 
-		if( nightVision > 0.0 ) Absorbtion += exp(-totEpsilon * 25.0) * nightVision;
+		// brighten up the fully absorbed parts of water when night vision activates.
+		if(nightVision > 0.0) Absorbtion += exp(-totEpsilon * 25.0) * nightVision;
 
 		// apply caustics to the lighting, and make sure they dont look weird
-		DirectLightColor *= mix(1.0, waterCaustics(feetPlayerPos + cameraPosition, WsunVec)*WATER_CAUSTICS_BRIGHTNESS, clamp(estimatedDepth,0,1));
+		DirectLightColor *= pow(mix(1.0, waterCaustics(feetPlayerPos + cameraPosition, WsunVec) * WATER_CAUSTICS_BRIGHTNESS, clamp(estimatedDepth,0,1)), WATER_CAUSTICS_STRENGTH);
 	}
 
 	if (swappedDepth < 1.0) {
@@ -869,22 +865,8 @@ void main() {
 			vec3 projectedShadowPosition = mat3(shadowModelView) * shadowPlayerPos + shadowModelView[3].xyz;
 			projectedShadowPosition = diagonal3(shadowProjection) * projectedShadowPosition + shadowProjection[3].xyz;
 
-			#if OPTIMIZED_SHADOW_DISTANCE > 0
-
-				float shadowMapFalloff = smoothstep(0.0, 1.0, min(max(1.0 - length(feetPlayerPos) / (shadowDistance+16.0),0.0)*5.0,1.0));
-				float shadowMapFalloff2 = smoothstep(0.0, 1.0, min(max(1.0 - length(feetPlayerPos) / shadowDistance,0.0)*5.0,1.0));
-			#else
-				vec3 shadowEdgePos = projectedShadowPosition * vec3(0.4,0.4,0.5/6.0) + vec3(0.5,0.5,0.12);
-				float fadeLength = max((shadowDistance/256)*30,10.0); 
-
-				vec3 cubicRadius = clamp(   min((1.0-shadowEdgePos)*fadeLength, shadowEdgePos*fadeLength),0.0,1.0);
-				float shadowmapFade = cubicRadius.x*cubicRadius.y*cubicRadius.z;
-
-				shadowmapFade = 1.0 - pow(1.0-pow(shadowmapFade,1.5),3.0);
-
-				float shadowMapFalloff = shadowmapFade;
-				float shadowMapFalloff2 = shadowmapFade;
-			#endif
+			float shadowMapFalloff = smoothstep(0.0, 1.0, min(max(1.0 - length(feetPlayerPos) / (shadowDistance+32.0),0.0)*5.0,1.0));
+			float shadowMapFalloff2 = smoothstep(0.0, 1.0, min(max(1.0 - length(feetPlayerPos) / shadowDistance,0.0)*5.0,1.0));
 
 			if(isEyeInWater == 1){
 				shadowMapFalloff = 1.0;
@@ -932,15 +914,12 @@ void main() {
 
 				#ifdef SCREENSPACE_CONTACT_SHADOWS
 					vec2 SS_directLight = SSRT_Shadows(toScreenSpace_DH(texcoord/RENDER_SCALE, z, DH_depth1), isDHrange, normalize(WsunVec*mat3(gbufferModelViewInverse)), interleaved_gradientNoise_temporal(), sunSSS_density > 0.0 && shadowMapFalloff2 < 1.0, hand);
-					// Shadows = SS_directLight.r;
 
 					// combine shadowmap with a minumum shadow determined by the screenspace shadows.
 					shadowColor *= SS_directLight.r;
-					// combine shadowmap blocker depth with a minumum determined by the screenspace shadows, starting after the shadowmap ends
-					ShadowBlockerDepth = mix(SS_directLight.g, ShadowBlockerDepth, shadowMapFalloff2);
-
-					// shadowColor = vec3(SS_directLight.r*0 + 1);
-					// ShadowBlockerDepth = SS_directLight.g;
+					ShadowBlockerDepth = max(ShadowBlockerDepth, SS_directLight.g*(1.0-shadowMapFalloff2));
+				#else
+					ShadowBlockerDepth = max(ShadowBlockerDepth, (1.0-shadowMapFalloff2) * 10.0);
 				#endif
 
 				#ifdef TRANSLUCENT_COLORED_SHADOWS
@@ -952,10 +931,6 @@ void main() {
 				SSSColor *= SubsurfaceScattering_sun(albedo, ShadowBlockerDepth, sunSSS_density, clamp(dot(feetPlayerPos_normalized, WsunVec),0.0,1.0), SSS_shadow, shadowMapFalloff2);
 
 				if(isEyeInWater != 1) SSSColor *= lightLeakFix;
-
-				#ifndef SCREENSPACE_CONTACT_SHADOWS
-					SSSColor = mix(vec3(0.0), SSSColor, shadowMapFalloff2);
-				#endif
 
 				#ifdef CLOUDS_SHADOWS
 					float cloudShadows = GetCloudShadow(feetPlayerPos.xyz + cameraPosition, WsunVec);
@@ -1041,7 +1016,7 @@ void main() {
 			const vec3 lpvPos = vec3(0.0);
 		#endif
 
-		vec3 blockLightColor = doBlockLightLighting(vec3(TORCH_R,TORCH_G,TORCH_B), lightmap.x, exposure, feetPlayerPos, lpvPos, FlatNormals);
+		vec3 blockLightColor = doBlockLightLighting(vec3(TORCH_R,TORCH_G,TORCH_B), lightmap.x, feetPlayerPos, lpvPos, FlatNormals);
 		Indirect_lighting += blockLightColor;
 
 		vec4 flashLightSpecularData = vec4(0.0);
@@ -1084,7 +1059,7 @@ void main() {
 			Indirect_lighting *= AO;
 
 		// SSGI
-		#elif indirect_effect == 3 || indirect_effect == 4
+		#elif indirect_effect == 3
 			if(!hand) Indirect_lighting = ApplySSRT(Indirect_lighting, blockLightColor, MinimumLightColor, viewPos, normal, vec3(bnoise, noise_2), lightmap.y, isGrass, isDHrange) + ssrtFLASHLIGHT;
 		#endif
 
@@ -1133,10 +1108,8 @@ void main() {
 
 		#ifdef OVERWORLD_SHADER
 			#ifdef AO_in_sunlight
-				// Direct_lighting = max(shadowColor*NdotL * (AO*0.7+0.3), SSSColor);
 				Direct_lighting = shadowColor*NdotL*(AO*0.7+0.3) + SSSColor * (1.0-NdotL);
 			#else
-				// Direct_lighting = max(shadowColor*NdotL, SSSColor);
 				Direct_lighting = shadowColor*NdotL + SSSColor * (1.0-NdotL);
 			#endif
 
@@ -1146,14 +1119,14 @@ void main() {
 		#endif
 
 		vec3 FINAL_COLOR = (Indirect_lighting + Direct_lighting) * albedo;
-		Emission(FINAL_COLOR, albedo, SpecularTex.a, exposure);
+		Emission(FINAL_COLOR, albedo, SpecularTex.a);
 
 		if(lightningBolt) FINAL_COLOR = vec3(77.0, 153.0, 255.0);
 
 		#ifdef DEFERRED_SPECULAR	
 			vec3 specularNoises = vec3(BN.xy, blueNoise());
-			vec3 specularNormal = slopednormal;
-			if (dot(slopednormal, (feetPlayerPos_normalized)) > 0.0) specularNormal = FlatNormals;
+			vec3 specularNormal = normal;
+			if (dot(normal, (feetPlayerPos_normalized)) > 0.0) specularNormal = FlatNormals;
 			
 			FINAL_COLOR = specularReflections(viewPos, feetPlayerPos_normalized, WsunVec, specularNoises, specularNormal, SpecularTex.r, SpecularTex.g, albedo, FINAL_COLOR, shadowColor, lightmap.y, hand, isWater || (!isWater && isEyeInWater == 1), flashLightSpecularData);
 		#endif

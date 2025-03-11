@@ -49,14 +49,14 @@ uniform sampler2D depthtex0;
 	uniform sampler2D dhDepthTex1;
 #endif
 
+uniform sampler2D colortex3;
+uniform sampler2D colortex4;
+uniform sampler2D colortex5;
+uniform sampler2D colortex6;
 uniform sampler2D colortex7;
 uniform sampler2D colortex12;
 uniform sampler2D colortex13;
 uniform sampler2D colortex14;
-uniform sampler2D colortex5;
-uniform sampler2D colortex3;
-uniform sampler2D colortex4;
-uniform sampler2D colortex6;
 
 uniform sampler2D texture;
 uniform sampler2D specular;
@@ -77,8 +77,6 @@ varying vec3 flatnormal;
 	varying vec3 shitnormal;
 #endif
 
-flat varying float exposure;
-
 uniform float near;
 // uniform float far;
 
@@ -86,6 +84,7 @@ uniform int isEyeInWater;
 uniform float skyIntensityNight;
 uniform float skyIntensity;
 uniform ivec2 eyeBrightnessSmooth;
+uniform float nightVision;
 
 uniform float frameTimeCounter;
 uniform vec2 texelSize;
@@ -143,14 +142,16 @@ uniform float waterEnteredAltitude;
 varying vec3 viewVector;
 vec3 getParallaxDisplacement(vec3 waterPos, vec3 playerPos) {
 
-	float waterHeight = getWaterHeightmap(waterPos.xy) ;
-	waterHeight = exp(-20*sqrt(waterHeight));
-	// waterHeight *= 5.0;
+	float largeWaves = texture2D(noisetex, waterPos.xy / 600.0 ).b;
+ 	float largeWavesCurved = pow(1.0-pow(1.0-largeWaves,2.0),2.5);
+ 
+ 	float waterHeight = getWaterHeightmap(waterPos.xy, largeWaves, largeWavesCurved);
+ 	// waterHeight = exp(-20.0*sqrt(waterHeight));
+ 	waterHeight = exp(-7.0*exp(-7.0*waterHeight)) * 0.25;
 	
 	vec3 parallaxPos = waterPos;
 
 	parallaxPos.xy += (viewVector.xy / -viewVector.z) * waterHeight;
-	// parallaxPos.xz -= (viewVector.xy / viewVector.z) * waterHeight;
 
 	return parallaxPos;
 }
@@ -214,7 +215,7 @@ uniform float dhFarPlane;
 #ifdef OVERWORLD_SHADER
 	float ComputeShadowMap(inout vec3 directLightColor, vec3 playerPos, float maxDistFade, float noise){
 
-		if(maxDistFade <= 0.0) return 1.0;
+		// if(maxDistFade <= 0.0) return 1.0;
 
 		// setup shadow projection
 		vec3 projectedShadowPosition = mat3(shadowModelView) * playerPos + shadowModelView[3].xyz;
@@ -291,7 +292,8 @@ uniform float dhFarPlane;
 			directLightColor *= mix(vec3(1.0), translucentTint.rgb / samples, maxDistFade);
 		#endif
 
-		return mix(1.0, shadowmap / samples, maxDistFade);
+		return shadowmap / samples;
+		// return mix(1.0, shadowmap / samples, maxDistFade);
 	}
 #endif
 
@@ -303,11 +305,9 @@ void convertHandDepth(inout float depth) {
 void Emission(
 	inout vec3 Lighting,
 	vec3 Albedo,
-	float Emission,
-	float exposure
+	float Emission
 ){
-	// float autoBrightnessAdjust = mix(5.0, 100.0, clamp(exp(-10.0*exposure),0.0,1.0));
-	if(Emission < 254.5/255.0) Lighting = mix(Lighting, Albedo * 5.0 * Emissive_Brightness, pow(Emission, Emissive_Curve)); // old method.... idk why
+	if(Emission < 254.5/255.0) Lighting = mix(Lighting, Albedo * 5.0 * Emissive_Brightness, pow(Emission, Emissive_Curve));
 }
 
 uniform vec3 eyePosition;
@@ -360,8 +360,6 @@ if (gl_FragCoord.x * texelSize.x < 1.0  && gl_FragCoord.y * texelSize.y < 1.0 ){
 	gl_FragData[0] = texture2D(texture, lmtexcoord.xy, Texture_MipMap_Bias) * color;
 
 	float UnchangedAlpha = gl_FragData[0].a;
-
-	// gl_FragData[0].a = pow(gl_FragData[0].a,3);
 
 	vec3 Albedo = toLinear(gl_FragData[0].rgb);
 
@@ -424,23 +422,20 @@ if (gl_FragCoord.x * texelSize.x < 1.0  && gl_FragCoord.y * texelSize.y < 1.0 ){
 			vec3 flowDir = normalize(worldSpaceNormal*10.0) * frameTimeCounter * WATER_WAVE_SPEED * (2.0 + rainStrength);
 			
 			vec2 newPos = worldPos.xy + abs(flowDir.xz);
-			newPos = mix(newPos, worldPos.zy + abs(flowDir.zx), clamp(abs(worldSpaceNormal.x),0,1));
-			newPos = mix(newPos, worldPos.xz, clamp(abs(worldSpaceNormal.y),0,1));
+			newPos = mix(newPos, worldPos.zy + abs(flowDir.zx), clamp(abs(worldSpaceNormal.x),0.0,1.0));
+			newPos = mix(newPos, worldPos.xz, clamp(abs(worldSpaceNormal.y),0.0,1.0));
 			waterPos.xy = newPos;
-
-			// make the waves flow in the direction the water faces, except for perfectly up facing parts.
-			// if(abs(worldSpaceNormal.y) < 0.9995) posxz.xz -= posxz.y + normalize(worldSpaceNormal.xz*10.0) * frameTimeCounter * 3.0 * WATER_WAVE_SPEED;
 		
 			waterPos.xyz = getParallaxDisplacement(waterPos, playerPos);
 			
 			vec3 bump = normalize(getWaveNormal(waterPos, playerPos, false));
 
 			#ifdef WATER_RIPPLES
-				vec3 rippleNormal = drawRipples(worldPos.xz * 5.0, frameTimeCounter) * applyRipple * 0.25 * clamp(1.0 - length(playerPos) / 128.0, 0.0, 1.0);
+				vec3 rippleNormal = drawRipples(worldPos.xz * 5.0, frameTimeCounter) * applyRipple * 0.5 * clamp(1.0 - length(playerPos) / 128.0, 0.0, 1.0);
 				bump = normalize(bump + rippleNormal);
 			#endif
 
-			float bumpmult = WATER_WAVE_STRENGTH * (10.0 + 5.0 * rainStrength);
+			float bumpmult = WATER_WAVE_STRENGTH + 0.5 * rainStrength;
 			bump = bump * vec3(bumpmult, bumpmult, bumpmult) + vec3(0.0f, 0.0f, 1.0f - bumpmult);
 
 			NormalTex.xyz = bump;
@@ -494,7 +489,6 @@ if (gl_FragCoord.x * texelSize.x < 1.0  && gl_FragCoord.y * texelSize.y < 1.0 ){
 
 	vec3 Indirect_lighting = vec3(0.0);
 	vec3 MinimumLightColor = vec3(1.0);
-	if(isEyeInWater == 1) MinimumLightColor = vec3(10.0);
 
 	vec3 Direct_lighting = vec3(0.0);
 
@@ -518,7 +512,7 @@ if (gl_FragCoord.x * texelSize.x < 1.0  && gl_FragCoord.y * texelSize.y < 1.0 ){
 
 		Shadows = ComputeShadowMap(DirectLightColor, shadowPlayerPos, shadowMapFalloff, blueNoise());
 
-		Shadows = mix(LM_shadowMapFallback, Shadows, shadowMapFalloff2);
+		Shadows *= mix(LM_shadowMapFallback, 1.0, shadowMapFalloff2);
 
 		#ifdef CLOUDS_SHADOWS
 			Shadows *= GetCloudShadow(feetPlayerPos+cameraPosition, WsunVec);
@@ -582,7 +576,7 @@ if (gl_FragCoord.x * texelSize.x < 1.0  && gl_FragCoord.y * texelSize.y < 1.0 ){
 		const vec3 lpvPos = vec3(0.0);
 	#endif
 
-	Indirect_lighting += doBlockLightLighting(vec3(TORCH_R,TORCH_G,TORCH_B), lightmap.x, exposure, feetPlayerPos, lpvPos, worldSpaceNormal);
+	Indirect_lighting += doBlockLightLighting(vec3(TORCH_R,TORCH_G,TORCH_B), lightmap.x, feetPlayerPos, lpvPos, worldSpaceNormal);
 
 	vec4 flashLightSpecularData = vec4(0.0);
 	#ifdef FLASHLIGHT
@@ -592,7 +586,7 @@ if (gl_FragCoord.x * texelSize.x < 1.0  && gl_FragCoord.y * texelSize.y < 1.0 ){
 	vec3 FinalColor = (Indirect_lighting + Direct_lighting) * Albedo;
 
 	#if EMISSIVE_TYPE == 2 || EMISSIVE_TYPE == 3
-		Emission(FinalColor, Albedo, SpecularTex.b, exposure);
+		Emission(FinalColor, Albedo, SpecularTex.b);
 	#endif
 
 ////////////////////////////////////////////////////////////////////////////////

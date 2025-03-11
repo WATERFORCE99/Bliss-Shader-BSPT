@@ -57,7 +57,6 @@ uniform ivec2 eyeBrightnessSmooth;
 // uniform ivec2 eyeBrightness;
 uniform float caveDetection;
 uniform int isEyeInWater;
-uniform float nightVision;
 
 vec4 lightCol = vec4(lightSourceColor, float(sunElevation > 1e-5)*2-1.);
 
@@ -122,18 +121,18 @@ float invLinZ (float lindepth){
 	flat varying vec4 CurrentFrame_dailyWeatherParams0;
 	flat varying vec4 CurrentFrame_dailyWeatherParams1;
 
-
 	#define VL_CLOUDS_DEFERRED
 
 	#include "/lib/volumetricClouds.glsl"
 	#include "/lib/climate_settings.glsl"
 	#include "/lib/overworld_fog.glsl"
-	
 #endif
+
 #ifdef NETHER_SHADER
 	uniform sampler2D colortex4;
 	#include "/lib/nether_fog.glsl"
 #endif
+
 #ifdef END_SHADER
 	uniform sampler2D colortex4;
 	#include "/lib/end_fog.glsl"
@@ -174,7 +173,6 @@ float mixhistory = 0.06;
 			if(gl_FragCoord.x < 2) gl_FragData[0] = vec4(CurrentFrame_dailyWeatherParams0.rgb * 10.0,1.0);
 			if(gl_FragCoord.x > 2) gl_FragData[0] = vec4(CurrentFrame_dailyWeatherParams1.rgb * 10.0,1.0);
 			if(gl_FragCoord.x > 3) gl_FragData[0] = vec4(CurrentFrame_dailyWeatherParams0.a * 10.0, CurrentFrame_dailyWeatherParams1.a * 10.0, 0.0, 1.0);
-	
 		}
 	#endif
 
@@ -311,7 +309,7 @@ if (gl_FragCoord.x > 18.+257. && gl_FragCoord.y > 1. && gl_FragCoord.x < 18+257+
 
 		vec4 VL_Fog = GetVolumetricFog(mat3(gbufferModelView)*viewVector*256., noise, 1.0-noise);
 
-		BackgroundColor += VL_Fog.rgb + vec3(0.5,0.75,1.0) * nightVision;
+		BackgroundColor += VL_Fog.rgb + vec3(0.5,0.75,1.0);
 
 	  	gl_FragData[0] = vec4(BackgroundColor*8.0, 1.0);
 

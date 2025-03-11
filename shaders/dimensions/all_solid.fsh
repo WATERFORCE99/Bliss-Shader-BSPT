@@ -60,6 +60,14 @@ uniform sampler2D depthtex0;
 uniform float alphaTestRef;
 uniform float frameTimeCounter;
 
+#ifdef VIVECRAFT
+ 	uniform bool vivecraftIsVR;
+ 	uniform vec3 vivecraftRelativeMainHandPos;
+ 	uniform vec3 vivecraftRelativeOffHandPos;
+ 	uniform mat4 vivecraftRelativeMainHandRot;
+ 	uniform mat4 vivecraftRelativeOffHandRot;
+ #endif
+
 uniform vec4 entityColor;
 
 // in vec3 velocity;
@@ -226,11 +234,18 @@ void main() {
 			vec3 playerCamPos = cameraPosition;
 		#endif
 
+	#ifdef VIVECRAFT
+         	if (vivecraftIsVR){ 
+ 			playerCamPos = cameraPosition - vivecraftRelativeMainHandPos;
+ 		}
+ 	#endif
+
 		// if(HELD_ITEM_BRIGHTNESS > 0.0) torchlightmap = max(torchlightmap, HELD_ITEM_BRIGHTNESS * clamp( pow(max(1.0-length(worldPos-playerCamPos)/HANDHELD_LIGHT_RANGE,0.0),1.5),0.0,1.0));
 		if(HELD_ITEM_BRIGHTNESS > 0.0){ 
-			float pointLight = clamp(1.0-length(worldPos-playerCamPos)/HANDHELD_LIGHT_RANGE,0.0,1.0);
-			torchlightmap = mix(torchlightmap, HELD_ITEM_BRIGHTNESS, pointLight*pointLight);
+			float pointLight = clamp(1.0-(length(worldpos-playerCamPos)-1)/HANDHELD_LIGHT_RANGE,0.0,1.0);
+ 			torchlightmap = mix(torchlightmap, HELD_ITEM_BRIGHTNESS, pointLight);
 		}
+
 		#ifdef HAND
 			torchlightmap *= 0.9;
 		#endif
@@ -431,7 +446,7 @@ void main() {
 		NormalTex.xyz = mix(vec3(0,0,1), NormalTex.xyz, MATERIAL_NORMAL_STRENGTH);
 
 		#ifdef GROUND_RIPPLES
-			vec3 rippleNormal = drawRipples(worldPos.xz * 10.0, frameTimeCounter * 2.0) * applyRipple * 0.1 * clamp(1.0 - length(playerPos) / 16.0, 0.0, 1.0);
+			vec3 rippleNormal = drawRipples(worldPos.xz * 10.0, frameTimeCounter * 2.0) * applyRipple * 0.2 * clamp(1.0 - length(playerPos) / 16.0, 0.0, 1.0);
 			NormalTex.xyz = normalize(NormalTex.xyz + rippleNormal);
 		#endif
 
