@@ -242,7 +242,7 @@ void main() {
 
 		// if(HELD_ITEM_BRIGHTNESS > 0.0) torchlightmap = max(torchlightmap, HELD_ITEM_BRIGHTNESS * clamp( pow(max(1.0-length(worldPos-playerCamPos)/HANDHELD_LIGHT_RANGE,0.0),1.5),0.0,1.0));
 		if(HELD_ITEM_BRIGHTNESS > 0.0){ 
-			float pointLight = clamp(1.0-(length(worldpos-playerCamPos)-1)/HANDHELD_LIGHT_RANGE,0.0,1.0);
+			float pointLight = clamp(1.0-(length(worldPos-playerCamPos)-1)/HANDHELD_LIGHT_RANGE,0.0,1.0);
  			torchlightmap = mix(torchlightmap, HELD_ITEM_BRIGHTNESS, pointLight);
 		}
 

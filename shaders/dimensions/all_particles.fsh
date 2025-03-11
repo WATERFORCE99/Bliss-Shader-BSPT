@@ -54,6 +54,7 @@ uniform float nightVision;
 
 flat varying float HELD_ITEM_BRIGHTNESS;
 
+uniform vec3 previousCameraPosition;
 #include "/lib/projections.glsl"
 
 #ifdef OVERWORLD_SHADER
