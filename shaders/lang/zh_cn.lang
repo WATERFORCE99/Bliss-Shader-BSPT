@@ -234,12 +234,18 @@ screen.Ambient_Colors=环境光颜色
 		value.indirect_effect.0=原版 AO
 		value.indirect_effect.1=SSAO
 		value.indirect_effect.2=GTAO
-		value.indirect_effect.3=RTAO + SSGI
-		value.indirect_effect.4=RTAO + 高质量 SSGI
+		value.indirect_effect.3=RTAO
 
-screen.AO_GI=环境光遮蔽/全局光照配置
+	option.indirect_RTGI=光线追踪全局光照模式
+		value.indirect_RTGI.0=OFF
+		value.indirect_RTGI.1=SSGI
+		value.indirect_RTGI.2=高质量 SSGI
+
+screen.AO=环境光遮蔽配置
 	option.AO_Strength=环境光遮蔽倍率
 	option.AO_in_sunlight=阳光遮蔽
+
+screen.GI=全局光照配置
 	option.GI_Strength=全局照明倍率
 	option.RAY_COUNT=光照数量
 	option.STEPS=光照步进
@@ -317,8 +323,8 @@ screen.Filtering=阴影过滤配置
 	option.Max_Shadow_Filter_Radius=最大阴影过滤半径
 	option.Max_Filter_Depth=最大过滤深度
 
-screen.LPV=FloodFill - §c需要使用Iris加载器§r
-	option.LPV_ENABLED=启用 LPV
+screen.LPV=FloodFill 彩色照明
+	option.LPV_ENABLED=启用 LPV - §c需要使用Iris加载器
 	option.LPV_SIZE=LPV 规模
 		value.LPV_SIZE.6=小 [64]
 		value.LPV_SIZE.7=中 [128]
@@ -340,12 +346,12 @@ screen.LPV=FloodFill - §c需要使用Iris加载器§r
 		suffix.LPV_VL_FOG_ILLUMINATION_BRIGHTNESS=%
 	option.VANILLA_LIGHTMAP_MASK=原版 LPV 光照
 
-screen.BLOCK_SHADOWS=路径追踪阴影
-	option.LPV_SHADOWS=LPV阴影
-	option.LPV_SHADOWS_LIGHT_COUNT=LPV阴影精度
-	option.LPV_COLOR_SHADOWS=LPV彩色阴影
-	option.LPV_SHADOWS_LIGHT_MULT=LPV阴影区域亮度
-	option.LPV_HAND_SHADOWS=LPV手部阴影
+screen.BLOCK_SHADOWS=FloodFill 阴影
+	option.LPV_SHADOWS=LPV 阴影 - §c需要开启 LPV
+	option.LPV_SHADOWS_LIGHT_COUNT=LPV 阴影精度
+	option.LPV_COLOR_SHADOWS=LPV 彩色阴影
+	option.LPV_SHADOWS_LIGHT_MULT=LPV 阴影区域亮度
+	option.LPV_HAND_SHADOWS=LPV 手部阴影
 
 screen.Fog=雾气配置
 	option.VL_RENDER_RESOLUTION=雾气渲染分辨率
@@ -540,20 +546,20 @@ screen.TAA_OPTIONS = 抗锯齿配置
 
 screen.Resource_Pack_Support = 资源包配置
 screen.Reflections = 高光反射
-	option.DEFERRED_SPECULAR = 后置高光反射
-	option.FORWARD_SPECULAR = 前置高光反射
-	option.DEFERRED_ENVIORNMENT_REFLECTION = 后置环境反射
-	option.FORWARD_ENVIORNMENT_REFLECTION = 前置环境反射
-	option.DEFERRED_BACKGROUND_REFLECTION = 后置背景反射
-	option.FORWARD_BACKGROUND_REFLECTION = 前置背景反射
-	option.DEFERRED_ROUGH_REFLECTION = 后置粗糙度反射
-	option.FORWARD_ROUGH_REFLECTION = 前置粗糙度反射
+	option.DEFERRED_SPECULAR = 延迟高光反射
+	option.FORWARD_SPECULAR = 前向高光反射
+	option.DEFERRED_ENVIORNMENT_REFLECTION = 延迟环境反射
+	option.FORWARD_ENVIORNMENT_REFLECTION = 前向环境反射
+	option.DEFERRED_BACKGROUND_REFLECTION = 延迟背景反射
+	option.FORWARD_BACKGROUND_REFLECTION = 前向背景反射
+	option.DEFERRED_ROUGH_REFLECTION = 延迟粗糙度反射
+	option.FORWARD_ROUGH_REFLECTION = 前向粗糙度反射
 	option.Roughness_Threshold = 粗糙度反射阀值
 	option.Sun_specular_Strength = 太阳反射强度
-	option.reflection_quality = 反射质量
-	option.MATERIAL_WETNESS_TYPE = 潮湿反射模式
-		value.MATERIAL_WETNESS_TYPE.0 = 自适应
-		value.MATERIAL_WETNESS_TYPE.1 = 统一
+	option.reflection_quality=反射质量
+	option.MATERIAL_WETNESS_TYPE=潮湿反射模式
+		value.MATERIAL_WETNESS_TYPE.0=自适应
+		value.MATERIAL_WETNESS_TYPE.1=统一
 
 screen.Emissives = 发光效果
 	option.Emissive_Brightness = 发光倍率
@@ -634,6 +640,8 @@ screen.GAMEPLAY_EFFECTS=游玩效果配置
 	option.MOTION_AMOUNT=效果强度
 	option.DAMAGE_TAKEN_EFFECT=受伤效果
 	option.LOW_HEALTH_EFFECT=低生命值效果
+	option.LOW_HEALTH_EFFECT_START=配置低生命值的剩余 HP
+	option.CRITICALLY_LOW_HEALTH_EFFECT_START=配置危险生命值的剩余 HP
 	option.WATER_ON_CAMERA_EFFECT=相机覆水效果
 
 screen.Aerochrome_Mode=Aerochrome 模式
@@ -680,11 +688,13 @@ screen.EXPERIMENTAL_STUFF=实验性选项
 	option.PLANET_GROUND_BRIGHTNESS=行星地表亮度
 	option.LIT_PARTICLE_BRIGHTNESS=提高粒子亮度
 	option.WATER_CAUSTICS_BRIGHTNESS=水体焦散线亮度
+	option.WATER_CAUSTICS_STRENGTH=水体焦散线强度
 	option.OLD_CAVE_DETECTION=旧版洞穴检测
 	option.FORCE_TRANSLUCENT_GLASS=强制玻璃半透明
 	option.LARGE_WAVE_DISPLACEMENT=大型波浪
 	option.OLD_LIGHTLEAK_FIX=旧版阳光泄露修复
 	option.LIGHTNING_FLASH=闪电闪烁
+	option.Texture_MipMap_Bias=纹理 MipMap 偏移
 
 screen.the_end_orb=末地球形天体
 	option.THE_ORB=球形天体
@@ -752,14 +762,18 @@ screen.DISTANT_HORIZONS_SETTINGS = §2Distant Horizons §f配置
 		value.OVERDRAW_MAX_DISTANCE.240 = 15 区块
 		value.OVERDRAW_MAX_DISTANCE.256 = 16 区块
 
-	option.DH_AMBIENT_OCCLUSION = LOD区块的AO
-	option.DH_SUBSURFACE_SCATTERING = LOD区块的SSS
-	option.DH_SCREENSPACE_REFLECTIONS = LOD区块的SSR
-	option.DH_NOISE_TEXTURE = DH噪声贴图
+	option.DH_AMBIENT_OCCLUSION = LOD 区块的 AO
+	option.DH_SUBSURFACE_SCATTERING = LOD 区块的 SSS
+	option.DH_SCREENSPACE_REFLECTIONS = LOD 区块的 SSR
+	option.DH_TAA_JITTER = DH 抖动 TAA
+	option.DH_NOISE_TEXTURE = DH 噪声贴图
+	option.NOISE_RESOLUTION = DH 噪声分辨率
+	option.NOISE_INTENSITY = DH 噪声强度
+	option.NOISE_DROPOFF = DH 噪声衰减
 
 	option.DH_KNOWN_ISSUES =DH 支持已知问题
 		value.DH_KNOWN_ISSUES.0 = §c 点击此处文本循环查看已知问题列表
-		value.DH_KNOWN_ISSUES.1 = §a LOD 区域的 GTAO, RTAO, 和 SSGI 不生效 - 未能实现对 DH 的支持
+		value.DH_KNOWN_ISSUES.1 = §a LOD 区域的 GTAO, RTAO 和 SSGI 不生效 - 未能实现对 DH 的支持
 
 	option.DISTANT_HORIZONS_SHADOWMAP = §c(如果不知道本选项作用, 请不要开启)§r DH 阴影图支持
 	option.TOGGLE_VL_FOG = 体积雾
@@ -815,10 +829,11 @@ option.TORCH_AMOUNT.comment=配置照明的亮度.
 
 option.ambient_brightness.comment=配置环境光的亮度.
 option.MIN_LIGHT_AMOUNT.comment=配置阴影区域的最小照明亮度.
-option.indirect_effect.comment=配置间接照明类型. 使用RTAO + SSGI 以开启基于屏幕空间的光线追踪.
+option.indirect_effect.comment=配置间接照明类型以在相互接触的表面上产生柔和的阴影.
+option.indirect_RTGI.comment=配置全局光照模式以使用光线追踪计算反弹光. 仅在开启 RTAO 时生效.
 
-option.AO_Strength.comment=配置由 SSAO, GTAO 渲染的环境光遮蔽强度.
-option.GI_Strength.comment=配置由 RTGI, SSGI 渲染的光线反射强度.
+option.AO_Strength.comment=配置由 SSAO, GTAO, RTAO 渲染的环境光遮蔽强度.
+option.GI_Strength.comment=配置由 (高质量) SSGI 渲染的光线反射强度.
 option.RAY_COUNT.comment=配置光线追踪使用的光线数量, 更高的光线数量有助于提升光照准确度, 降低暗部噪点水平.
 option.STEPS.comment=配置计算每次光照间的间隔, 更高的步进将以视觉效果为代价提高运行性能.
 option.SKY_CONTRIBUTION_IN_SSRT.comment=开启此选项使来自天空的直接光源介入光线追踪的计算. §a性能开销较高.
@@ -882,7 +897,7 @@ option.FOG_START_HEIGHT.comment=配置雾气生成的高度.
 
 option.TOD_Fog_mult.comment=配置一天中特定时段的总体雾气量. 
 
-option.CAVE_FOG.comment=配置仅出现在洞穴等黑暗区域的雾气, 由于着色器的局限性, 可能会影响一些照明不佳的室内环境
+option.CAVE_FOG.comment=配置仅出现在洞穴等黑暗区域的雾气, 由于着色器的局限性, 可能在一些非洞穴区域启用.
 option.CaveFogFallOff.comment=配置雾气淡出梯度达到最亮部分的容易程度/速度.
 
 option.NETHER_PLUME_DENSITY.comment=配置下界柱状烟雾的密度.
@@ -916,9 +931,9 @@ option.CloudLayer2_height.comment=配置高层云的高度位置.
 option.CloudLayer2_scale.comment=配置高层云的尺寸缩放. 数值与尺寸成反比关系.
 
 option.rayMarchSampleCount.comment=配置水体对环境光吸收的采样次数.
-option.FAKE_REFRACTION_EFFECT.comment=开启此选项以使光在进入水体或其他半透明方块时产生折射扭曲. §a性能开销较低.
-option.FAKE_DISPERSION_EFFECT.comment=开启此选项以使光在水体或其他半透明方块中产生散射效果. §a性能开销较低.
-option.REFRACTION_SMUDGE.comment=开启此选项以使水体或其他半透明方块中的折射. §a性能开销中等.
+option.FAKE_REFRACTION_EFFECT.comment=开启此选项以使穿过水体或其他半透明方块的光线折射. §a性能开销较低.
+option.FAKE_DISPERSION_EFFECT.comment=开启此选项以使穿过水体或其他半透明方块的光线散射. §a性能开销较低.
+option.REFRACTION_SMUDGE.comment=开启此选项以使穿过水体或其他半透明方块的光线扭曲. §a性能开销中等.
 option.Dirt_Amount.comment=配置水体的浑浊程度.
 option.WATER_WAVE_STRENGTH.comment=配置水波法线的高度.
 option.SNELLS_WINDOW.comment=开启此选项以应用在水下看到的黑色反射圆圈. 这是对现实水下会发生的情况的模拟, 称为 "全内反射". §a性能开销较低.
@@ -941,8 +956,8 @@ option.TAA_UPSCALING.comment=开启此选项以使用时间性升分辨率. 相�
 option.SCALE_FACTOR.comment=配置原始分辨率使用比重. 更高的数值意味着依赖更高的原始分辨率, 相比更低的数值会保留更多的细节.
 
 option.LUMINANCE_CURVE.comment=开启此选项以启用色调曲线. 独立于颜色分级且首先应用. §a性能开销很低.
-option.LOWER_CURVE.comment=配置上部曲线的补偿数值.
-option.UPPER_CURVE.comment=配置下部曲线的补偿数值.
+option.LOWER_CURVE.comment=配置下部曲线的补偿数值.
+option.UPPER_CURVE.comment=配置上部曲线的补偿数值.
 option.COLOR_GRADING_ENABLED.comment=开启此选项以启用后处理的颜色分级. §a性能开销较低.
 option.CAMERA_GRIDLINES.comment=开启此选项以启用相机网格线效果. §a性能开销很低.
 option.MOTION_BLUR.comment=开启此选项以启用动态模糊效果. §a性能开销很低.
@@ -952,7 +967,7 @@ option.CHROMATIC_ABERRATION_STRENGTH.comment=配置色差效果的强度.
 option.VIGNETTE.comment=开启此选项以启用相机暗角效果. §a性能开销很低.
 option.VIGNETTE_STRENGTH.comment=配置相机暗角效果强度.
 option.LENS_FLARE.comment=开启此选项以启用镜头光晕效果. §a性能开销较低.
-option.LENS_FLARE_STRENGTH=配置镜头光晕效果的强度.
+option.LENS_FLARE_STRENGTH.comment=配置镜头光晕效果的强度.
 
 option.DEFERRED_SPECULAR.comment=WIP选项
 option.FORWARD_SPECULAR.comment=WIP选项
@@ -1008,6 +1023,8 @@ option.EMISSIVE_ORE_RANGE.comment=配置矿物发光的光照距离.
 option.MOTION_AMOUNT.comment=配置屏幕特效滤镜的效果强度. §aIRIS限定功能.
 option.DAMAGE_TAKEN_EFFECT.comment=开启此选项以启用受击效果. §aIRIS限定功能.
 option.LOW_HEALTH_EFFECT.comment=开启此选项以启用低生命值效果. §aIRIS限定功能.
+option.LOW_HEALTH_EFFECT_START.comment=配置低生命值的阈值. §aIRIS限定功能.
+option.CRITICALLY_LOW_HEALTH_EFFECT_START.comment=配置危险生命值的阈值. §aIRIS限定功能.
 option.WATER_ON_CAMERA_EFFECT.comment=开启此选项以启用相机覆水效果. §aIRIS限定功能.
 
 option.AEROCHROME_MODE.comment=开启此选项以启用受Chrome浏览器启发而开发的 Aerochrome 红外胶片效果.
@@ -1017,7 +1034,7 @@ option.AEROCHROME_WOOL_ENABLED.comment=开启此选项以使羊毛方块也受 A
 option.FANCY_END_PORTAL.comment=开启此选项以启用特殊的末地传送门效果.
 
 option.TONEMAP.comment=配置使用的色调映射方案.
-option.USE_ACES_COLORSPACE_APPROXIMATION.comment=开启此选项以启用 ACES 色彩空间的近似值拟合. 仅在使用 ACES 色调映射时生效.
+option.USE_ACES_COLORSPACE_APPROXIMATION.comment=开启此选项以启用 ACES 色彩空间的近似值拟合.
 option.WF99_AGX_PRESET.comment=开启此选项以启用WF99风格的AGX预设. 仅在使用 Tonemap_AGX_Minimal 与 Tonemap_AGX 时生效.
 option.SATURATION.comment=配置图像的整体饱和度.
 option.CROSSTALK.comment=配置图像的光照干扰. 用以减少光照对图像色彩的影响.
@@ -1046,11 +1063,13 @@ option.OLD_BLOOM.comment=开启此选项以替换为旧版的泛光系统.
 option.OLD_INDIRECT_SSS.comment=开启此选项以替换为旧版的 SSS.
 option.PLANET_GROUND_BRIGHTNESS.comment=配置从极高空看向地面时地表的亮度水平.
 option.WATER_CAUSTICS_BRIGHTNESS.comment=配置水体底部焦散线的亮度.
+option.WATER_CAUSTICS_STRENGTH.comment=配置水体底部焦散线的强度.
 option.OLD_CAVE_DETECTION.comment=开启此选项以替换为旧版洞穴检测机制.
-option.FORCE_TRANSLUCENT_GLASS.comment=开启此选项以强制玻璃透光. 用以避免一些潜在的BUG.
+option.FORCE_TRANSLUCENT_GLASS.comment=开启此选项以强制玻璃透光. 用以避免一些潜在的 BUG.
 option.LARGE_WAVE_DISPLACEMENT.comment=WIP选项. 开启此选项以应用大型波浪法线.
 option.OLD_LIGHTLEAK_FIX.comment=开启此选项以替换为旧版洞穴阳光泄露修复.
-option.LIGHTNING_FLASH.comment=开启此选项以启用全局覆盖的闪电闪烁. 用以避免在使用一些改变天空盒颜色资源包时影响闪电闪烁的BUG.
+option.LIGHTNING_FLASH.comment=开启此选项以启用全局覆盖的闪电闪烁. 用以在使用 Optifine 时避免在使用一些改变天空盒颜色资源包时影响闪电闪烁的BUG.
+option.Texture_MipMap_Bias.comment=配置纹理 MipMap 的级别. 使用较低的值可以得到更精细的纹理, 而较高的值则会以损失纹理细节而获得更高的性能.
 
 option.THE_ORB.comment=WIP选项. 开启此选项以在末地天空中放置一个球形天体.
 
@@ -1066,7 +1085,11 @@ option.OVERDRAW_MAX_DISTANCE.comment=配置防止过度绘制的最大距离. �
 option.DH_AMBIENT_OCCLUSION.comment=WIP选项. 开启此选项以在 LOD 区块内使用 AO.
 option.DH_SUBSURFACE_SCATTERING.comment=WIP选项. 开启此选项以在 LOD 区块内使用 SSS.
 option.DH_SCREENSPACE_REFLECTIONS.comment=WIP选项. 开启此选项以在 LOD 区块内使用 SSR.
-option.DH_NOISE_TEXTURE.comment=开启此选项以在 DH 区块内使用特殊的噪声贴图.
+option.DH_TAA_JITTER.comment=开启此选项以在 DH 区块内使用特殊的噪声贴图.
+option.DH_NOISE_TEXTURE=开启此选项以在 DH 区块内使用特殊的噪声贴图. 用以使普通区块与 DH 区块之间的过渡更自然.
+option.NOISE_RESOLUTION=配置 DH 区块内的噪声分辨率.
+option.NOISE_INTENSITY=配置 DH 区块内的噪声强度.
+option.NOISE_DROPOFF=配置 DH 区块内的噪声衰减速度/容易程度.
 
 option.DH_KNOWN_ISSUES.comment=点击以循环已知问题.
 
