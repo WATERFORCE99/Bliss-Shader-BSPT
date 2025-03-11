@@ -1,10 +1,12 @@
 2025-3-11 v1.45
 1. Add customizable rainbow.
 ~ rainbow/ composite1 新增了彩虹
-2. Merge X0nk's latest commit for water.
-~ 整合了X0nk最新的水体更新
-3. Add more eng setting comments. (85% done)
-~ en_us 添加了更多英语设置选项说明
+2. Merge X0nk's latest commit for water. Tweak water style to fit my aesthetic.
+~ 整合了X0nk最新的水体更新，调整水波效果以符合我的审美
+3. Full ENG/CHS descriptions. (100% done)
+~ en_us/zh_cn 100% 英语/中文设置界面描述
+4. Setting screen tweak。
+~ settings/shaders 设置界面优化
 
 2025-3-10 v1.43
 1. Add material normal strenghth setting.
