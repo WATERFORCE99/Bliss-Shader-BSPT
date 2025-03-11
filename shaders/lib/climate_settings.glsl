@@ -168,10 +168,6 @@ uniform float snowStorm;
 		BiomeColors.g = isSwamps*SWAMP_G + isJungles*JUNGLE_G + isDarkForests*DARKFOREST_G + isSnowy*SNOWY_G + sandStorm*0.5 + snowStorm*0.8;
 		BiomeColors.b = isSwamps*SWAMP_B + isJungles*JUNGLE_B + isDarkForests*DARKFOREST_B + isSnowy*SNOWY_B + sandStorm*0.2 + snowStorm*1.0;
 
-		// insure the biome colors are locked to the fog shape and lighting, but not its orignal color.
-		// DirectLightCol = BiomeColors * max(dot(DirectLightCol,vec3(0.33333)), MIN_LIGHT_AMOUNT*0.025 + nightVision*0.2); 
-		// IndirectLightCol = BiomeColors * max(dot(IndirectLightCol,vec3(0.33333)), MIN_LIGHT_AMOUNT*0.025 + nightVision*0.2); 
-		
 		DirectLightCol = BiomeColors * max(dot(DirectLightCol,vec3(0.33333)), MIN_LIGHT_AMOUNT*0.025 ); 
 		IndirectLightCol = BiomeColors * max(dot(IndirectLightCol,vec3(0.33333)), MIN_LIGHT_AMOUNT*0.025 ); 
 		

@@ -196,12 +196,12 @@ vec3 ApplySSRT(
 		vec2 ij = fract(R2_samples(seed) + noise.xy);
 		lowp vec3 rayDir = TangentToWorld(normal, normalize(cosineHemisphereSample(ij)));
 
-		#if indirect_effect == 3
+		#if indirect_RTGI == 0 || indirect_RTGI == 1
 			vec3 rayHit = RT_alternate(mat3(gbufferModelView) * rayDir, viewPos, noise.z, 10.0, isLOD, CURVE);  // choc sspt 
 
 			CURVE = 1.0 - pow(1.0-pow(1.0 - CURVE, 2.0), 5.0);
 			CURVE = mix(CURVE, 1.0, clamp(length(viewPos.z) / far, 0.0, 1.0));
-		#elif indirect_effect == 4
+		#elif indirect_RTGI == 2
 			vec3 rayHit = rayTrace_GI(mat3(gbufferModelView) * rayDir, viewPos, noise.z, 50.0); // ssr rt
 		#endif
 
@@ -222,11 +222,11 @@ vec3 ApplySSRT(
 		radiance2 += skycontribution2;
 
 		if (rayHit.z < 1.0){
-			#if indirect_effect == 3
+			#if indirect_RTGI == 1
 				rayHit.xy = clamp(rayHit.xy, 0.0, 1.0);
 				bouncedLight = texture2D(colortex5, rayHit.xy).rgb;
 
-			#elif indirect_effect == 4
+			#elif indirect_RTGI == 2
 				vec3 previousPosition = mat3(gbufferModelViewInverse) * toScreenSpace(rayHit) + gbufferModelViewInverse[3].xyz + cameraPosition-previousCameraPosition;
 				previousPosition = mat3(gbufferPreviousModelView) * previousPosition + gbufferPreviousModelView[3].xyz;
 				previousPosition.xy = projMAD(gbufferPreviousProjection, previousPosition).xy / -previousPosition.z * 0.5 + 0.5;
