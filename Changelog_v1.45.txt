@@ -5,8 +5,10 @@
 ~ 整合了X0nk最新的水体更新，调整水波效果以符合我的审美
 3. Full ENG/CHS descriptions. (100% done)
 ~ en_us/zh_cn 100% 英语/中文设置界面描述
-4. Setting screen tweak。
+4. Setting screen tweak.
 ~ settings/shaders 设置界面优化
+5. Tweaks for ripples.
+~ all_solid/ all_translusent 调整涟漪强度
 
 2025-3-10 v1.43
 1. Add material normal strenghth setting.
