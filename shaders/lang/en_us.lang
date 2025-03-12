@@ -51,7 +51,6 @@ screen.Aurora=Aurora
 	option.AURORA_BRIGHTNESS=Aurora Brightness
 	option.AURORA_SPEED=Aurora Speed
 	option.AURORA_SNOWY=Aurora Appears Snow Biome ONLY
-	option.AURORA_STEP=Aurora Quality
 	option.AUR_ENV_OFFSET=Aurora Light Contribution to Environment
 	option.AURORA_UPPER_R=Aurora Upper Color R
 	option.AURORA_UPPER_G=Aurora Upper Color G
@@ -249,7 +248,6 @@ screen.GI=GI Settings
 	option.GI_Strength=GI Multiplier
 	option.RAY_COUNT=Ray Count
 	option.STEPS=Ray Step
-	option.SKY_CONTRIBUTION_IN_SSRT=Ambient Light Contribution In SSRT
 	option.UseQuarterResDepth=Use Quarter Resolution Depth
 
 screen.HAND_HELD_LIGHT=Hand Held Light/Flashlight Settings
@@ -798,7 +796,6 @@ option.Moon_temp.comment=Configure the temperature of the moon. Higher = White. 
 option.AURORA_BRIGHTNESS.comment=Configure the brightness of the aurora.
 option.AURORA_SPEED.comment=Configure the moving speed of the aurora.
 option.AURORA_SNOWY.comment=Toggle aurora ONLY in snowy biomes.
-option.AURORA_STEP.comment=Configure the quality of the aurora.
 option.AUR_ENV_OFFSET.comment=Configure the contribution of lighting to the ground/cloud from the aurora.
 
 option.Rain_coverage.comment=Configure how much of the sky the clouds cover during rain.
@@ -837,7 +834,6 @@ option.AO_Strength.comment= Configure the strength of the ambient occlusion crea
 option.GI_Strength.comment=Configure the strength of the global illumination created by (HQ) SSGI.
 option.RAY_COUNT.comment=Configure the ray count that involves in ray tracing, higher value will result a less noisy graphic.
 option.STEPS.comment=Configure the step size for ray tracing, higher values will boost performance at the expense of ray tracing quality.
-option.SKY_CONTRIBUTION_IN_SSRT.comment=Toggle to take the entire sky and fog into account to create high quality lighting for shaded areas for RTAO. This may introduce more noise.
 option.AO_in_sunlight.comment=Toggle the ambient occlusion created by the sun.
 option.UseQuarterResDepth.comment=Toggle 1/4 resolution depth instead of full to improve performance.
 option.Hand_Held_lights.comment=Toggle the hand held light.
