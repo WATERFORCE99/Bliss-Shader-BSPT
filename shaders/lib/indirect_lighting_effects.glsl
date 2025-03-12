@@ -60,7 +60,7 @@ vec4 BilateralUpscale_SSAO(sampler2D tex, sampler2D depth, vec2 coord, float ref
 }
 
 ////////////////////////////////////////////////////////////////////
-/////////////////////////////	RTGI/SSGI ///////////////////////////
+/////////////////////////////	RTAO/SSGI ///////////////////////////
 ////////////////////////////////////////////////////////////////////
 
 vec2 texelSizeInv = 1.0 / texelSize;
@@ -184,10 +184,6 @@ vec3 ApplySSRT(
 	vec3 occlusion = vec3(0.0);
 	vec3 skycontribution = vec3(0.0);
 
-	vec3 radiance2 = vec3(0.0);
-	vec3 occlusion2 = vec3(0.0);
-	vec3 skycontribution2 = vec3(0.0);
-
 	float CURVE = 1.0;
 	vec3 bouncedLight = vec3(0.0);
 
@@ -205,24 +201,17 @@ vec3 ApplySSRT(
 			vec3 rayHit = rayTrace_GI(mat3(gbufferModelView) * rayDir, viewPos, noise.z, 50.0); // ssr rt
 		#endif
 
-		#ifdef SKY_CONTRIBUTION_IN_SSRT
-			#ifdef OVERWORLD_SHADER
-				skycontribution = doIndirectLighting(skyCloudsFromTex(rayDir, colortex4).rgb/1200.0, minimumLightColor, lightmap);
-				skycontribution = mix(skycontribution, vec3(luma(skycontribution)), 0.25) + blockLightColor;
-			#else
-				skycontribution = volumetricsFromTex(rayDir, colortex4, 6).rgb / 1200.0;
-			#endif
+		#ifdef OVERWORLD_SHADER
+			skycontribution = doIndirectLighting(skyCloudsFromTex(rayDir, colortex4).rgb/1200.0, minimumLightColor, lightmap);
+			skycontribution = mix(skycontribution, vec3(luma(skycontribution)), 0.25) + blockLightColor;
 		#else
-			#ifdef OVERWORLD_SHADER
-				skycontribution = unchangedIndirect;// * (max(rayDir.y,pow(1.0-lightmap,2)) * 0.95 + 0.05);
-			#endif
+			skycontribution = volumetricsFromTex(rayDir, colortex4, 6).rgb / 1200.0;
 		#endif
 
 		radiance += skycontribution;
-		radiance2 += skycontribution2;
 
 		if (rayHit.z < 1.0){
-			#if indirect_RTGI == 1
+            		#if indirect_RTGI == 1
 				rayHit.xy = clamp(rayHit.xy, 0.0, 1.0);
 				bouncedLight = texture2D(colortex5, rayHit.xy).rgb;
 
@@ -237,17 +226,9 @@ vec3 ApplySSRT(
 
 			bouncedLight *= CURVE * GI_Strength;
 			radiance += bouncedLight;
-			radiance2 += bouncedLight;
 
 			occlusion += skycontribution * CURVE;
-			occlusion2 += skycontribution2 * CURVE;
-		}
+        	}
 	}
-
-	#ifdef SKY_CONTRIBUTION_IN_SSRT
-		return max((radiance - occlusion)/nrays,0.0);
-	#else
-		float threshold = isGrass ? 0.8 : (pow(1.0-lightmap,2.0) * 0.9 + 0.1);
-		return max((radiance - occlusion)/nrays, (radiance2 - occlusion2)/nrays * threshold);
-	#endif
+	return max((radiance - occlusion)/nrays,0.0);
 }

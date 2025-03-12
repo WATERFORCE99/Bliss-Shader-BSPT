@@ -48,7 +48,7 @@ vec4 aurora(vec3 dir, float dither) {
 	vec4 outerColor = vec4(0.0);
 	vec4 avgColor = vec4(0.0);
 
-	const int aurStep = AURORA_STEP;
+	const int aurStep = 32;
 	for (int i = 0; i < aurStep; ++i) {
 		float amp = float(i) / float(aurStep - 1);
 		float jitter = 0.012 * dither * clamp(smoothstep(0.0, 15.0, float(i)), 0.0, 1.0);
