@@ -1,3 +1,11 @@
+2025-3-12 v1.46
+1. Merge X0nk's latest commit.
+~ 整合了X0nk最新的更新
+2. Fix an error with skyground.
+~ composite2 修复了一个关于地表大气的问题
+3. Remove few necessary settings.
+~ xxx 删除了少许无意义的设置
+
 2025-3-11 v1.45
 1. Add customizable rainbow.
 ~ rainbow/ composite1 新增了彩虹
