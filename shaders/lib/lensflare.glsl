@@ -1,3 +1,5 @@
+//Original lens flare code : https://www.shadertoy.com/view/XdfXRX , simplified
+
 vec3 lensflare(vec2 uv, vec2 pos) {
 	uv -= 0.5;
 	pos -= 0.5;
