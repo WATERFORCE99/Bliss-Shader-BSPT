@@ -18,7 +18,7 @@ uniform sampler2D depthtex1;
 uniform sampler2D colortex0;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
-// uniform sampler2D colortex4;
+uniform sampler2D colortex4;
 uniform sampler2D colortex6;
 uniform sampler2D colortex7;
 uniform sampler2D colortex10;
@@ -117,12 +117,10 @@ float invLinZ (float lindepth){
 #endif
 
 #ifdef NETHER_SHADER
-	uniform sampler2D colortex4;
 	#include "/lib/nether_fog.glsl"
 #endif
 
 #ifdef END_SHADER
-	uniform sampler2D colortex4;
 	#include "/lib/end_fog.glsl"
 #endif
 
@@ -198,7 +196,6 @@ vec4 waterVolumetrics(vec3 rayStart, vec3 rayEnd, float rayLength, vec2 dither, 
 		float phase = 0.0;
 	#endif
 
-	// float thing = -normalize(dVWorld + (cameraPosition - vec3(cameraPosition.x, waterEnteredAltitude-1.0, cameraPosition.z))).y;
  	float thing = -normalize(dVWorld).y;
  	thing = clamp(thing + 0.333,0.0,1.0);
  	thing = pow(1.0-pow(1.0-thing,2.0),2.0);

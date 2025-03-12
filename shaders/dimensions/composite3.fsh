@@ -22,6 +22,7 @@ uniform sampler2D colortex0;
 uniform sampler2D colortex1;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
+uniform sampler2D colortex4;
 uniform sampler2D colortex5;
 uniform sampler2D colortex6;
 uniform sampler2D colortex7;
@@ -35,7 +36,6 @@ uniform sampler2D colortex14;
 uniform sampler2D colortex15;
 uniform vec2 texelSize;
 
-uniform sampler2D colortex4;
 uniform float viewHeight;
 uniform float viewWidth;
 uniform vec3 sunVec;
