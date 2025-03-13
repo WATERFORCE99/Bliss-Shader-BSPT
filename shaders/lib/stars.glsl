@@ -1,18 +1,5 @@
 //Original star code : https://www.shadertoy.com/view/Md2SR3 , optimised
 
-// Return random noise in the range [0.0, 1.0], as a function of x.
-float hash12(vec2 p){
-	vec3 p3  = fract(vec3(p.xyx) * 0.1031);
-	p3 += dot(p3, p3.yzx + 19.19);
-	return fract((p3.x + p3.y) * p3.z);
-}
-// 1 out, 3 in...
-float hash13(vec3 p3){
-	p3  = fract(p3 * 0.1031);
-	p3 += dot(p3, p3.zyx + 31.32);
-	return fract((p3.x + p3.y) * p3.z);
-}
-
 // Convert Noise2d() into a "star field" by stomping everthing below fThreshhold to zero.
 float NoisyStarField(in vec3 vSamplePos, float fThreshhold){
 	float StarVal = hash13(vSamplePos);

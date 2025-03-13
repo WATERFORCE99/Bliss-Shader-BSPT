@@ -234,3 +234,21 @@ float blueNoise(){
 		return fract(texelFetch2D(noisetex, ivec2(gl_FragCoord.xy)%512, 0).a + 1.0/1.6180339887);
 	#endif
 }
+
+float hash12(vec2 p){
+	vec3 p3  = fract(vec3(p.xyx) * 0.1031);
+	p3 += dot(p3, p3.yzx + 19.19);
+	return fract((p3.x + p3.y) * p3.z);
+}
+
+float hash13(vec3 p3){
+	p3  = fract(p3 * 0.1031);
+	p3 += dot(p3, p3.zyx + 31.32);
+	return fract((p3.x + p3.y) * p3.z);
+}
+
+vec2 hash22(vec2 p) {
+	vec3 p3 = fract(vec3(p.xyx) * vec3(.1031, .1030, .0973));
+	p3 += dot(p3, p3.yzx+19.19);
+	return fract((p3.xx+p3.yz)*p3.zy);
+}

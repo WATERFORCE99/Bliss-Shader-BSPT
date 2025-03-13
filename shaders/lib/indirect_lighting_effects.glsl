@@ -60,7 +60,7 @@ vec4 BilateralUpscale_SSAO(sampler2D tex, sampler2D depth, vec2 coord, float ref
 }
 
 ////////////////////////////////////////////////////////////////////
-/////////////////////////////	RTAO/SSGI ///////////////////////////
+/////////////////////////////	RTGI/SSGI ///////////////////////////
 ////////////////////////////////////////////////////////////////////
 
 vec2 texelSizeInv = 1.0 / texelSize;
@@ -188,9 +188,9 @@ vec3 ApplySSRT(
 	vec3 bouncedLight = vec3(0.0);
 
 	for (int i = 0; i < nrays; i++){
-		int seed = (frameCounter%40000) * nrays + i;
+		int seed = (frameCounter%40000)*nrays+i;
 		vec2 ij = fract(R2_samples(seed) + noise.xy);
-		lowp vec3 rayDir = TangentToWorld(normal, normalize(cosineHemisphereSample(ij)));
+		vec3 rayDir = TangentToWorld(normal, normalize(cosineHemisphereSample(ij)));
 
 		#if indirect_RTGI == 0 || indirect_RTGI == 1
 			vec3 rayHit = RT_alternate(mat3(gbufferModelView) * rayDir, viewPos, noise.z, 10.0, isLOD, CURVE);  // choc sspt 
@@ -211,9 +211,10 @@ vec3 ApplySSRT(
 		radiance += skycontribution;
 
 		if (rayHit.z < 1.0){
-            		#if indirect_RTGI == 1
-				rayHit.xy = clamp(rayHit.xy, 0.0, 1.0);
-				bouncedLight = texture2D(colortex5, rayHit.xy).rgb;
+			rayHit.xy = clamp(rayHit.xy, 0.0, 1.0);
+
+			#if indirect_RTGI == 1
+				bouncedLight = texture2D(colortex5, rayHit.xy).rgb; // vec3 (1,0,0);
 
 			#elif indirect_RTGI == 2
 				vec3 previousPosition = mat3(gbufferModelViewInverse) * toScreenSpace(rayHit) + gbufferModelViewInverse[3].xyz + cameraPosition-previousCameraPosition;
@@ -224,11 +225,10 @@ vec3 ApplySSRT(
 				bouncedLight = texture2D(colortex5, previousPosition.xy).rgb;
 			#endif
 
-			bouncedLight *= CURVE * GI_Strength;
-			radiance += bouncedLight;
+			radiance += bouncedLight * GI_Strength;
 
 			occlusion += skycontribution * CURVE;
-        	}
+		}
 	}
 	return max((radiance - occlusion)/nrays,0.0);
 }

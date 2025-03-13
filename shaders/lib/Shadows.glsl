@@ -17,7 +17,7 @@ void GriAndEminShadowFix(
 	float theDistance = max(1.0 - length(WorldPos) / shadowDistance,0.0);
 	float DistanceMultiplier =  mix(0.5, 0.05, theDistance);
 	float DistanceMultiplier2 = mix(1.0, 0.02, theDistance);
-	
+
 	vec3 Bias = (FlatNormal * DistanceMultiplier + WsunVec * DistanceMultiplier2);
 
 	// stop lightleaking by zooming up, centered on blocks

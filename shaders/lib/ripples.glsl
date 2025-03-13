@@ -1,26 +1,7 @@
 //Original ripple code : https://www.shadertoy.com/view/ldfyzl , optimised
 
-uniform float rainStrength;
-uniform float noPuddleAreas;
-
-float lightmap = clamp((lmtexcoord.w-0.9) * 10.0,0.,1.);
-float isRain = rainStrength * noPuddleAreas;
-float applyRipple = isRain * lightmap;
-
 // Maximum number of cells a ripple can cross.
 #define MAX_RADIUS 2
-
-float hash12(vec2 p) {
-	vec3 p3  = fract(vec3(p.xyx) * .1031);
-	p3 += dot(p3, p3.yzx + 19.19);
-	return fract((p3.x + p3.y) * p3.z);
-}
-
-vec2 hash22(vec2 p) {
-	vec3 p3 = fract(vec3(p.xyx) * vec3(.1031, .1030, .0973));
-	p3 += dot(p3, p3.yzx+19.19);
-	return fract((p3.xx+p3.yz)*p3.zy);
-}
 
 vec3 drawRipples(vec2 uv, float time) {
 	vec2 p0 = floor(uv);
