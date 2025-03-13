@@ -974,7 +974,7 @@ void main() {
 
 				skylight = mix(0.2 + 2.3*(1.0-lightmap.y), 2.5, SkylightDir);
 
-			#elif indirect_effect == 3 || indirect_effect == 4
+			#elif indirect_effect == 3
 				skylight = 2.5;
 			#endif
 			
