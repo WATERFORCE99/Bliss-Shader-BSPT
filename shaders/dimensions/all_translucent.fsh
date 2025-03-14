@@ -20,6 +20,10 @@ varying vec4 lmtexcoord;
 varying vec4 color;
 uniform vec4 entityColor;
 uniform float rainStrength;
+uniform float noPuddleAreas;
+
+float lightmap = clamp((lmtexcoord.w-0.9) * 10.0,0.,1.);
+float isRain = rainStrength * noPuddleAreas;
 
 #ifdef OVERWORLD_SHADER
 	const bool shadowHardwareFiltering = true;
@@ -432,7 +436,7 @@ if (gl_FragCoord.x * texelSize.x < 1.0  && gl_FragCoord.y * texelSize.y < 1.0 ){
 			vec3 bump = normalize(getWaveNormal(waterPos, playerPos, false));
 
 			#ifdef WATER_RIPPLES
-				vec3 rippleNormal = drawRipples(worldPos.xz * 5.0, frameTimeCounter) * 0.5 * clamp(1.0 - length(playerPos) / 128.0, 0.0, 1.0);
+				vec3 rippleNormal = drawRipples(worldPos.xz * 5.0, frameTimeCounter) * 0.5 * isRain * lightmap * clamp(1.0 - length(playerPos) / 128.0, 0.0, 1.0);
 				bump = normalize(bump + rippleNormal);
 			#endif
 
