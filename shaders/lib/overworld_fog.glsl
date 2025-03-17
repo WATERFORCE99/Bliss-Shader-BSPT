@@ -203,9 +203,7 @@ vec4 GetVolumetricFog(
 			#endif
 		}
 
-		#ifdef VL_CLOUDS_SHADOWS
-			sh *= GetCloudShadow(progressW, sunVector);
-		#endif
+		sh *= GetCloudShadow(progressW, sunVector);
 
 		#ifdef PER_BIOME_ENVIRONMENT
 			float maxDistance = inBiome * min(max(1.0 -  length(d*dVWorld.xz)/(32*8),0.0)*2.0,1.0);

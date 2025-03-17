@@ -1,9 +1,6 @@
 uniform sampler2D noisetex;
 uniform int frameCounter;
 
-#define TIME_MULT 1.0
-#define TIME (frameTimeCounter * TIME_MULT)
-
 const float PI 		= acos(-1.0);
 const float TAU 	= PI * 2.0;
 const float hPI 	= PI * 0.5;
@@ -197,42 +194,20 @@ float Hammersley(int i) {
 	return float(bits) * 2.3283064365386963e-10; // 1/2^32
 }
 
-float luma(vec3 color) {
-	return dot(color,vec3(0.21, 0.72, 0.07));
-}
-
-float interleaved_gradientNoise_temporal(){
-	vec2 coord = gl_FragCoord.xy;
-	
-	#ifdef TAA
-		coord += (frameCounter*9)%40000;
-	#endif
-
-	return fract(52.9829189*fract(0.06711056*coord.x + 0.00583715*coord.y));
-}
-
-float R2_dither(){
-	vec2 coord = gl_FragCoord.xy ;
-
-	#ifdef TAA
-		coord += (frameCounter*2)%40000;
-	#endif
-	
-	vec2 alpha = vec2(0.75487765, 0.56984026);
-	return fract(alpha.x * coord.x + alpha.y * coord.y) ;
-}
-
 vec2 R2_samples(int n){
 	vec2 alpha = vec2(0.75487765, 0.56984026);
 	return fract(alpha * n);
 }
 
-float blueNoise(){
-	#ifdef TAA
-  		return fract(texelFetch2D(noisetex, ivec2(gl_FragCoord.xy)%512, 0).a + 1.0/1.6180339887 * frameCounter);
-	#else
-		return fract(texelFetch2D(noisetex, ivec2(gl_FragCoord.xy)%512, 0).a + 1.0/1.6180339887);
-	#endif
+float luma(vec3 color) {
+	return dot(color,vec3(0.21, 0.72, 0.07));
+}
+
+float hash11(float p) {
+	p = fract(p * .1031);
+	p *= p + 33.33;
+	p *= p + p;
+	return fract(p);
 }
 
 float hash12(vec2 p){
@@ -251,4 +226,10 @@ vec2 hash22(vec2 p) {
 	vec3 p3 = fract(vec3(p.xyx) * vec3(.1031, .1030, .0973));
 	p3 += dot(p3, p3.yzx+19.19);
 	return fract((p3.xx+p3.yz)*p3.zy);
+}
+
+vec3 hash31(float p){
+	vec3 p3 = fract(vec3(p) * vec3(.1031, .1030, .0973));
+	p3 += dot(p3, p3.yzx+33.33);
+	return fract((p3.xxy+p3.yzz)*p3.zyx); 
 }

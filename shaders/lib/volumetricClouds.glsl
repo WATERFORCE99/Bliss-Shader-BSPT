@@ -132,24 +132,30 @@ float getPlanetShadow(vec3 playerPos, vec3 WsunVec){
 float GetCloudShadow(vec3 playerPos, vec3 sunVector){
 
 	float totalShadow = getPlanetShadow(playerPos, sunVector);
-	float cloudShadows = 0.0;
 
-	#ifdef CloudLayer0
-		vec3 pos0 = playerPos + sunVector / abs(sunVector.y) * max(CloudLayer0_height - playerPos.y + 20.0, 0.0);
-		cloudShadows = getCloudShape(SMALLCUMULUS_LAYER, 0, pos0, CloudLayer0_height, CloudLayer0_height + 50.0) * dailyWeatherParams1.x;
+	#ifdef CLOUDS_SHADOWS
+ 		float cloudShadows = 0.0;
+
+		#ifdef CloudLayer0
+			vec3 pos0 = playerPos + sunVector / abs(sunVector.y) * max(CloudLayer0_height - playerPos.y + 20.0, 0.0);
+			cloudShadows = getCloudShape(SMALLCUMULUS_LAYER, 0, pos0, CloudLayer0_height, CloudLayer0_height + 50.0) * dailyWeatherParams1.x;
+		#endif
+		#ifdef CloudLayer1
+			vec3 pos1 = playerPos + sunVector / abs(sunVector.y) * max(CloudLayer1_height - playerPos.y + 40.0, 0.0);
+			cloudShadows += getCloudShape(LARGECUMULUS_LAYER, 0, pos1, CloudLayer1_height, CloudLayer1_height + 100.0) * dailyWeatherParams1.y;
+		#endif
+		#ifdef CloudLayer2
+			vec3 pos2 = playerPos + sunVector / abs(sunVector.y) * max(CloudLayer2_height - playerPos.y + 1.0, 0.0);
+			cloudShadows += getCloudShape(ALTOSTRATUS_LAYER, 0, pos2, CloudLayer2_height, CloudLayer2_height + 2.5) * dailyWeatherParams1.z * (1.0-abs(WsunVec.y));
+		#endif
+
+		cloudShadows *= CLOUD_SHADOW_STRENGTH;
+
+		#if defined CloudLayer0 || defined CloudLayer1 || defined CloudLayer2
+			totalShadow *= exp((cloudShadows*cloudShadows) * -200.0);
+		#endif
 	#endif
-	#ifdef CloudLayer1
-		vec3 pos1 = playerPos + sunVector / abs(sunVector.y) * max(CloudLayer1_height - playerPos.y + 40.0, 0.0);
-		cloudShadows += getCloudShape(LARGECUMULUS_LAYER, 0, pos1, CloudLayer1_height, CloudLayer1_height + 100.0) * dailyWeatherParams1.y;
-	#endif
-	#ifdef CloudLayer2
-		vec3 pos2 = playerPos + sunVector / abs(sunVector.y) * max(CloudLayer2_height - playerPos.y + 1.0, 0.0);
-		cloudShadows += getCloudShape(ALTOSTRATUS_LAYER, 0, pos2, CloudLayer2_height, CloudLayer2_height + 2.5) * dailyWeatherParams1.z * (1.0-abs(WsunVec.y));
-	#endif
-	#if defined CloudLayer0 || defined CloudLayer1 || defined CloudLayer2
-		totalShadow *= exp((cloudShadows*cloudShadows) * -200.0);
-	#endif
-	
+
 	return totalShadow;
 }
 

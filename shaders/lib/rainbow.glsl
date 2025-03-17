@@ -1,4 +1,4 @@
-#define TAU 6.28318530718
+// Hue generate thanks to Builderb0y.
 vec3 smoothHue(float h) {
 	vec3 phaseShift = vec3(0.0, 1.0, 2.0) * (TAU / 3.0);
 	vec3 cosine = cos(h * TAU - phaseShift);

@@ -48,7 +48,7 @@ vec4 aurora(vec3 dir, float dither) {
 	vec4 outerColor = vec4(0.0);
 	vec4 avgColor = vec4(0.0);
 
-	const int aurStep = AURORA_STEP;
+	const int aurStep = 32;
 	for (int i = 0; i < aurStep; ++i) {
 		float amp = float(i) / float(aurStep - 1);
 		float jitter = 0.012 * dither * clamp(smoothstep(0.0, 15.0, float(i)), 0.0, 1.0);
@@ -80,3 +80,16 @@ vec3 drawAurora(vec3 rayDir, float dither) {
 
 	return color;
 }
+
+// Get aurora amount
+#ifdef AURORA_SNOWY
+	float aurMult = Night * isSnowy;
+#else
+	float aurMult = Night;
+#endif
+
+// Get aurora color
+vec3 aurCol = mix(vec3(AURORA_UPPER_R, AURORA_UPPER_G, AURORA_UPPER_B), vec3(AURORA_LOWER_R, AURORA_LOWER_G, AURORA_LOWER_B), 0.25);
+
+// Aurora emission offset
+vec3 aurOffset = aurMult * aurCol * AURORA_BRIGHTNESS * AUR_ENV_OFFSET;

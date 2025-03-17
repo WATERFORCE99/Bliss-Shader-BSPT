@@ -60,7 +60,7 @@ vec4 BilateralUpscale_SSAO(sampler2D tex, sampler2D depth, vec2 coord, float ref
 }
 
 ////////////////////////////////////////////////////////////////////
-/////////////////////////////	RTGI/SSGI ///////////////////////////
+/////////////////////////////	RTAO/SSGI ///////////////////////////
 ////////////////////////////////////////////////////////////////////
 
 vec2 texelSizeInv = 1.0 / texelSize;
@@ -190,7 +190,7 @@ vec3 ApplySSRT(
 	for (int i = 0; i < nrays; i++){
 		int seed = (frameCounter%40000)*nrays+i;
 		vec2 ij = fract(R2_samples(seed) + noise.xy);
-		vec3 rayDir = TangentToWorld(normal, normalize(cosineHemisphereSample(ij)));
+		lowp vec3 rayDir = TangentToWorld(normal, normalize(cosineHemisphereSample(ij)));
 
 		#if indirect_RTGI == 0 || indirect_RTGI == 1
 			vec3 rayHit = RT_alternate(mat3(gbufferModelView) * rayDir, viewPos, noise.z, 10.0, isLOD, CURVE);  // choc sspt 

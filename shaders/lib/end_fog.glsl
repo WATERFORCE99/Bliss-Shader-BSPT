@@ -20,21 +20,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.*/
 //----------------------------------------------------------------------------------------
-		vec3 hash31(float p){
-			vec3 p3 = fract(vec3(p) * vec3(.1031, .1030, .0973));
-			p3 += dot(p3, p3.yzx+33.33);
-			return fract((p3.xxy+p3.yzz)*p3.zyx); 
-		}
-
-		float hash11(float p){
-			p = fract(p * .1031);
-			p *= p + 33.33;
-			p *= p + p;
-			return fract(p);
-		}
-	
-//----------------------------------------------------------------------------------------
-
 // Integer Hash - II
 // - Inigo Quilez, Integer Hash - II, 2017
 //   https://www.shadertoy.com/view/XlXcW4

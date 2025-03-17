@@ -1,8 +1,6 @@
 // this file contains all things for seasons, weather, and biome specific settings.
 // i gotta start centralizing shit someday. 
 
-#include "/lib/aurora.glsl"
-
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////// SEASONS //////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -178,19 +176,6 @@ uniform float snowStorm;
 	}
 
 #endif
-
-// Get aurora amount
-#ifdef AURORA_SNOWY
-	float aurMult = Night * isSnowy;
-#else
-	float aurMult = Night;
-#endif
-
-// Get aurora color
-vec3 aurCol = mix(vec3(AURORA_UPPER_R, AURORA_UPPER_G, AURORA_UPPER_B), vec3(AURORA_LOWER_R, AURORA_LOWER_G, AURORA_LOWER_B), 0.25);
-
-// Aurora emission offset
-vec3 aurOffset = aurMult * aurCol * AURORA_BRIGHTNESS * AUR_ENV_OFFSET;
 
 ///////////////////////////////////////////////////////////////////////////////
 ////////////////////////////// FOG CONTROLLER ////////////////////////////
