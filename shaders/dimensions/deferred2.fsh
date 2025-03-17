@@ -1,7 +1,8 @@
 #include "/lib/settings.glsl"
 #include "/lib/util.glsl"
-//Computes volumetric clouds at variable resolution (default 1/4 res)
+#include "/lib/dither.glsl"
 
+//Computes volumetric clouds at variable resolution (default 1/4 res)
 
 flat varying vec3 sunColor;
 // flat varying vec3 moonColor;
@@ -13,13 +14,11 @@ uniform float near;
 uniform sampler2D depthtex0;
 
 #ifdef DISTANT_HORIZONS
-uniform sampler2D dhDepthTex;
-uniform sampler2D dhDepthTex1;
+	uniform sampler2D dhDepthTex;
+	uniform sampler2D dhDepthTex1;
 #endif
 
-
 // uniform sampler2D colortex4;
-
 uniform sampler2D colortex12;
 
 flat varying vec3 WsunVec;
@@ -84,18 +83,16 @@ flat in vec4 dailyWeatherParams1;
 
 void main() {
 
-
-
 	#if defined OVERWORLD_SHADER && defined VOLUMETRIC_CLOUDS && !defined  CLOUDS_INTERSECT_TERRAIN
 		vec2 halfResTC = vec2(floor(gl_FragCoord.xy)/CLOUDS_QUALITY/RENDER_SCALE+0.5+offsets[framemod8]*CLOUDS_QUALITY*RENDER_SCALE*0.5);
 
 		vec2 halfResTC2 = vec2(floor(gl_FragCoord.xy)/CLOUDS_QUALITY+0.5+offsets[framemod8]*CLOUDS_QUALITY*0.5);
 		
 		#ifdef CLOUDS_INTERSECT_TERRAIN
-			float depth = texture2D(depthtex0, halfResTC2*texelSize).x;
+			float depth = texelFetch2D(depthtex0, ivec2(halfResTC2), 0).x;
 
 			#ifdef DISTANT_HORIZONS
-				float DH_depth =  texture2D(dhDepthTex, halfResTC2*texelSize).x;
+				float DH_depth =  texelFetch2D(dhDepthTex, ivec2(halfResTC2),0).x;
 				vec3 viewPos = toScreenSpace_DH(halfResTC*texelSize, depth, DH_depth);
 			#else
 				vec3 viewPos = toScreenSpace(vec3(halfResTC*texelSize, depth));

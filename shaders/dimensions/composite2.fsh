@@ -1,5 +1,6 @@
 #include "/lib/settings.glsl"
 #include "/lib/util.glsl"
+#include "/lib/dither.glsl"
 
 #define EXCLUDE_WRITE_TO_LUT
 
@@ -40,7 +41,7 @@ uniform vec3 previousCameraPosition;
  	uniform mat4 vivecraftRelativeMainHandRot;
  	uniform mat4 vivecraftRelativeOffHandRot;
  #endif
- 
+
 uniform float frameTimeCounter;
 
 // varying vec2 texcoord;
@@ -196,7 +197,6 @@ vec4 waterVolumetrics(vec3 rayStart, vec3 rayEnd, float rayLength, vec2 dither, 
 		float phase = 0.0;
 	#endif
 
-	// float thing = -normalize(dVWorld + (cameraPosition - vec3(cameraPosition.x, waterEnteredAltitude-1.0, cameraPosition.z))).y;
  	float thing = -normalize(dVWorld).y;
  	thing = clamp(thing + 0.333,0.0,1.0);
  	thing = pow(1.0-pow(1.0-thing,2.0),2.0);
@@ -245,9 +245,8 @@ vec4 waterVolumetrics(vec3 rayStart, vec3 rayEnd, float rayLength, vec2 dither, 
 				#endif
 			}
 
-			#ifdef VL_CLOUDS_SHADOWS
-				sh *= GetCloudShadow(progressW, WsunVec * lightCol.a);
-			#endif
+			sh *= GetCloudShadow(progressW, WsunVec * lightCol.a);
+
 		#endif
 
 		float bubble = exp2(-10.0 * clamp(1.0 - length(d*dVWorld) / 16.0, 0.0,1.0));
@@ -390,19 +389,17 @@ void main() {
 	vec2 BN = fract(r2_sequence + bnoise);
 
 	// vec2 tc = floor(gl_FragCoord.xy)/VL_RENDER_RESOLUTION*texelSize + texelSize*0.5;
-	vec2 tc = gl_FragCoord.xy/VL_RENDER_RESOLUTION*texelSize;// + texelSize*0.5;
+	vec2 tc = (gl_FragCoord.xy - 0.5)/VL_RENDER_RESOLUTION*texelSize;
 
 	bool iswater = texture2D(colortex7,tc).a > 0.99;
 
-	vec2 jitter = TAA_Offset/VL_RENDER_RESOLUTION*texelSize*0.5;
-
-	float depth = texture2D(depthtex0, tc + jitter).x;
+	float depth = texelFetch2D(depthtex0, ivec2(tc/texelSize),0).x;
 	
 	float z0 = depth < 0.56 ? convertHandDepth(depth) : depth;
 
 	float DH_z0 = 0.0;
 	#ifdef DISTANT_HORIZONS
-		DH_z0 = texture2D(dhDepthTex,tc).x;
+		DH_z0 = texelFetch2D(dhDepthTex, ivec2(tc/texelSize),0).x;
 	#endif
 	
 	vec3 viewPos0 = toScreenSpace_DH(tc/RENDER_SCALE, z0, DH_z0);

@@ -1,5 +1,6 @@
 #include "/lib/settings.glsl"
 #include "/lib/util.glsl"
+#include "/lib/dither.glsl"
 
 uniform sampler2D colortex5;
 uniform sampler2D colortex6;

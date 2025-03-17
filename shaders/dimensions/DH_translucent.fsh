@@ -3,6 +3,7 @@
 #include "/lib/color_transforms.glsl"
 #include "/lib/projections.glsl"
 #include "/lib/util.glsl"
+#include "/lib/dither.glsl"
 
 uniform vec2 texelSize;
 // uniform int moonPhase;
@@ -274,9 +275,7 @@ void main() {
 			}
 		#endif
 
-		#ifdef CLOUDS_SHADOWS
-			Shadows *= GetCloudShadow(playerPos + cameraPosition, WsunVec);
-		#endif
+		Shadows *= GetCloudShadow(playerPos + cameraPosition, WsunVec);
 
     		Direct_lighting = DirectLightColor * NdotL * Shadows;
 

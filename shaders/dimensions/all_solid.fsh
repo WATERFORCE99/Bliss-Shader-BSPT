@@ -6,6 +6,7 @@
 #include "/lib/items.glsl"
 #include "/lib/util.glsl"
 #include "/lib/projections.glsl"
+#include "/lib/dither.glsl"
 
 varying vec4 lmtexcoord;
 #include "/lib/ripples.glsl"

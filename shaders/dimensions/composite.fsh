@@ -1,5 +1,6 @@
 #include "/lib/settings.glsl"
 #include "/lib/util.glsl"
+#include "/lib/dither.glsl"
 
 #ifndef DH_AMBIENT_OCCLUSION
 	#undef DISTANT_HORIZONS
@@ -248,18 +249,15 @@ void main() {
 	float noise = R2_dither();
 	vec2 texcoord = gl_FragCoord.xy*texelSize;
 
-	float z = texture(depthtex1,texcoord).x;
-	// float z = texelFetch2D(depthtex1,ivec2(gl_FragCoord.xy),0).x;
+	float z = texelFetch2D(depthtex1,ivec2(gl_FragCoord.xy),0).x;
 
 	#ifdef DISTANT_HORIZONS
-		float DH_depth1 = texture2D(dhDepthTex1,texcoord).x;
+		float DH_depth1 = texelFetch2D(dhDepthTex1,ivec2(gl_FragCoord.xy),0).x;
 		float swappedDepth = z >= 1.0 ? DH_depth1 : z;
 	#else
 		float DH_depth1 = 1.0;
 		float swappedDepth = z;
 	#endif
-
-	vec4 SHADOWDATA = vec4(0.0);
 
 	vec4 data = texelFetch2D(colortex1,ivec2(gl_FragCoord.xy),0);
 	vec4 dataUnpacked0 = vec4(decodeVec2(data.x),decodeVec2(data.y));
@@ -267,7 +265,7 @@ void main() {
 	vec3 normal = mat3(gbufferModelViewInverse) * clamp(worldToView( decode(dataUnpacked0.yw) ),-1.,1.);
 	vec2 lightmap = dataUnpacked1.yz;
 
-	gl_FragData[1] = vec4(0.0,0.0,0.0, texture2D(colortex14,floor(gl_FragCoord.xy)/VL_RENDER_RESOLUTION*texelSize+0.5*texelSize).a);
+	gl_FragData[1] = vec4(0.0,0.0,0.0, texelFetch2D(colortex14,ivec2((floor(gl_FragCoord.xy)/VL_RENDER_RESOLUTION*texelSize+0.5*texelSize)/texelSize),0).a);
 
 	// bool lightningBolt = abs(dataUnpacked1.w-0.5) <0.01;
 	bool isLeaf = abs(dataUnpacked1.w-0.55) <0.01;

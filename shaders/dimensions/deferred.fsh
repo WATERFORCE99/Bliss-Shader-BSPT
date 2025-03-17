@@ -1,5 +1,6 @@
 #include "/lib/settings.glsl"
 #include "/lib/util.glsl"
+#include "/lib/dither.glsl"
 
 #define ReflectedFog
 
@@ -126,6 +127,7 @@ float invLinZ (float lindepth){
 	#include "/lib/volumetricClouds.glsl"
 	#include "/lib/climate_settings.glsl"
 	#include "/lib/overworld_fog.glsl"
+	#include "/lib/aurora.glsl"
 #endif
 
 #ifdef NETHER_SHADER
@@ -364,9 +366,6 @@ if (gl_FragCoord.x > 18.+257. && gl_FragCoord.y > 1. && gl_FragCoord.x < 18+257+
 	}
 
 #endif
-
-
-
 
 //Temporally accumulate sky and light values
 vec3 frameHistory = texelFetch2D(colortex4,ivec2(gl_FragCoord.xy),0).rgb;

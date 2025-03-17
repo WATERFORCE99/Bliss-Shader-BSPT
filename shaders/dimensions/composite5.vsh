@@ -3,7 +3,6 @@
 
 varying vec2 texcoord;
 flat varying float tempOffsets;
-uniform sampler2D colortex4;
 
 uniform int framemod8;
 #include "/lib/TAA_jitter.glsl"

@@ -1,5 +1,6 @@
 #include "/lib/settings.glsl"
 #include "/lib/util.glsl"
+#include "/lib/dither.glsl"
 
 #ifdef IS_LPV_ENABLED
 	#extension GL_ARB_shader_image_load_store: enable
@@ -141,6 +142,7 @@ float convertHandDepth_2(in float depth, bool hand) {
 #include "/lib/stars.glsl"
 #include "/lib/climate_settings.glsl"
 #include "/lib/sky_gradient.glsl"
+#include "/lib/aurora.glsl"
 
 #ifdef OVERWORLD_SHADER
 	flat in vec4 dailyWeatherParams0;
@@ -205,7 +207,7 @@ vec3 fp10Dither(vec3 color,float dither){
 }
 
 vec4 blueNoise(vec2 coord){
-  return texelFetch2D(colortex6, ivec2(coord)%512 , 0) ;
+	return texelFetch2D(colortex6, ivec2(coord)%512 , 0) ;
 }
 
 vec2 CleanSample(
@@ -254,7 +256,6 @@ vec2 SSRT_Shadows(vec3 viewPos, bool depthCheck, vec3 lightDir, float noise, boo
 		_near = dhNearPlane;
 		_far = dhFarPlane;
 	}
-
 
 	vec3 clipPosition = toClipSpace3_DH(viewPos, depthCheck);
 	//prevents the ray from going behind the camera
@@ -894,9 +895,9 @@ void main() {
 			// transition to fallback lightmap shadow mask.
 			shadowColor *= mix(isWater ? lightLeakFix : LM_shadowMapFallback, 1.0, shadowMapFalloff2);
 
-			// #ifdef OLD_LIGHTLEAK_FIX
-			// 	if (isEyeInWater == 0) Shadows *= lightLeakFix; // light leak fix
-			// #endif
+			#ifdef OLD_LIGHTLEAK_FIX
+				if(isEyeInWater != 1) shadowColor *= lightLeakFix; // light leak fix
+			#endif
 		
 	////////////////////////////////	SUN SSS		////////////////////////////////
 	
@@ -932,11 +933,9 @@ void main() {
 
 				if(isEyeInWater != 1) SSSColor *= lightLeakFix;
 
-				#ifdef CLOUDS_SHADOWS
-					float cloudShadows = GetCloudShadow(feetPlayerPos.xyz + cameraPosition, WsunVec);
-					shadowColor *= cloudShadows;
-					SSSColor *= cloudShadow*cloudShadows;
-				#endif
+				float cloudShadows = GetCloudShadow(feetPlayerPos.xyz + cameraPosition, WsunVec);
+				shadowColor *= cloudShadows;
+				SSSColor *= cloudShadow*cloudShadows;
 			#endif
 		#endif
 
@@ -1180,14 +1179,13 @@ void main() {
 		gl_FragData[0].rgb = clamp(fp10Dither(Background, triangularize(noise_2)), 0.0, 65000.);
 	}
 
+	// water absorbtion will impact ALL light coming up from terrain underwater.
+ 	gl_FragData[0].rgb *= Absorbtion;
+
 	if(translucentMasks > 0.0 && isEyeInWater != 1){
-
-		// water absorbtion will impact ALL light coming up from terrain underwater.
-		gl_FragData[0].rgb *= Absorbtion;
-
 		vec4 vlBehingTranslucents = BilateralUpscale_VLFOG(colortex13, depthtex1, gl_FragCoord.xy - 1.5, ld(z));
 
-    	gl_FragData[0].rgb = gl_FragData[0].rgb * vlBehingTranslucents.a + vlBehingTranslucents.rgb;
+		gl_FragData[0].rgb = gl_FragData[0].rgb * vlBehingTranslucents.a + vlBehingTranslucents.rgb;
 	}
 
 	////// DEBUG VIEW STUFF

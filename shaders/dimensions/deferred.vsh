@@ -53,6 +53,7 @@ vec3 sunVec = normalize(mat3(gbufferModelViewInverse) * sunPosition);
 #include "/lib/sky_gradient.glsl"
 #include "/lib/ROBOBO_sky.glsl"
 #include "/lib/climate_settings.glsl"
+#include "/lib/aurora.glsl"
 
 vec3 rodSample(vec2 Xi) {
 	float r = sqrt(1.0f - Xi.x*Xi.y);
@@ -88,13 +89,6 @@ void getWeatherParams(
 ){
 	weatherParams0 = vec4(layer0_coverage, layer1_coverage, layer2_coverage, uniformFog_density);
 	weatherParams1 = vec4(layer0_density, layer1_density, layer2_density, cloudyFog_density);
-}
-
-float hash11(float p) {
-	p = fract(p * .1031);
-	p *= p + 33.33;
-	p *= p + p;
-	return fract(p);
 }
 
 void main() {
