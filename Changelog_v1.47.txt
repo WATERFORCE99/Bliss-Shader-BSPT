@@ -1,3 +1,11 @@
+2025-3-17 v1.47
+1. Merge X0nk's latest commit.
+~ 整合了X0nk最新的更新
+2. Fix random stuffs.
+~ xxx 修复了许多问题
+3. Add credit to builderb0y's hue.
+~ rainbow
+
 2025-3-12 v1.46
 1. Merge X0nk's latest commit.
 ~ 整合了X0nk最新的更新
