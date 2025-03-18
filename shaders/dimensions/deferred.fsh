@@ -24,6 +24,7 @@ flat varying float avgL2;
 flat varying float centerDepth;
 
 uniform sampler2D colortex1;
+uniform sampler2D colortex4;
 
 vec2 decodeVec2(float a){
 	const vec2 constant1 = 65535. / vec2( 256., 65536.);
@@ -41,19 +42,10 @@ uniform float rainStrength;
 uniform float eyeAltitude;
 uniform vec3 sunVec;
 uniform vec2 texelSize;
-uniform mat4 gbufferProjection;
-uniform mat4 gbufferProjectionInverse;
-uniform mat4 gbufferPreviousProjection;
-uniform mat4 gbufferModelViewInverse;
-uniform mat4 gbufferModelView;
-uniform mat4 shadowModelView;
 uniform mat4 shadowModelViewI;
-uniform mat4 shadowProjection;
 uniform float sunElevation;
 uniform vec3 sunPosition;
 uniform vec3 moonPosition;
-uniform vec3 cameraPosition;
-// uniform float far;
 uniform ivec2 eyeBrightnessSmooth;
 // uniform ivec2 eyeBrightness;
 uniform float caveDetection;
@@ -66,45 +58,29 @@ vec4 lightCol = vec4(lightSourceColor, float(sunElevation > 1e-5)*2-1.);
 #include "/lib/Shadow_Params.glsl"
 #include "/lib/waterBump.glsl"
 
+#include "/lib/projections.glsl"
+#include "/lib/DistantHorizons_projections.glsl"
+
 vec3 WsunVec = mat3(gbufferModelViewInverse)*sunVec;
 // vec3 WsunVec = normalize(LightDir);
 
-vec3 toShadowSpaceProjected(vec3 p3){
-	p3 = mat3(gbufferModelViewInverse) * p3 + gbufferModelViewInverse[3].xyz;
-	p3 = mat3(shadowModelView) * p3 + shadowModelView[3].xyz;
-	p3 = diagonal3(shadowProjection) * p3 + shadowProjection[3].xyz;
-
-	return p3;
-}
-
 #define DHVLFOG
 
-vec3 toScreenSpace(vec3 p) {
-	vec4 iProjDiag = vec4(gbufferProjectionInverse[0].x, gbufferProjectionInverse[1].y, gbufferProjectionInverse[2].zw);
-	vec3 feetPlayerPos = p * 2. - 1.;
-	vec4 viewPos = iProjDiag * feetPlayerPos.xyzz + gbufferProjectionInverse[3];
-	return viewPos.xyz / viewPos.w;
-}
-
+// uniform float far;
 uniform float near;
-
-#include "/lib/DistantHorizons_projections.glsl"
-
 
 float linearizeDepthFast(const in float depth, const in float near, const in float far) {
 	return (near * far) / (depth * (near - far) + far);
 }
+
 float invLinZ (float lindepth){
 	return -((2.0*near/lindepth)-far-near)/(far-near);
 }
-#ifdef OVERWORLD_SHADER
 
-	uniform sampler2D colortex4;
+#ifdef OVERWORLD_SHADER
 	// uniform sampler2D colortex12;
 	// const bool shadowHardwareFiltering = true;
 	uniform sampler2DShadow shadow;
-
-	// #undef TRANSLUCENT_COLORED_SHADOWS
 
 	#ifdef TRANSLUCENT_COLORED_SHADOWS
 		uniform sampler2D shadowcolor0;
@@ -124,19 +100,17 @@ float invLinZ (float lindepth){
 
 	#define VL_CLOUDS_DEFERRED
 
-	#include "/lib/volumetricClouds.glsl"
 	#include "/lib/climate_settings.glsl"
+	#include "/lib/volumetricClouds.glsl"
 	#include "/lib/overworld_fog.glsl"
 	#include "/lib/aurora.glsl"
 #endif
 
 #ifdef NETHER_SHADER
-	uniform sampler2D colortex4;
 	#include "/lib/nether_fog.glsl"
 #endif
 
 #ifdef END_SHADER
-	uniform sampler2D colortex4;
 	#include "/lib/end_fog.glsl"
 #endif
 
@@ -284,10 +258,11 @@ if (gl_FragCoord.x > 18.+257. && gl_FragCoord.y > 1. && gl_FragCoord.x < 18+257+
 		suncol = vec3(0.0);
 	#endif
 	float rejection = 1.0;
-	vec4 volumetricClouds = GetVolumetricClouds(viewPos, vec2(noise, 1.0-noise), WsunVec, suncol*2.5, skyGroundCol/30.0);
+	float cloudPlaneDistance = 0.0;
+ 	vec4 volumetricClouds = GetVolumetricClouds(viewPos, vec2(noise, 1.0-noise), WsunVec, suncol*2.5, skyGroundCol/30.0, cloudPlaneDistance);
 
 	float atmosphereAlpha = 1.0;
-	vec4 volumetricFog = GetVolumetricFog(viewPos, WsunVec, vec2(noise, 1.0-noise), suncol*2.5, skyGroundCol/30.0, averageSkyCol_Clouds*5.0, atmosphereAlpha, volumetricClouds.rgb);
+	vec4 volumetricFog = GetVolumetricFog(viewPos, WsunVec, vec2(noise, 1.0-noise), suncol*2.5, skyGroundCol/30.0, averageSkyCol_Clouds*5.0, atmosphereAlpha, volumetricClouds.rgb, cloudPlaneDistance);
 
 	sky = sky * volumetricClouds.a + volumetricClouds.rgb / 5.0;
 	sky = sky * volumetricFog.a + volumetricFog.rgb / 5.0;

@@ -68,6 +68,9 @@ uniform int dhRenderDistance;
 #define CLOUDS_INTERSECT_TERRAIN
 uniform float eyeAltitude;
 
+uniform int worldTime;
+uniform int worldDay;
+
 flat in vec4 dailyWeatherParams0;
 flat in vec4 dailyWeatherParams1;
 

@@ -2,6 +2,8 @@
 #include "/lib/util.glsl"
 #include "/lib/dither.glsl"
 
+#include "/lib/ripples.glsl"
+
 #ifdef IS_LPV_ENABLED
 	#extension GL_ARB_shader_image_load_store: enable
 	#extension GL_ARB_shading_language_packing: enable
@@ -580,7 +582,12 @@ void applyPuddles(
 	float wetnessStages = mix(puddles, 1.0, fullWet) * lightmap;
 	if(isWater) wetnessStages = 0.0;
 
-	normals = mix(normals, flatNormals, puddles * lightmap * clamp(flatNormals.y,0.0,1.0));
+	vec3 rippleNormal = vec3(0.0);
+	#ifdef GROUND_RIPPLES
+		rippleNormal = drawRipples(worldPos.xz * 10.0, frameTimeCounter * 1.5) * 0.25 * clamp(1.0 - length(worldPos - cameraPosition) / 16.0, 0.0, 1.0);
+	#endif
+
+	normals = mix(normals, flatNormals + rippleNormal, puddles * lightmap * clamp(flatNormals.y,0.0,1.0));
 	#if MATERIAL_WETNESS_TYPE == 0
 		roughness = mix(roughness, 1.0, wetnessStages * (roughness * 0.5 + 0.5));
 	#elif MATERIAL_WETNESS_TYPE == 1
@@ -1026,7 +1033,6 @@ void main() {
 			float flashlightshadows = SSRT_FlashLight_Shadows(toScreenSpace_DH(texcoord/RENDER_SCALE, z, DH_depth1), isDHrange, newViewPos, interleaved_gradientNoise_temporal());
 
 			ssrtFLASHLIGHT = calculateFlashlight(texcoord, viewPos, albedoSmooth, slopednormal, flashLightSpecularData, hand);
-			Indirect_lighting += ssrtFLASHLIGHT;
 		#endif
 
 	/////////////////////////////////////////////////////////////////////////////////////
@@ -1059,8 +1065,10 @@ void main() {
 
 		// SSGI
 		#elif indirect_effect == 3
-			if(!hand) Indirect_lighting = ApplySSRT(Indirect_lighting, blockLightColor, MinimumLightColor, viewPos, normal, vec3(bnoise, noise_2), lightmap.y, isGrass, isDHrange) + ssrtFLASHLIGHT;
+			if(!hand) Indirect_lighting = ApplySSRT(Indirect_lighting, blockLightColor, MinimumLightColor, viewPos, normal, vec3(bnoise, noise_2), lightmap.y, isGrass, isDHrange);
 		#endif
+
+		Indirect_lighting += ssrtFLASHLIGHT;
 
 	////////////////////////////////////////////////////////////////////////////////
 	///////////////////////// SUB SURFACE SCATTERING	/////////////////////////
@@ -1127,7 +1135,7 @@ void main() {
 			vec3 specularNormal = normal;
 			if (dot(normal, (feetPlayerPos_normalized)) > 0.0) specularNormal = FlatNormals;
 			
-			FINAL_COLOR = specularReflections(viewPos, feetPlayerPos_normalized, WsunVec, specularNoises, specularNormal, SpecularTex.r, SpecularTex.g, albedo, FINAL_COLOR, shadowColor, lightmap.y, hand, isWater || (!isWater && isEyeInWater == 1), flashLightSpecularData);
+			FINAL_COLOR = specularReflections(viewPos, feetPlayerPos_normalized, WsunVec, specularNoises, specularNormal, SpecularTex.r, SpecularTex.g, albedo, FINAL_COLOR, shadowColor, lightmap.y, hand, flashLightSpecularData);
 		#endif
 
 		gl_FragData[0].rgb = FINAL_COLOR;
@@ -1141,7 +1149,7 @@ void main() {
 				// vec3 orbitstar = vec3(feetPlayerPos_normalized.x,abs(feetPlayerPos_normalized.y),feetPlayerPos_normalized.z); orbitstar.x -= WsunVec.x*0.2;
 				vec3 orbitstar = normalize(mat3(gbufferModelViewInverse) * toScreenSpace(vec3(texcoord/RENDER_SCALE,1.0)));
 				float radiance = 2.39996 - worldTime * STAR_ROTATION_MULT/ 24000.0;
-				mat2 rotationMatrix  = mat2(vec2(cos(radiance),  -sin(radiance)),  vec2(sin(radiance),  cos(radiance)));
+				mat2 rotationMatrix  = mat2(vec2(cos(radiance), -sin(radiance)), vec2(sin(radiance), cos(radiance)));
 				orbitstar.xy *= rotationMatrix;
 
 				Background += stars(orbitstar) * 10.0 * clamp(-unsigned_WsunVec.y*2.0,0.0,1.0);
@@ -1162,13 +1170,13 @@ void main() {
 			// Render aurora
 			Background += drawAurora(feetPlayerPos_normalized, noise) * aurMult;
 
-			vec3 Sky = skyFromTex(feetPlayerPos_normalized, colortex4)/1200.0 * Sky_Brightness;
-			Background += Sky;
-
-			#if defined OVERWORLD_SHADER && (RAINBOW == 1 || RAINBOW == 2)
+			#if RAINBOW == 1 || RAINBOW == 2
 				vec3 rainbow = drawRainbow(viewPos, feetPlayerPos_normalized, noise);
 				if(isEyeInWater == 0) Background += rainbow * RAINBOW_STRENGTH;
 			#endif
+
+			vec3 Sky = skyFromTex(feetPlayerPos_normalized, colortex4)/1200.0 * Sky_Brightness;
+			Background += Sky;
 
 			#if defined VOLUMETRIC_CLOUDS && !defined CLOUDS_INTERSECT_TERRAIN
 				vec4 Clouds = texture2D_bicubic_offset(colortex0, texcoord*CLOUDS_QUALITY, noise, RENDER_SCALE.x);
@@ -1176,13 +1184,17 @@ void main() {
 			#endif
 		#endif
 
+		#ifdef END_SHADER
+			Background += stars(feetPlayerPos_normalized) * 20.0;
+		#endif
+
 		gl_FragData[0].rgb = clamp(fp10Dither(Background, triangularize(noise_2)), 0.0, 65000.);
 	}
 
-	// water absorbtion will impact ALL light coming up from terrain underwater.
- 	gl_FragData[0].rgb *= Absorbtion;
-
 	if(translucentMasks > 0.0 && isEyeInWater != 1){
+		// water absorbtion will impact ALL light coming up from terrain underwater.
+		gl_FragData[0].rgb *= Absorbtion;
+
 		vec4 vlBehingTranslucents = BilateralUpscale_VLFOG(colortex13, depthtex1, gl_FragCoord.xy - 1.5, ld(z));
 
 		gl_FragData[0].rgb = gl_FragData[0].rgb * vlBehingTranslucents.a + vlBehingTranslucents.rgb;

@@ -87,8 +87,8 @@ float linearizeDepthFast(const in float depth, const in float near, const in flo
 
 	#define CLOUDS_INTERSECT_TERRAIN
 	// #define CLOUDSHADOWSONLY
-	#include "/lib/volumetricClouds.glsl"
 	#include "/lib/climate_settings.glsl"
+	#include "/lib/volumetricClouds.glsl"
 	#include "/lib/overworld_fog.glsl"
 #endif
 
@@ -305,11 +305,12 @@ void main() {
 
 		vec4 finalVolumetrics = vec4(0.0,0.0,0.0,1.0);
 
+		float cloudPlaneDistance = 0.0;
 		#ifdef OVERWORLD_SHADER
-			vec4 VolumetricClouds = GetVolumetricClouds(viewPos1, vec2(noise_1, noise_2), WsunVec, directLightColor, indirectLightColor);
+			vec4 VolumetricClouds = GetVolumetricClouds(viewPos1, vec2(noise_1, noise_2), WsunVec, directLightColor, indirectLightColor,cloudPlaneDistance);
 
 			float atmosphereAlpha = 1.0;
-			vec4 VolumetricFog = GetVolumetricFog(viewPos1, WsunVec,  vec2(noise_1, noise_2), directLightColor, indirectLightColor, indirectLightColor_dynamic, atmosphereAlpha, VolumetricClouds.rgb);
+			vec4 VolumetricFog = GetVolumetricFog(viewPos1, WsunVec,  vec2(noise_1, noise_2), directLightColor, indirectLightColor, indirectLightColor_dynamic, atmosphereAlpha, VolumetricClouds.rgb,cloudPlaneDistance);
 				
 			finalVolumetrics.rgb += VolumetricClouds.rgb;
  			finalVolumetrics.a *= VolumetricClouds.a;

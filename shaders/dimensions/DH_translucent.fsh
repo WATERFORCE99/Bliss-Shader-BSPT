@@ -43,11 +43,6 @@ uniform vec3 previousCameraPosition;
 // uniform mat4 gbufferModelView;
 uniform mat4 gbufferPreviousModelView;
 
-// uniform mat4 shadowModelView;
-// uniform mat4 shadowModelViewInverse;
-// uniform mat4 shadowProjection;
-// uniform mat4 shadowProjectionInverse;
-
 // uniform sampler2D colortex4;
 flat varying vec3 averageSkyCol_Clouds;
 flat varying vec4 lightCol;
@@ -72,6 +67,9 @@ uniform int isEyeInWater;
 uniform float rainStrength;
 
 #ifdef OVERWORLD_SHADER
+	uniform int worldTime;
+	uniform int worldDay;
+
 	flat in vec4 dailyWeatherParams0;
 	flat in vec4 dailyWeatherParams1;
 

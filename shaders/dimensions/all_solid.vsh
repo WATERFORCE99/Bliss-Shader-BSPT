@@ -103,7 +103,7 @@ vec3 calcWaveLeaves(in vec3 pos, in float fm, in float mm, in float ma, in float
 }
 
 vec3 calcMoveLeaves(in vec3 pos, in float f0, in float f1, in float f2, in float f3, in float f4, in float f5, in vec3 amp1, in vec3 amp2) {
-	vec3 move1 = calcWaveLeaves(pos      , 0.0054, 0.0400, 0.0400, 0.0127, 0.0089, 0.0114, 0.0063, 0.0224, 0.0015) * amp1;
+	vec3 move1 = calcWaveLeaves(pos, 0.0054, 0.0400, 0.0400, 0.0127, 0.0089, 0.0114, 0.0063, 0.0224, 0.0015) * amp1;
 	return move1*5.*WAVY_STRENGTH;
 }
 
@@ -242,9 +242,9 @@ void main() {
 
 		// strong
 		if (
-			mc_Entity.x == BLOCK_GROUND_WAVING || mc_Entity.x == BLOCK_GROUND_WAVING_VERTICAL || mc_Entity.x == BLOCK_AIR_WAVING ||
+			mc_Entity.x == BLOCK_GROUND_WAVING || mc_Entity.x == BLOCK_GROUND_WAVING_VERTICAL ||
 			mc_Entity.x == BLOCK_GRASS_SHORT || mc_Entity.x == BLOCK_GRASS_TALL_UPPER || mc_Entity.x == BLOCK_GRASS_TALL_LOWER ||
-			mc_Entity.x == BLOCK_SSS_STRONG || mc_Entity.x == BLOCK_SAPLING 
+			mc_Entity.x == BLOCK_SSS_STRONG || mc_Entity.x == BLOCK_SAPLING
 			/*|| (mc_Entity.x >= 410 && mc_Entity.x <= 415) || (mc_Entity.x >= 402 && mc_Entity.x <= 405) THIS IS FOR MCME NEW TREES.*/
 		){
 			SSSAMOUNT = 1.0;
@@ -252,10 +252,10 @@ void main() {
 
 		// medium
 		if (
-			mc_Entity.x == BLOCK_SSS_WEAK || mc_Entity.x == BLOCK_SSS_WEAK_2 ||
+			mc_Entity.x == BLOCK_SSS_WEAK || mc_Entity.x == BLOCK_SSS_WEAK_2 || mc_Entity.x == BLOCK_AIR_WAVING ||
 			mc_Entity.x == BLOCK_GLOW_LICHEN || mc_Entity.x == BLOCK_SNOW_LAYERS || mc_Entity.x == BLOCK_CARPET ||
 			mc_Entity.x == BLOCK_AMETHYST_BUD_MEDIUM || mc_Entity.x == BLOCK_AMETHYST_BUD_LARGE || mc_Entity.x == BLOCK_AMETHYST_CLUSTER ||
-			mc_Entity.x == BLOCK_BAMBOO || mc_Entity.x == BLOCK_SAPLING || mc_Entity.x == BLOCK_VINE
+			mc_Entity.x == BLOCK_BAMBOO || mc_Entity.x == BLOCK_SAPLING || mc_Entity.x == BLOCK_VINE || mc_Entity.x == BLOCK_CAVE_VINE_BERRIES
 		){
 			SSSAMOUNT = 0.5;
 		}

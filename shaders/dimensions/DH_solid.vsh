@@ -13,12 +13,13 @@ flat varying int dh_material_id;
 uniform vec2 texelSize;
 uniform int framemod8;
 
+uniform float far;
+
 #if DOF_QUALITY == 5
 	uniform int hideGUI;
 	uniform int frameCounter;
 	uniform float aspectRatio;
 	uniform float screenBrightness;
-	uniform float far;
 	#include "/lib/bokeh.glsl"
 #endif
 
@@ -26,11 +27,9 @@ uniform int framemod4_DH;
 #define DH_TAA_OVERRIDE
 #include "/lib/TAA_jitter.glsl"
 
-
 uniform mat4 gbufferModelViewInverse;
 uniform mat4 gbufferModelView;
 
-uniform float far;
 uniform mat4 dhProjection;
 uniform vec3 cameraPosition;
 

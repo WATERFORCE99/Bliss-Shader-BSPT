@@ -14,6 +14,9 @@ uniform sampler2D depthtex2;
 #endif
 
 #ifdef OVERWORLD_SHADER
+	uniform int worldTime;
+	uniform int worldDay;
+
 	flat in vec3 WsunVec;
 	flat in vec4 dailyWeatherParams0;
 	flat in vec4 dailyWeatherParams1;

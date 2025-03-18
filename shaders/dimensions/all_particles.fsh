@@ -58,6 +58,9 @@ uniform vec3 previousCameraPosition;
 #include "/lib/projections.glsl"
 
 #ifdef OVERWORLD_SHADER
+	uniform int worldTime;
+	uniform int worldDay;
+
 	flat in vec4 dailyWeatherParams0;
 	flat in vec4 dailyWeatherParams1;
 

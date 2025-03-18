@@ -45,10 +45,7 @@ uniform float near;
 uniform float frameTime;
 uniform float rainStrength;
 
-// uniform int worldTime;
 vec3 sunVec = normalize(mat3(gbufferModelViewInverse) * sunPosition);
-
-// vec3 sunVec = normalize(LightDir);
 
 #include "/lib/sky_gradient.glsl"
 #include "/lib/ROBOBO_sky.glsl"
@@ -72,7 +69,6 @@ float ld(float depth) {
 
 uniform float nightVision;
 
-uniform int worldDay;
 void getWeatherParams(
 	inout vec4 weatherParams0,
 	inout vec4 weatherParams1,
@@ -146,13 +142,13 @@ void main() {
 ////////////////////////////////////////
 
 	vec2 planetSphere = vec2(0.0);
+	vec3 skyAbsorb = vec3(0.0);
 
 	float sunVis = clamp(sunElevation,0.0,0.05)/0.05*clamp(sunElevation,0.0,0.05)/0.05;
 	float moonVis = clamp(-sunElevation,0.0,0.05)/0.05*clamp(-sunElevation,0.0,0.05)/0.05;
 
-	vec3 skyAbsorb = vec3(0.0);
 	sunColor = calculateAtmosphere(vec3(0.0), sunVec, vec3(0.0,1.0,0.0), sunVec, -sunVec, planetSphere, skyAbsorb, 25,0.0);
-	sunColor = sunColorBase/4000.0 * skyAbsorb;
+	sunColor = sunColorBase/4000.0 * skyAbsorb * vec3(1-0.1 * Evening, 1-0.85 * Evening, 1-0.8 * Evening);
 	moonColor = moonColorBase/4000.0;
 
 	// lightSourceColor = sunVis >= 1e-5 ? sunColor * sunVis : moonColor * moonVis;

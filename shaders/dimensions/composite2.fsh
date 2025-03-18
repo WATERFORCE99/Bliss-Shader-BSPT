@@ -112,8 +112,8 @@ float invLinZ (float lindepth){
 	// #define CLOUDS_INTERSECT_TERRAIN
 
 	#include "/lib/lightning_stuff.glsl"
-	#include "/lib/volumetricClouds.glsl"
 	#include "/lib/climate_settings.glsl"
+	#include "/lib/volumetricClouds.glsl"
 	#include "/lib/overworld_fog.glsl"
 #endif
 
@@ -297,6 +297,16 @@ float convertHandDepth(float depth) {
 	return ndcDepth * 0.5 + 0.5;
 }
 
+vec3 alterCoords(in vec3 coords, bool lighting){
+	float theDistance = length(coords + (lighting ? vec3(0.0) : cameraPosition));
+
+	coords.x = coords.x*3;
+	coords.y = coords.y;
+	coords.z = coords.z*3;
+
+	return coords;
+ }
+
 vec4 raymarchTest(
 	in vec3 viewPosition,
 	in vec2 dither
@@ -335,7 +345,7 @@ vec4 raymarchTest(
 	
 	// float cloudRange = mix(max(cameraPosition.y - maxHeight,0.0), max(minHeight - cameraPosition.y,0.0), clamp(rayDirection.y,0.0,1.0));
 
-	vec3 rayProgress = rayDirection*dither.x + cameraPosition + (rayDirection / length(alterCoords(rayDirection, false))) * 200;
+	vec3 rayProgress = rayDirection + cameraPosition + (rayDirection / length(alterCoords(rayDirection, false))) * 200.0;
 
 	float dL = length(rayDirection);
 	
@@ -416,11 +426,12 @@ void main() {
 	vec3 directLightColor = lightCol.rgb / 2400.0;
 	vec3 indirectLightColor = averageSkyCol / 1200.0;
 	vec3 indirectLightColor_dynamic = averageSkyCol_Clouds / 1200.0;
+	float cloudPlaneDistance = 0.0;
 
 	#ifdef OVERWORLD_SHADER
 		// z0 = texture2D(depthtex0, tc + jitter/VL_RENDER_RESOLUTION).x;
 		// viewPos0 = toScreenSpace_DH(tc/RENDER_SCALE, z0, DH_z0);
-		vec4 VolumetricClouds = GetVolumetricClouds(viewPos0, BN, WsunVec, directLightColor, indirectLightColor);
+		vec4 VolumetricClouds = GetVolumetricClouds(viewPos0, BN, WsunVec, directLightColor, indirectLightColor, cloudPlaneDistance);
 
 		#ifdef CAVE_FOG
   	  		float skyhole = pow(clamp(1.0-pow(max(playerPos_normalized.y - 0.6,0.0)*5.0,2.0),0.0,1.0),2)* caveDetection;
@@ -431,9 +442,8 @@ void main() {
 		float atmosphereAlpha = 1.0;
 
 		vec3 sceneColor = texelFetch2D(colortex3,ivec2(tc/texelSize),0).rgb * VolumetricClouds.a + VolumetricClouds.rgb;
-		vec4 VolumetricFog = GetVolumetricFog(viewPos0, WsunVec, BN, directLightColor, indirectLightColor, indirectLightColor_dynamic, atmosphereAlpha, VolumetricClouds.rgb);
+		vec4 VolumetricFog = GetVolumetricFog(viewPos0, WsunVec, BN, directLightColor, indirectLightColor, indirectLightColor_dynamic, atmosphereAlpha, VolumetricClouds.rgb, cloudPlaneDistance);
 		VolumetricFog = vec4(VolumetricClouds.rgb * VolumetricFog.a  + VolumetricFog.rgb, VolumetricFog.a*VolumetricClouds.a);
-		// VolumetricFog = vec4(VolumetricClouds.rgb * VolumetricFog.a  + VolumetricFog.rgb, VolumetricFog.a*VolumetricClouds.a);
 	#else
 		vec4 VolumetricFog = GetVolumetricFog(viewPos0, BN.x, BN.y);
 	#endif
