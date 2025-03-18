@@ -5,24 +5,28 @@
 
 vec3 drawRipples(vec2 uv, float time) {
 	vec2 p0 = floor(uv);
-	vec2 circles = vec2(0.);
+	vec2 circles = vec2(0.0);
 	for (int j = -MAX_RADIUS; j < MAX_RADIUS; ++j) {
 		for (int i = -MAX_RADIUS; i < MAX_RADIUS; ++i) {
 			vec2 pi = p0 + vec2(i, j);
-			vec2 p = pi + hash22(pi);
+			vec2 randHash = hash22(pi);
+			vec2 p = pi + randHash * 2.0;
 
-			float t = fract(0.6*time + hash12(pi));
+			float t = fract(0.6 * time + randHash.x);
 			vec2 v = p - uv;
-			float d = length(v) - (float(MAX_RADIUS) + 1.)*t;
+			float d = length(v) - (float(MAX_RADIUS) + 1.0) * t;
 
-			float carrier = cos(8.*radians(180.) *d);
-			float x = clamp(3.*d + 1., -1., 1.); 
-			float energy = 1.-x * x * (3. - 2.*abs(x));
-			circles += 16.* normalize(v) * carrier * energy * pow(1. - t, 2.);
+			float carrier = cos(6.0 * PI * d);
+			float x = clamp(3.0 * d + 1.0, - 1.0, 1.0); 
+			float energy = 1.0 - x * x * (3.0 - 2.0 * abs(x));
+			float decay = (1.0 - t) * (1.0 - t);
+			if (decay < 0.04) continue;
+
+			circles += 20.0 * normalize(v) * carrier * energy * decay;
 		}
 	}
-	circles /= float((MAX_RADIUS*2+1)*(MAX_RADIUS*2+1));
+	circles /= float((MAX_RADIUS * 2) * (MAX_RADIUS * 2));
 
-	vec3 n = vec3(circles, sqrt(1. - dot(circles, circles)));
+	vec3 n = vec3(circles, sqrt(1.0 - dot(circles, circles)));
 	return n;
 }

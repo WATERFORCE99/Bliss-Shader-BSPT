@@ -235,7 +235,7 @@ vec3 agxDefaultContrastApprox(vec3 x){
 
 #ifdef WF99_AGX_PRESET
 	vec3 oContrast = vec3(1.175);
-	float oSaturation = 0.99;
+	float oSaturation = 0.98;
 #else
 	vec3 oContrast = vec3(1.0);
 	float oSaturation = 1.25;

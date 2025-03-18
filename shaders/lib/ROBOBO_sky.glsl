@@ -1,10 +1,10 @@
 // uniform float LowCoverage;
+uniform int moonPhase;
 
-// uniform float isDeserts;
 const float sunAngularSize = 0.533333;
 const float moonAngularSize = 0.516667;
 
-//Sky coefficients and heights
+// Sky coefficients and heights
 
 #define airNumberDensity 2.5035422e25
 #define ozoneConcentrationPeak 8e-6
@@ -16,9 +16,7 @@ const float ozoneNumberDensity = airNumberDensity * ozoneConcentrationPeak;
 #define sky_atmosphereHeight 110e3
 #define sky_scaleHeights vec2(8.0e3, 1.2e3)
 
-
 #define sky_coefficientRayleigh vec3(sky_coefficientRayleighR*1e-6, sky_coefficientRayleighG*1e-5, sky_coefficientRayleighB*1e-5)
-
 
 #define sky_coefficientMie vec3(sky_coefficientMieR*1e-6, sky_coefficientMieG*1e-6, sky_coefficientMieB*1e-6) // Should be >= 2e-6
 const vec3 sky_coefficientOzone = (ozoneCrossSection * (ozoneNumberDensity * 0.2e-6)); // ozone cross section * (ozone number density * (cm ^ 3))
@@ -29,11 +27,21 @@ const float sky_atmosphereRadius = sky_planetRadius + sky_atmosphereHeight;
 const float sky_atmosphereRadiusSquared = sky_atmosphereRadius * sky_atmosphereRadius;
 
 #define sky_coefficientsScattering mat2x3(sky_coefficientRayleigh, sky_coefficientMie)
-const mat3   sky_coefficientsAttenuation = mat3(sky_coefficientRayleigh , sky_coefficientMie, sky_coefficientOzone ); // commonly called the extinction coefficient
+const mat3 sky_coefficientsAttenuation = mat3(sky_coefficientRayleigh , sky_coefficientMie, sky_coefficientOzone); // commonly called the extinction coefficient
 
+#ifdef MOONPHASE_BASED_MOONLIGHT
+	float moonlightbrightness = abs(4-moonPhase)/4.0;
+#else
+	float moonlightbrightness = 1.0;
+#endif
 
-
-
+#if colortype == 1
+	#define sunColorBase vec3(sunColorR, sunColorG, sunColorB) * sun_illuminance
+	#define moonColorBase vec3(moonColorR,moonColorG,moonColorB) * moon_illuminance * moonlightbrightness
+#else
+	#define sunColorBase blackbody(Sun_temp) * sun_illuminance
+	#define moonColorBase blackbody(Moon_temp) * moon_illuminance * moonlightbrightness
+#endif
 
 float sky_rayleighPhase(float cosTheta) {
 	const vec2 mul_add = vec2(0.1, 0.28) * rPI;
@@ -69,6 +77,7 @@ vec3 sky_airmass(vec3 position, vec3 direction, float rayLength, const float ste
 
 	return airmass * stepSize;
 }
+
 vec3 sky_airmass(vec3 position, vec3 direction, const float steps) {
 	float rayLength = dot(position, direction);
 	rayLength = rayLength * rayLength + sky_atmosphereRadiusSquared - dot(position, position);
@@ -81,6 +90,7 @@ vec3 sky_airmass(vec3 position, vec3 direction, const float steps) {
 vec3 sky_opticalDepth(vec3 position, vec3 direction, float rayLength, const float steps) {
 	return sky_coefficientsAttenuation * sky_airmass(position, direction, rayLength, steps);
 }
+
 vec3 sky_opticalDepth(vec3 position, vec3 direction, const float steps) {
 	return sky_coefficientsAttenuation * sky_airmass(position, direction, steps);
 }
@@ -89,14 +99,14 @@ vec3 sky_transmittance(vec3 position, vec3 direction, const float steps) {
 	return exp(-sky_opticalDepth(position, direction, steps) * rLOG2);
 }
 
-
 vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 sunVector, vec3 moonVector, out vec2 pid, out vec3 transmittance, const int iSteps, float noise) {
 	const int jSteps = 4;
 
+	// darken the ground in the sky.
 	#ifdef SKY_GROUND
-		float planetGround = exp(-100 * pow(max(-viewVector.y*5 + 0.1,0.0),2)); // darken the ground in the sky.
+		float planetGround = exp(-100 * pow(max(-viewVector.y*5 + 0.1,0.0),2));
 	#else
-		float planetGround = pow(clamp(viewVector.y+1.0,0.0,1.0),2); // darken the ground in the sky.
+		float planetGround = pow(clamp(viewVector.y+1.0,0.0,1.0),2);
 	#endif
 	
 	float GroundDarkening = max(planetGround * 0.7+0.3,clamp(sunVector.y*2.0,0.0,1.0));
@@ -140,23 +150,20 @@ vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 s
 
 		#ifdef ORIGINAL_CHOCAPIC_SKY
 			scatteringSun += sky_coefficientsScattering  * (stepAirmass.xy * phaseSun) * stepScatteringVisible * sky_transmittance(position, sunVector,  jSteps) * planetGround;
+
+			scatteringAmbient += sky_coefficientsScattering * stepAirmass.xy * stepScatteringVisible;
 		#else
 			scatteringSun += sky_coefficientsScattering  * (stepAirmass.xy * phaseSun) * stepScatteringVisible * sky_transmittance(position, sunVector * 0.5 + 0.1,  jSteps) * planetGround;
+
+			scatteringAmbient += sky_coefficientsScattering * stepAirmass.xy * stepScatteringVisible * low_sun;
 		#endif
 
 		scatteringMoon += sky_coefficientsScattering * (stepAirmass.xy * phaseMoon) * stepScatteringVisible * sky_transmittance(position, moonVector, jSteps) * planetGround;
 
-		// Nice way to fake multiple scattering.
-		#ifdef ORIGINAL_CHOCAPIC_SKY
-			scatteringAmbient += sky_coefficientsScattering * stepAirmass.xy * stepScatteringVisible;
-		#else
-			scatteringAmbient += sky_coefficientsScattering * stepAirmass.xy * stepScatteringVisible * low_sun;
-		#endif
-
 		transmittance *= stepTransmittance;
 	}
 
-	vec3 scattering = scatteringAmbient * background + scatteringSun * sunColorBase + scatteringMoon*moonColorBase * 0.5;
+	vec3 scattering = scatteringAmbient * background + scatteringSun * sunColorBase + scatteringMoon * moonColorBase * 0.5;
 
 	return scattering;
 }

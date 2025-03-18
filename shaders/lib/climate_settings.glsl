@@ -1,5 +1,13 @@
 // this file contains all things for seasons, weather, and biome specific settings.
-// i gotta start centralizing shit someday. 
+
+uniform int worldTime;
+uniform int worldDay;
+
+float Time = worldTime%24000;
+float Morning = clamp((Time-23000.0)/2000.0,0.0,1.0) + clamp((2000.0-Time)/2000.0,0.0,1.0);
+float Noon = clamp((Time-2000)/2000.0,0.0,1.0) * clamp((12000.0-Time)/2000.0,0.0,1.0);
+float Evening = clamp((Time-11000.0)/2000.0,0.0,1.0) * clamp((15000.0-Time)/2000.0,0.0,1.0);
+float Night = clamp((Time-14000.0)/2000.0,0.0,1.0) * clamp((23000.0-Time)/2000.0,0.0,1.0);
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////// SEASONS //////////////////////////////////
@@ -8,9 +16,6 @@
 /////////////////////////////////////////////////////////////////////////////// VERTEX SHADER
 #ifdef Seasons
 	#ifdef SEASONS_VSH
-
-		uniform int worldDay;  
-		uniform float noPuddleAreas;
 
 		void YearCycleColor (
 			inout vec3 FinalColor,
@@ -42,7 +47,7 @@
 				AutumnCol *= glcolor;
 				WinterCol *= glcolor;
 				SpringCol *= glcolor;
-	    		}
+	    	}
 
 			// length of each season in minecraft days
 			int SeasonLength = Season_Length; 
@@ -84,7 +89,7 @@ vec3 getSeasonColor(int worldDay) {
 	// loop the year. multiply the season length by the 4 seasons to create a years time.
 	float YearLoop = mod(worldDay + SeasonLength, SeasonLength * 4);
 
-    	// the time schedule for each season
+    // the time schedule for each season
 	float SummerTime = clamp(YearLoop, 0, SeasonLength) / SeasonLength;
 	float AutumnTime = clamp(YearLoop - SeasonLength, 0, SeasonLength) / SeasonLength;
 	float WinterTime = clamp(YearLoop - SeasonLength*2, 0, SeasonLength) / SeasonLength;
@@ -182,7 +187,6 @@ uniform float snowStorm;
 ///////////////////////////////////////////////////////////////////////////////
 
 #ifdef TIMEOFDAYFOG
-	// uniform int worldTime;
 	void FogDensities(
 		inout float Uniform, inout float Cloudy, inout float Rainy, float maxDistance, float DailyWeather_UniformFogDensity, float DailyWeather_CloudyFogDensity
 	) {

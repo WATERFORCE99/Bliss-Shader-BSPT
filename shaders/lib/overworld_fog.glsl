@@ -77,7 +77,8 @@ vec4 GetVolumetricFog(
 	in vec3 AmbientColor,
 	in vec3 AveragedAmbientColor,
 	inout float atmosphereAlpha,
-	inout vec3 sceneColor
+	inout vec3 sceneColor,
+	in float cloudPlaneDistance
 ){
 	#ifndef TOGGLE_VL_FOG
 		return vec4(0.0,0.0,0.0,1.0);
@@ -168,11 +169,15 @@ vec4 GetVolumetricFog(
 	for (int i = 0; i < SAMPLECOUNT; i++) {
 		float d = (pow(expFactor, float(i+dither.x)/float(SAMPLECOUNT))/expFactor - 1.0/expFactor)/(1-1.0/expFactor);
 		float dd = pow(expFactor, float(i+dither.y)/float(SAMPLECOUNT)) * log(expFactor) / float(SAMPLECOUNT)/(expFactor-1.0);
-		
+
+		#ifdef VOLUMETRIC_CLOUDS
+			// check if the fog intersects clouds
+ 			if(length(d*dVWorld) > cloudPlaneDistance) break;
+ 		#endif
+
 		progress = start.xyz + d*dV;
 		progressW = gbufferModelViewInverse[3].xyz + cameraPosition + d*dVWorld;
 
-		// if(length(progressW-cameraPosition) > cloudDepth) break;
 		//------------------------------------
 		//------ SAMPLE SHADOWS FOR FOG EFFECTS
 		//------------------------------------
@@ -271,16 +276,11 @@ vec4 GetVolumetricFog(
 		//------ ATMOSPHERE HAZE EFFECT
 		//------------------------------------
 
-		#if defined CloudLayer0 && defined VOLUMETRIC_CLOUDS
-			float cloudPlaneCutoff = clamp((CloudLayer0_height +  max(eyeAltitude-(CloudLayer0_height-100),0)) - progressW.y,0.0,1.0);
-		#else
-			float cloudPlaneCutoff = 1.0;
-		#endif
 		// maximum range for atmosphere haze, basically.
 		float planetVolume = 1.0 - exp(clamp(1.0 - length(progressW-cameraPosition) / (16*150), 0.0,1.0) * -10);
 
 		// just air
-		vec2 airCoef = (exp2(-max(progressW.y-SEA_LEVEL,0.0)/vec2(8.0e3, 1.2e3)*vec2(6.,7.0)) * 192.0 * Haze_amount) * cloudPlaneCutoff * planetVolume;
+		vec2 airCoef = (exp2(-max(progressW.y-SEA_LEVEL,0.0)/vec2(8.0e3, 1.2e3)*vec2(6.,7.0)) * 192.0 * Haze_amount) * planetVolume;
 
 		// Pbr for air, yolo mix between mie and rayleigh for water droplets
 		vec3 rL = rC*airCoef.x;
@@ -291,8 +291,6 @@ vec4 GetVolumetricFog(
 		// vec3 Atmosphere = LightSourcePhased * sh * (rayL*rL + sunPhase*m) + AveragedAmbientColor * (rL+m);
 		vec3 Atmosphere = (LightSourcePhased * sh * (rayL*rL + sunPhase*m) + AveragedAmbientColor * (rL+m) * (lightLevelZero*0.99 + 0.01)) * inACave;
 		color += (Atmosphere - Atmosphere * atmosphereVolumeCoeff) / (rL+m+1e-6) * atmosphereAbsorbance;
-			
-		// finalsceneColor = sceneColor * totalAbsorbance;
 			
 		atmosphereAbsorbance *= atmosphereVolumeCoeff*fogVolumeCoeff;
 

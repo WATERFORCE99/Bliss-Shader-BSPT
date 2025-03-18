@@ -1,5 +1,5 @@
 vec3 cosineHemisphereSample(vec2 Xi){
-	float theta = 6.28318530718 * Xi.y;
+	float theta = TAU * Xi.y;
 
 	float r = sqrt(Xi.x);
 	return vec3(r * cos(theta), r * sin(theta), sqrt(1.0 - Xi.x));
@@ -211,12 +211,7 @@ vec3 ApplySSRT(
 		radiance += skycontribution;
 
 		if (rayHit.z < 1.0){
-			rayHit.xy = clamp(rayHit.xy, 0.0, 1.0);
-
-			#if indirect_RTGI == 1
-				bouncedLight = texture2D(colortex5, rayHit.xy).rgb; // vec3 (1,0,0);
-
-			#elif indirect_RTGI == 2
+			#if indirect_RTGI == 1 || indirect_RTGI == 2
 				vec3 previousPosition = mat3(gbufferModelViewInverse) * toScreenSpace(rayHit) + gbufferModelViewInverse[3].xyz + cameraPosition-previousCameraPosition;
 				previousPosition = mat3(gbufferPreviousModelView) * previousPosition + gbufferPreviousModelView[3].xyz;
 				previousPosition.xy = projMAD(gbufferPreviousProjection, previousPosition).xy / -previousPosition.z * 0.5 + 0.5;

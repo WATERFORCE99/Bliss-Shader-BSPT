@@ -150,7 +150,7 @@ vec4 screenSpaceReflections(
 ){
 	vec4 reflection = vec4(0.0);
 	float reflectionLength = 0.0;
-	float quality = mix(0.3 * reflection_quality, reflection_quality, fresnel);
+	float quality = mix(0.5 * reflection_quality, reflection_quality, fresnel);
 
 	vec3 raytracePos = rayTraceSpeculars(reflectedVector, viewPos, noise, quality, isHand, reflectionLength, fresnel);
 
@@ -269,9 +269,8 @@ vec3 specularReflections(
 	in bool isHand // mask for the hand
 
 	#ifdef FORWARD_SPECULAR
-	, inout float reflectanceForAlpha
-	#else
 	, bool isWater
+	, inout float reflectanceForAlpha
 	#endif
 
 	,in vec4 flashLight_stuff
@@ -310,7 +309,7 @@ vec3 specularReflections(
 
 	float shlickFresnel = shlickFresnelRoughness(dot(-normalize(viewDir), vec3(0.0,0.0,1.0)), roughness);
 	#if defined FORWARD_SPECULAR && defined SNELLS_WINDOW
-		if(isEyeInWater == 1) shlickFresnel = mix(shlickFresnel, 1.0, min(max(0.98 - (1.0-shlickFresnel),0.0)/(1-0.98),1.0));
+		if(isEyeInWater == 1 && isWater) shlickFresnel = mix(shlickFresnel, 1.0, min(max(0.98 - (1.0-shlickFresnel),0.0)/(1-0.98),1.0));
 	#endif
 
 	// F0 <  230 dialectrics
