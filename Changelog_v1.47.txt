@@ -1,10 +1,40 @@
+2025-3-19 v1.5
+1. Add puddle ripple, improve ripple visual & perf.
+~ composite1 添加水坑涟漪，优化涟漪外观与性能
+2. Fix LPV RANGE.
+~ lpv_common 修复LPV光照范围问题
+3. Add vanilla style starfield to end.
+~ composite1 为末地添加原版风格的星空
+4. Adjust lightening color in end.
+~ settings 调整末地闪电风暴颜色
+
+2025-3-18 v1.49
+1. Merge X0nk's latest commit.
+~ 整合了X0nk最新的更新
+2. Improve flashlight
+~ composite1 优化手电筒光照
+3. Adjust sunset color
+~ deferred 优化了日落颜色
+4. Optimize the code
+~ xxx 优化代码
+5. Fix cave vine waving & SSS error.
+~ block/all_solid 修复了洞穴藤蔓摇晃与次表面散射的问题
+
+2025-3-17 v1.48
+1. Adjust cloud color.
+~ volumetric_cloud 调整云层颜色
+2. Adjust personal color grading.
+~ color_transformer 调整个人调色
+3. Improve SSRT
+~ indirect_light 优化SSRT
+
 2025-3-17 v1.47
 1. Merge X0nk's latest commit.
 ~ 整合了X0nk最新的更新
 2. Fix random stuffs.
 ~ xxx 修复了许多问题
 3. Add credit to builderb0y's hue.
-~ rainbow
+~ rainbow 为builderb0y的色环添加鸣谢
 
 2025-3-12 v1.46
 1. Merge X0nk's latest commit.
