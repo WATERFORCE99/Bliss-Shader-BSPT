@@ -2,8 +2,6 @@
 #include "/lib/util.glsl"
 #include "/lib/dither.glsl"
 
-#include "/lib/ripples.glsl"
-
 #ifdef IS_LPV_ENABLED
 	#extension GL_ARB_shader_image_load_store: enable
 	#extension GL_ARB_shading_language_packing: enable
@@ -97,12 +95,16 @@ uniform float viewHeight;
 uniform float aspectRatio;
 
 uniform float eyeAltitude;
-flat varying vec2 TAA_Offset;
+flat in vec2 TAA_Offset;
 
 uniform float frameTimeCounter;
 
 uniform float rainStrength;
+uniform float wetnessAmount;
+uniform float wetness;
+
 uniform int isEyeInWater;
+uniform float waterEnteredAltitude;
 uniform ivec2 eyeBrightnessSmooth;
 uniform float nightVision;
 
@@ -117,8 +119,6 @@ flat varying vec3 albedoSmooth;
 	uniform int heldItemId;
 	uniform int heldItemId2;
 #endif
-
-uniform float waterEnteredAltitude;
 
 void convertHandDepth(inout float depth) {
 	float ndcDepth = depth * 2.0 - 1.0;
@@ -144,7 +144,9 @@ float convertHandDepth_2(in float depth, bool hand) {
 #include "/lib/stars.glsl"
 #include "/lib/climate_settings.glsl"
 #include "/lib/sky_gradient.glsl"
+#include "/lib/ripples.glsl"
 #include "/lib/aurora.glsl"
+#include "/lib/rainbow.glsl"
 
 #ifdef OVERWORLD_SHADER
 	flat in vec4 dailyWeatherParams0;
@@ -161,7 +163,7 @@ float convertHandDepth_2(in float depth, bool hand) {
 	#include "/lib/lpv_render.glsl"
 #endif
 
-// #define DEFERRED_SPECULAR
+#define DEFERRED_SPECULAR
 #define DEFERRED_ENVIORNMENT_REFLECTION
 #define DEFERRED_BACKGROUND_REFLECTION
 #define DEFERRED_ROUGH_REFLECTION
@@ -558,14 +560,9 @@ vec3 SubsurfaceScattering_sky(vec3 albedo, float Scattering, float Density){
 	return scatter;
 }
 
-uniform float wetnessAmount;
-uniform float wetness;
-
 void applyPuddles(
 	in vec3 worldPos, in vec3 flatNormals, in float lightmap, in bool isWater, inout vec3 albedo, inout vec3 normals, inout float roughness, inout float f0
 ){
-	vec3 unchangedNormals = normals;
-
 	float halfWet = min(wetnessAmount,1.0);
 	float fullWet = clamp(wetnessAmount - 2.0,0.0,1.0);
 
@@ -584,10 +581,10 @@ void applyPuddles(
 
 	vec3 rippleNormal = vec3(0.0);
 	#ifdef GROUND_RIPPLES
-		rippleNormal = drawRipples(worldPos.xz * 10.0, frameTimeCounter * 1.5) * 0.25 * clamp(1.0 - length(worldPos - cameraPosition) / 16.0, 0.0, 1.0);
+		rippleNormal = drawRipples(worldPos.xz * 10.0, frameTimeCounter * 1.5) * 0.25 * clamp(1.0 - length(worldPos - cameraPosition) / 32.0, 0.0, 1.0) * rainStrength;
 	#endif
 
-	normals = mix(normals, flatNormals + rippleNormal, puddles * lightmap * clamp(flatNormals.y,0.0,1.0));
+	normals = mix(normals, normalize(flatNormals + rippleNormal), puddles * lightmap * clamp(flatNormals.y,0.0,1.0));
 	#if MATERIAL_WETNESS_TYPE == 0
 		roughness = mix(roughness, 1.0, wetnessStages * (roughness * 0.5 + 0.5));
 	#elif MATERIAL_WETNESS_TYPE == 1
@@ -596,7 +593,8 @@ void applyPuddles(
 	if(f0 < 229.5/255.0) albedo = pow(albedo * (1.0 - 0.08*wetnessStages), vec3(1.0 + 0.7*wetnessStages));
 
 	//////////////// snow
-	
+	// vec3 unchangedNormals = normals;
+
 	// float upnormal = clamp(-(normals / dot(abs(normals),vec3(1.0))).y+clamp(flatNormals.y,0.5,1.0),0,1);
 	// halfWet = clamp(halfWet - upnormal - (1.0-lightmap),0.0,1.0);
 	// float snow = max(halfWet - noise,0.0);
@@ -608,8 +606,6 @@ void applyPuddles(
 	// roughness = mix(roughness, 0.5, snow);
 	// albedo = mix(albedo, vec3(1.0), snow);
 }
-
-#include "/lib/rainbow.glsl"
 
 void main() {
 	vec3 DEBUG = vec3(1.0);
