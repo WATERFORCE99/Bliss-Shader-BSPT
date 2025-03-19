@@ -31,6 +31,7 @@ in vec4 color;
 	flat in vec4 lightCol;
 #endif
 
+uniform int renderStage;
 uniform int isEyeInWater;
 
 uniform sampler2D texture;
@@ -232,7 +233,7 @@ uniform vec3 eyePosition;
 #ifdef DAMAGE_BLOCK_EFFECT
 	/* RENDERTARGETS:11 */
 #else
-	/* DRAWBUFFERS:29 */
+	/* RENDERTARGETS:2,9,11 */
 #endif
 
 void main() {
@@ -300,6 +301,8 @@ void main() {
 	
 	gl_FragData[0] = vec4(encodeVec2(vec2(0.5)), encodeVec2(Albedo.rg), encodeVec2(vec2(Albedo.b,0.02)), 1.0);
 #else
+	gl_FragData[2] = vec4(0.0);
+
 	#if defined LINES && !defined SELECT_BOX
 		if(SELECTION_BOX > 0) discard;
 	#endif
@@ -344,7 +347,7 @@ void main() {
 		#ifndef LINES
 			gl_FragData[0].a = TEXTURE.a;
 		#else
-			gl_FragData[0].a = 1.0;
+			gl_FragData[0].a = color.a;
 		#endif
 		#ifndef BLOOMY_PARTICLES
 			gl_FragData[1].a = 0.0; // for bloomy rain and stuff
@@ -421,6 +424,14 @@ void main() {
 			#if defined SELECT_BOX && (SELECTION_BOX > 0)
 				gl_FragData[0].rgba = vec4(toLinear(vec3(SELECT_BOX_COL_R, SELECT_BOX_COL_G, SELECT_BOX_COL_B)), 1.0);
 			#endif
+
+			float LITEMATICA_SCHEMATIC_THING_MASK = 0.0;
+			if (renderStage == MC_RENDER_STAGE_NONE){
+				LITEMATICA_SCHEMATIC_THING_MASK = 0.1;
+				gl_FragData[0] = vec4(toLinear(color.rgb), color.a);
+			}
+ 
+			gl_FragData[2] = vec4(encodeVec2(vec2(0.0)), encodeVec2(vec2(0.0)), encodeVec2(vec2(0.0)), encodeVec2(0.0, LITEMATICA_SCHEMATIC_THING_MASK));
 		#else
 			gl_FragData[0].rgb = (Indirect_lighting + Direct_lighting) * Albedo;
 		#endif

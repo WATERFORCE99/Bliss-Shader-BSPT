@@ -4,8 +4,8 @@
 
 flat varying vec3 zMults;
 
-flat varying vec2 TAA_Offset;
-flat varying vec3 WsunVec;
+flat in vec2 TAA_Offset;
+flat in vec3 WsunVec;
 
 #ifdef OVERWORLD_SHADER
 	flat varying vec3 skyGroundColor;
@@ -516,7 +516,7 @@ void main() {
 		// if(z >= 1.0) color = vec3(0,255,0);
 		// else color = vec3(0.01);
 
-		color *= min(temporallyFilteredVL.a + (1-nametagbackground),1.0);
+		color *= min(temporallyFilteredVL.a + (1.0-nametagbackground),1.0);
 		color += temporallyFilteredVL.rgb * nametagbackground;
 	#else
 		color *= temporallyFilteredVL.a ;

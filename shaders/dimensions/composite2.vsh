@@ -25,7 +25,7 @@ uniform vec3 sunPosition;
 uniform vec3 moonPosition;
 uniform mat4 gbufferModelViewInverse;
 
-flat varying vec2 TAA_Offset;
+flat out vec2 TAA_Offset;
 uniform int framemod8;
 #include "/lib/TAA_jitter.glsl"
 

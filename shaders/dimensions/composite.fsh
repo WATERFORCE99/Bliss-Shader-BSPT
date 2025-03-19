@@ -6,8 +6,8 @@
 	#undef DISTANT_HORIZONS
 #endif
 
-flat varying vec3 WsunVec;
-flat varying vec2 TAA_Offset;
+flat in vec3 WsunVec;
+flat in vec2 TAA_Offset;
 
 #include "/lib/res_params.glsl"
 

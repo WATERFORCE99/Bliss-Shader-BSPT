@@ -28,24 +28,8 @@ uniform vec2 texelSize;
 uniform float frameTimeCounter;
 uniform float rainStrength;
 uniform int framemod8;
-uniform mat4 gbufferProjectionInverse;
-uniform mat4 gbufferModelViewInverse;
-uniform vec3 cameraPosition;
 
-uniform mat4 gbufferModelView;
-uniform mat4 gbufferProjection;
-// flat varying vec2 TAA_Offset;
-
-#define diagonal3(m) vec3((m)[0].x, (m)[1].y, m[2].z)
-#define projMAD(m, v) (diagonal3(m) * (v) + (m)[3].xyz)
-
-vec3 toScreenSpace(vec3 p) {
-	vec4 iProjDiag = vec4(gbufferProjectionInverse[0].x, gbufferProjectionInverse[1].y, gbufferProjectionInverse[2].zw);
-	vec3 p3 = p * 2. - 1.;
-	vec4 fragposition = iProjDiag * p3.xyzz + gbufferProjectionInverse[3];
-	return fragposition.xyz / fragposition.w;
-}
-
+#include "/lib/projections.glsl"
 #include "/lib/DistantHorizons_projections.glsl"
 
 

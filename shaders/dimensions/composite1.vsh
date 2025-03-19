@@ -19,7 +19,7 @@ flat varying vec3 albedoSmooth;
 
 flat varying float exposure;
 
-flat varying vec2 TAA_Offset;
+flat out vec2 TAA_Offset;
 flat varying vec3 zMults;
 uniform sampler2D colortex4;
 

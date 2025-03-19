@@ -8,7 +8,8 @@ flat varying vec3 zMults;
 	flat varying vec3 skyGroundColor;
 #endif
 
-flat varying vec3 WsunVec;
+flat out vec3 WsunVec;
+flat out vec2 TAA_Offset;
 
 uniform float far;
 uniform float near;
@@ -18,7 +19,7 @@ uniform float dhNearPlane;
 uniform mat4 gbufferModelViewInverse;
 uniform vec3 sunPosition;
 uniform float sunElevation;
-flat varying vec2 TAA_Offset;
+
 uniform int framemod8;
 #include "/lib/TAA_jitter.glsl"
 

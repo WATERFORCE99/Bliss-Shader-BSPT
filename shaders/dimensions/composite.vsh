@@ -1,8 +1,8 @@
 #include "/lib/settings.glsl"
 #include "/lib/util.glsl"
 
-flat varying vec2 TAA_Offset;
-flat varying vec3 WsunVec;
+flat out vec2 TAA_Offset;
+flat out vec3 WsunVec;
 
 uniform sampler2D colortex4;
 
@@ -19,7 +19,6 @@ uniform float near;
 #include "/lib/res_params.glsl"
 
 uniform int framemod8;
-
 #include "/lib/TAA_jitter.glsl"
 
 void main() {
@@ -30,10 +29,9 @@ void main() {
 
 	zMults = vec3(1.0/(far * near),far+near,far-near);
 
+	TAA_Offset = vec2(0.0);
 	#ifdef TAA
 		TAA_Offset = offsets[framemod8];
-	#else
-		TAA_Offset = vec2(0.0);
 	#endif
 
 	#ifdef TAA_UPSCALING

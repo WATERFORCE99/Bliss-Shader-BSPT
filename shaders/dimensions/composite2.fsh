@@ -46,7 +46,7 @@ uniform float frameTimeCounter;
 
 // varying vec2 texcoord;
 uniform vec2 texelSize;
-flat varying vec2 TAA_Offset;
+flat in vec2 TAA_Offset;
 
 uniform int isEyeInWater;
 uniform float rainStrength;
