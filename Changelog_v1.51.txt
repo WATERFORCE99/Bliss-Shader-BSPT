@@ -1,3 +1,11 @@
+2025-3-19 v1.51
+1. Merge X0nk's latest commit.
+~ all_particles 整合了X0nk最新的更新
+2. Fix a puddle ripple mistake.
+~ composite1 修复一个水坑涟漪的错误
+3. Fix an error with vine SSS.
+~ all_solid/ shadow 修复了一个关于藤蔓的SSS错误
+
 2025-3-19 v1.5
 1. Add puddle ripple, improve ripple visual & perf.
 ~ composite1 添加水坑涟漪，优化涟漪外观与性能
