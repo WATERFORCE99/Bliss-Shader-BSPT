@@ -13,6 +13,7 @@
 uniform float exitWater;
 // uniform float exitPowderSnow;
 uniform int isEyeInWater;
+uniform float raining;
 
 // uniform float currentPlayerHunger;
 // uniform float maxPlayerHunger;
@@ -32,10 +33,32 @@ uniform int isEyeInWater;
 // uniform bool is_on_ground;
 // uniform bool isSpectator;
 
+vec3 distortedRain(){
+	vec2 uv = texcoord;
+
+	for (float r = 4.0; r > 0.0; r--) {
+		vec2 gridSize = viewSize * r * 0.015;
+		vec2 p = TAU * uv * gridSize + randNoise(uv * 100.0);
+		vec2 s = sin(p);
+
+		vec2 gridCoord = round(uv * gridSize - 0.25) / gridSize;
+		vec4 dropData = vec4(randNoise(gridCoord * 200.0), randNoise(gridCoord));
+
+		float timeFactor = max(0.0, 1.0 - fract(frameTimeCounter * (dropData.b + 0.1) + dropData.g) * 5.0);
+		float dropShape = (s.x + s.y) * timeFactor * raining * lightmap * (1.0 -exitWater) * (1.0 -exitWater);
+
+		if (dropData.r < (5.0 - r) * 0.08 && dropShape > 0.5) {
+			vec3 normal = normalize(-vec3(cos(p), mix(0.2, 2.0, dropShape - 0.5)));
+			vec2 refractedUV = uv - normal.xy;
+			return texture2D(colortex7, refractedUV).rgb * 0.4;
+		}
+	}
+	return vec3(0.0);
+}
 
 void applyGameplayEffects(inout vec3 color, in vec2 texcoord, float noise){
    
-// detect when health is zero
+	// detect when health is zero
 	#ifdef IS_IRIS
 		bool isDead = currentPlayerHealth * maxPlayerHealth <= 0.0 && currentPlayerHealth > -1;
 	#else
@@ -65,7 +88,7 @@ void applyGameplayEffects(inout vec3 color, in vec2 texcoord, float noise){
 		if(exitWater > 0.0){
 			vec3 scale = vec3(1.0,1.0,0.0);
 
-			scale.xy = (isEyeInWater == 1 ? vec2(0.3) : vec2(0.5, 0.25 + (exitWater * exitWater) * 0.25)) * vec2(aspectRatio, 1.0);
+			scale.xy = (isEyeInWater == 1 ? vec2(0.3) : vec2(0.5 * aspectRatio, 0.25 + (exitWater * exitWater) * 0.25));
 			scale.z = isEyeInWater == 1 ? 0.0 : exitWater;
 			vec2 motion = isEyeInWater == 1 ? vec2(sin(frameTimeCounter * 1.4 + texcoord.x * 5.0) * 0.02 + cos(frameTimeCounter * 1.8) * 0.015, sin(frameTimeCounter * 1.6 - texcoord.y * 4.0) * 0.018 + cos(frameTimeCounter * 2.0) * 0.016) : vec2(0.0);
 
@@ -88,6 +111,10 @@ void applyGameplayEffects(inout vec3 color, in vec2 texcoord, float noise){
 	#ifdef WATER_ON_CAMERA_EFFECT
 		// apply the distorted water color to the scene, but revert back to before when it ends
 		if(exitWater > 0.01) color = distortedColor;
+	#endif
+
+	#ifdef RAIN_ON_CAMERA_EFFECT
+		if(isEyeInWater == 0) color += distortedRain();
 	#endif
 
 //////////////////////// APPLY COLOR EFFECTS /////////////////////

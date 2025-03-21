@@ -203,6 +203,11 @@ float luma(vec3 color) {
 	return dot(color,vec3(0.21, 0.72, 0.07));
 }
 
+vec2 simpleRand22(vec2 p){
+    mat2 m = mat2(12.9898,.16180,78.233,.31415);
+	return fract(sin(m * p) * vec2(43758.5453, 14142.1));
+}
+
 float hash11(float p) {
 	p = fract(p * .1031);
 	p *= p + 33.33;
@@ -232,4 +237,19 @@ vec3 hash31(float p){
 	vec3 p3 = fract(vec3(p) * vec3(.1031, .1030, .0973));
 	p3 += dot(p3, p3.yzx+33.33);
 	return fract((p3.xxy+p3.yzz)*p3.zyx); 
+}
+
+vec3 decode (vec2 encn){
+	vec3 n = vec3(0.0);
+	encn = encn * 2.0 - 1.0;
+	n.xy = abs(encn);
+	n.z = 1.0 - n.x - n.y;
+	n.xy = n.z <= 0.0 ? (1.0 - n.yx) * sign(encn) : encn;
+	return clamp(normalize(n.xyz),-1.0,1.0);
+}
+
+vec2 decodeVec2(float a){
+	const vec2 constant1 = 65535. / vec2( 256., 65536.);
+	const float constant2 = 256. / 255.;
+	return fract( a * constant1 ) * constant2 ;
 }

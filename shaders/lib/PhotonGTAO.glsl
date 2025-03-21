@@ -57,8 +57,7 @@ float fast_acos(float x) {
 }
 vec2 fast_acos(vec2 v) { return vec2(fast_acos(v.x), fast_acos(v.y)); }
 
-uniform vec2 view_res;
-uniform vec2 view_pixel_size;
+uniform vec2 viewSize;
 
 float linear_step(float edge0, float edge1, float x) {
 	return clamp((x - edge0) / (edge1 - edge0), 0.0, 1.0);
@@ -114,11 +113,11 @@ float calculate_maximum_horizon_angle(
 	float max_cos_theta = -1.0;
 
 	vec2 ray_step = (view_to_screen_space(view_pos + view_slice_dir * step_size, true) - screen_pos).xy;
-	vec2 ray_pos = screen_pos.xy + ray_step * (dither + max_of(view_pixel_size) * rcp_length(ray_step));
+	vec2 ray_pos = screen_pos.xy + ray_step * (dither + max_of(texelSize) * rcp_length(ray_step));
 
 
 	for (int i = 0; i < GTAO_HORIZON_STEPS; ++i, ray_pos += ray_step) {
-		float depth = texelFetch2D(depthtex1, ivec2(clamp(ray_pos,0.0,1.0) * view_res * taau_render_scale - 0.5), 0).x;
+		float depth = texelFetch2D(depthtex1, ivec2(clamp(ray_pos,0.0,1.0) * viewSize * taau_render_scale - 0.5), 0).x;
 
 		if (depth == 1.0 || depth < hand_depth || depth == screen_pos.z) continue;
 

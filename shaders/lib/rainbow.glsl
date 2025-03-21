@@ -23,8 +23,7 @@ vec3 drawRainbow(vec3 viewPos, vec3 playerPos, float dither) {
 		float horizonFade = clamp(sunDir.y * 5.0, 0.0, 1.0);
 		float elevationFade = smoothstep(0.3, 0.4, sunDir.y);
 
-		float afterRain = 1.0;
-		if(RAINBOW == 1) afterRain = wetness * (1.0 - rainStrength);
+		float afterRain = RAINBOW == 1 ? wetness * (1.0 - rainStrength) : 1.0;
 
 		rainbowFactor *= rainbowDist * horizonFade * elevationFade * afterRain;
 

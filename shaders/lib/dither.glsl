@@ -16,7 +16,7 @@ float R2_dither(){
 	#endif
 	
 	vec2 alpha = vec2(0.75487765, 0.56984026);
-	return fract(alpha.x * coord.x + alpha.y * coord.y) ;
+	return fract(alpha.x * coord.x + alpha.y * coord.y);
 }
 
 float blueNoise(){
@@ -25,4 +25,15 @@ float blueNoise(){
 	#else
 		return fract(texelFetch2D(noisetex, ivec2(gl_FragCoord.xy)%512, 0).a + 1.0/1.6180339887);
 	#endif
+}
+
+vec2 randNoise(vec2 p){
+	vec2 co = floor(p);
+	vec2 mu = fract(p);
+	mu = 3.*mu*mu-2.*mu*mu*mu;
+	vec2 a = simpleRand22((co+vec2(0.,0.)));
+	vec2 b = simpleRand22((co+vec2(1.,0.)));
+	vec2 c = simpleRand22((co+vec2(0.,1.)));
+	vec2 d = simpleRand22((co+vec2(1.,1.)));
+	return mix(mix(a, b, mu.x), mix(c, d, mu.x), mu.y);
 }
