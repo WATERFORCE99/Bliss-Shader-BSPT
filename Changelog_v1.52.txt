@@ -1,3 +1,9 @@
+2025-3-21 v1.52
+1. Add raindrop filter.
+~ gameplay_effects 新增雨滴动画滤镜
+2. Make ground ripple only to be seen in puddles. (more realistic to me)
+~ all_solid 移除除水坑外的地表涟漪（对我来说更真实）
+
 2025-3-19 v1.51
 1. Merge X0nk's latest commit.
 ~ all_particles 整合了X0nk最新的更新
