@@ -25,23 +25,17 @@ const bool colortex5MipmapEnabled = true;
 	flat varying vec4 lightCol;
 	flat varying vec3 moonCol;
 
-	#if Sun_specular_Strength != 0
-		#define LIGHTSOURCE_REFLECTION
-	#endif
-
 	#include "/lib/lightning_stuff.glsl"
 #endif
 
 #ifdef NETHER_SHADER
 	const bool colortex4MipmapEnabled = true;
 	uniform vec3 lightningEffect;
-	#undef LIGHTSOURCE_REFLECTION
 #endif
 
 #ifdef END_SHADER
 	uniform vec3 lightningEffect;
 	flat varying float Flashing;
-	#undef LIGHTSOURCE_REFLECTION
 #endif
 
 uniform int hideGUI;
@@ -176,21 +170,6 @@ float convertHandDepth_2(in float depth, bool hand) {
 
 float ld(float dist) {
 	return (2.0 * near) / (far + near - dist * (far - near));
-}
-
-vec3 decode (vec2 encn){
-	vec3 n = vec3(0.0);
-	encn = encn * 2.0 - 1.0;
-	n.xy = abs(encn);
-	n.z = 1.0 - n.x - n.y;
-	n.xy = n.z <= 0.0 ? (1.0 - n.yx) * sign(encn) : encn;
-	return clamp(normalize(n.xyz),-1.0,1.0);
-}
-
-vec2 decodeVec2(float a){
-	const vec2 constant1 = 65535. / vec2( 256., 65536.);
-	const float constant2 = 256. / 255.;
-	return fract( a * constant1 ) * constant2 ;
 }
 
 float linearizeDepthFast(const in float depth, const in float near, const in float far) {
@@ -579,12 +558,12 @@ void applyPuddles(
 	float wetnessStages = mix(puddles, 1.0, fullWet) * lightmap;
 	if(isWater) wetnessStages = 0.0;
 
-	vec3 rippleNormal = vec3(0.0);
 	#ifdef GROUND_RIPPLES
-		rippleNormal = drawRipples(worldPos.xz * 10.0, frameTimeCounter * 1.5) * 0.25 * clamp(1.0 - length(worldPos - cameraPosition) / 32.0, 0.0, 1.0) * rainStrength;
+		vec3 rippleNormal = drawRipples(worldPos.xz * 10.0, frameTimeCounter * 1.5) * 0.25 * clamp(1.0 - length(worldPos - cameraPosition) / 32.0, 0.0, 1.0) * rainStrength;
+		flatNormals = normalize(flatNormals + rippleNormal);
 	#endif
 
-	normals = mix(normals, normalize(flatNormals + rippleNormal), puddles * lightmap * clamp(flatNormals.y,0.0,1.0));
+	normals = mix(normals, flatNormals, puddles * lightmap * clamp(flatNormals.y,0.0,1.0));
 	#if MATERIAL_WETNESS_TYPE == 0
 		roughness = mix(roughness, 1.0, wetnessStages * (roughness * 0.5 + 0.5));
 	#elif MATERIAL_WETNESS_TYPE == 1
@@ -659,7 +638,6 @@ void main() {
 
 	vec4 dataUnpacked0 = vec4(decodeVec2(data.x),decodeVec2(data.y)); // albedo, masks
 	vec4 dataUnpacked1 = vec4(decodeVec2(data.z),decodeVec2(data.w)); // normals, lightmaps
-	// vec4 dataUnpacked2 = vec4(decodeVec2(data.z),decodeVec2(data.w));
 
 	vec3 albedo = toLinear(vec3(dataUnpacked0.xz,dataUnpacked1.x));
 	vec3 normal = decode(dataUnpacked0.yw);
@@ -1142,7 +1120,6 @@ void main() {
 			float atmosphereGround = 1.0 - exp2(-50.0 * pow(clamp(feetPlayerPos_normalized.y+0.025,0.0,1.0),2.0)); // darken the ground in the sky.
 
 			#if RESOURCEPACK_SKY == 0 || RESOURCEPACK_SKY == 1 || RESOURCEPACK_SKY == 3
-				// vec3 orbitstar = vec3(feetPlayerPos_normalized.x,abs(feetPlayerPos_normalized.y),feetPlayerPos_normalized.z); orbitstar.x -= WsunVec.x*0.2;
 				vec3 orbitstar = normalize(mat3(gbufferModelViewInverse) * toScreenSpace(vec3(texcoord/RENDER_SCALE,1.0)));
 				float radiance = 2.39996 - worldTime * STAR_ROTATION_MULT/ 24000.0;
 				mat2 rotationMatrix  = mat2(vec2(cos(radiance), -sin(radiance)), vec2(sin(radiance), cos(radiance)));
@@ -1157,7 +1134,6 @@ void main() {
 					vec3 moonLightCol = moonCol / 2400.0;
 
 					Background += drawMoon(feetPlayerPos_normalized, WmoonVec, moonLightCol, Background); 
-					// Background += drawSun(dot(WmoonVec, feetPlayerPos_normalized),0, moonLightCol,vec3(0.0));
 				#endif
 
 				Background *= atmosphereGround;

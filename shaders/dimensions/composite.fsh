@@ -78,20 +78,6 @@ vec2 tapLocation2(int sampleNumber, int nb, float jitter){
 	return vec2(cos_v, sin_v)*sqrt(alpha);
 }
 
-vec3 decode (vec2 encn){
-	vec3 n = vec3(0.0);
-	encn = encn * 2.0 - 1.0;
-	n.xy = abs(encn);
-	n.z = 1.0 - n.x - n.y;
-	n.xy = n.z <= 0.0 ? (1.0 - n.yx) * sign(encn) : encn;
-	return clamp(normalize(n.xyz),-1.0,1.0);
-}
-vec2 decodeVec2(float a){
-	const vec2 constant1 = 65535. / vec2( 256., 65536.);
-	const float constant2 = 256. / 255.;
-	return fract( a * constant1 ) * constant2 ;
-}
-
 vec4 blueNoise(vec2 coord){
 	return texelFetch2D(colortex6, ivec2(coord)%512 , 0) ;
 }
@@ -262,7 +248,7 @@ void main() {
 	vec4 data = texelFetch2D(colortex1,ivec2(gl_FragCoord.xy),0);
 	vec4 dataUnpacked0 = vec4(decodeVec2(data.x),decodeVec2(data.y));
 	vec4 dataUnpacked1 = vec4(decodeVec2(data.z),decodeVec2(data.w));
-	vec3 normal = mat3(gbufferModelViewInverse) * clamp(worldToView( decode(dataUnpacked0.yw) ),-1.,1.);
+	vec3 normal = mat3(gbufferModelViewInverse) * clamp(worldToView(decode(dataUnpacked0.yw)),-1.,1.);
 	vec2 lightmap = dataUnpacked1.yz;
 
 	gl_FragData[1] = vec4(0.0,0.0,0.0, texelFetch2D(colortex14,ivec2((floor(gl_FragCoord.xy)/VL_RENDER_RESOLUTION*texelSize+0.5*texelSize)/texelSize),0).a);

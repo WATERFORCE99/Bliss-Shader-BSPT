@@ -2,6 +2,7 @@
 #include "/lib/util.glsl"
 #include "/lib/dither.glsl"
 
+uniform sampler2D colortex1;
 uniform sampler2D colortex5;
 uniform sampler2D colortex6;
 uniform sampler2D colortex7;
@@ -12,6 +13,12 @@ uniform sampler2D depthtex2;
 #ifdef DISTANT_HORIZONS
 	uniform sampler2D dhDepthTex0;
 #endif
+
+vec4 data = texelFetch2D(colortex1, ivec2(gl_FragCoord.xy), 0);
+vec4 dataUnpacked1 = vec4(decodeVec2(data.z),decodeVec2(data.w)); // normals, lightmaps
+vec2 lmcoord = dataUnpacked1.yz;
+
+float lightmap = clamp((lmcoord.y - 0.9) * 10.0, 0.0, 1.0);
 
 #ifdef OVERWORLD_SHADER
 	uniform int worldTime;
@@ -30,6 +37,7 @@ uniform sampler2D depthtex2;
 in vec2 texcoord;
 
 uniform vec2 texelSize;
+uniform vec2 viewSize;
 uniform float frameTimeCounter;
 uniform float viewHeight;
 uniform float viewWidth;
@@ -41,6 +49,7 @@ uniform int hideGUI;
 #include "/lib/color_dither.glsl"
 #include "/lib/res_params.glsl"
 #include "/lib/lensflare.glsl"
+#include "/lib/gameplay_effects.glsl"
 
 #if DEBUG_VIEW == debug_LIGHTS && defined LPV_SHADOWS
 	uniform usampler1D texCloseLights;
@@ -56,8 +65,6 @@ uniform float far;
 float ld(float dist){
 	return (2.0 * near) / (far + near - dist * (far - near));
 }
-
-#include "/lib/gameplay_effects.glsl"
 
 void doCameraGridLines(inout vec3 color, vec2 UV){
 
@@ -108,7 +115,7 @@ vec3 doMotionBlur(vec2 texcoord, float depth, float noise, bool hand){
 	velocity = (velocity / (1.0 + length(velocity)) ) * 0.05 * blurMult * MOTION_BLUR_STRENGTH;
 	texcoord = texcoord - velocity*(samples*0.5 + noise);
 
-	vec2 screenEdges = 2.0/vec2(viewWidth, viewHeight);
+	vec2 screenEdges = 2.0/viewSize;
 
 	for (int i = 0; i < int(samples); i++) {
 		texcoord += velocity;
@@ -129,7 +136,6 @@ float convertHandDepth_2(in float depth, bool hand) {
 uniform sampler2D shadowcolor1;
 
 float doVignette(in vec2 texcoord, in float noise){
-
 	float vignette = 1.0-clamp(1.0-length(texcoord-0.5),0.0,1.0);
   
 	// vignette = pow(1.0-pow(1.0-vignette,3),5);
@@ -164,17 +170,6 @@ void main() {
 	float noise = blueNoise();
 
 	vec3 COLOR = texture2D(colortex7,texcoord).rgb;
-	#ifdef MOTION_BLUR
-		float depth = texture2D(depthtex0, texcoord*RENDER_SCALE).r;
-		bool hand = depth < 0.56;
-		float depth2 = convertHandDepth_2(depth, hand);
-
-		COLOR = doMotionBlur(texcoord, depth2, noise, hand);
-	#endif
-
-	#ifdef VIGNETTE
-		COLOR *= doVignette(texcoord, noise);
-	#endif
 
 	#ifdef OVERWORLD_SHADER
 		#ifdef LENS_FLARE
@@ -201,6 +196,18 @@ void main() {
 				COLOR += lf;
 			}
 		#endif
+	#endif
+
+	#ifdef MOTION_BLUR
+		float depth = texture2D(depthtex0, texcoord*RENDER_SCALE).r;
+		bool hand = depth < 0.56;
+		float depth2 = convertHandDepth_2(depth, hand);
+
+		COLOR = doMotionBlur(texcoord, depth2, noise, hand);
+	#endif
+
+	#ifdef VIGNETTE
+		COLOR *= doVignette(texcoord, noise);
 	#endif
 
 	#if defined LOW_HEALTH_EFFECT || defined DAMAGE_TAKEN_EFFECT || defined WATER_ON_CAMERA_EFFECT  

@@ -93,21 +93,6 @@ float linearizeDepthFast(const in float depth, const in float near, const in flo
 	return (near * far) / (depth * (near - far) + far);
 }
 
-vec2 decodeVec2(float a){
-	const vec2 constant1 = 65535. / vec2( 256., 65536.);
-	const float constant2 = 256. / 255.;
-	return fract( a * constant1 ) * constant2 ;
-}
-
-vec3 decode (vec2 encn){
-	vec3 n = vec3(0.0);
-	encn = encn * 2.0 - 1.0;
-	n.xy = abs(encn);
-	n.z = 1.0 - n.x - n.y;
-	n.xy = n.z <= 0.0 ? (1.0 - n.yx) * sign(encn) : encn;
-	return clamp(normalize(n.xyz),-1.0,1.0);
-}
-
 vec3 doRefractionEffect(inout vec2 texcoord, vec2 normal, float linearDistance, bool isReflectiveEntity){
   
 	// make the tangent space normals match the directions of the texcoord UV, this greatly improves the refraction effect.

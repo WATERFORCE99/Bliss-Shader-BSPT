@@ -21,10 +21,9 @@ varying vec4 lmtexcoord;
 varying vec4 color;
 uniform vec4 entityColor;
 uniform float rainStrength;
-uniform float noPuddleAreas;
+uniform float raining;
 
-float lightmap = clamp((lmtexcoord.w-0.9) * 10.0,0.,1.);
-float isRain = rainStrength * noPuddleAreas;
+float lightmap = clamp((lmtexcoord.w-0.9) * 10.0, 0.0, 1.0);
 
 #ifdef OVERWORLD_SHADER
 	const bool shadowHardwareFiltering = true;
@@ -185,15 +184,15 @@ vec2 CleanSample(
 	
 	// for every sample, the sample position must change its distance from the origin.
 	// otherwise, you will just have a circle.
-    float spiralShape = pow(variedSamples / (totalSamples + variance),0.5);
+	float spiralShape = pow(variedSamples / (totalSamples + variance),0.5);
 
 	float shape = 2.26; // this is very important. 2.26 is very specific
-    float theta = variedSamples * (PI * shape);
+	float theta = variedSamples * (PI * shape);
 
 	float x =  cos(theta) * spiralShape;
 	float y =  sin(theta) * spiralShape;
 
-    return vec2(x, y);
+	return vec2(x, y);
 }
 
 vec4 encode (vec3 n, vec2 lightmaps){
@@ -441,7 +440,7 @@ if (gl_FragCoord.x * texelSize.x < 1.0  && gl_FragCoord.y * texelSize.y < 1.0 ){
 			vec3 bump = normalize(getWaveNormal(waterPos, playerPos, false));
 
 			#ifdef WATER_RIPPLES
-				vec3 rippleNormal = drawRipples(worldPos.xz * 5.0, frameTimeCounter) * 0.5 * isRain * lightmap * clamp(1.0 - length(playerPos) / 128.0, 0.0, 1.0);
+				vec3 rippleNormal = drawRipples(worldPos.xz * 5.0, frameTimeCounter) * 0.5 * raining * lightmap * clamp(1.0 - length(playerPos) / 128.0, 0.0, 1.0);
 				bump = normalize(bump + rippleNormal);
 			#endif
 

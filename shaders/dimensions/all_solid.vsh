@@ -262,7 +262,7 @@ void main() {
 
 		// low
 		#ifdef MISC_BLOCK_SSS
-			if(mc_Entity.x == BLOCK_SSS_WEIRD || mc_Entity.x == BLOCK_GRASS) SSSAMOUNT = 0.1;
+			if(mc_Entity.x == BLOCK_SSS_WEIRD || mc_Entity.x == BLOCK_GRASS) SSSAMOUNT = max(0.25 * (1-length(position)/64.0), 0.01);
 		#endif
 
 		#ifdef ENTITIES

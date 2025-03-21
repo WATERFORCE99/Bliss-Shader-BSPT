@@ -4,7 +4,7 @@
 
 /*
 const int colortex0Format = RGBA16F;				// low res clouds (deferred->composite2) + low res VL (composite5->composite15)
-const int colortex1Format = RGBA16;				// terrain gbuffer (gbuffer->composite2)
+const int colortex1Format = RGBA16;					// terrain gbuffer (gbuffer->composite2)
 const int colortex2Format = RGBA16F;				// forward + transparencies (gbuffer->composite4)
 const int colortex3Format = R11F_G11F_B10F;			// frame buffer + bloom (deferred6->final)
 const int colortex4Format = RGBA16F;				// light values and skyboxes (everything)
@@ -18,7 +18,7 @@ const int colortex12Format = RGBA16F;				// DISTANT HORIZONS + VANILLA MIXED DEP
 
 const int colortex13Format = RGBA16F;				// low res VL (composite5->composite15)
 const int colortex14Format = RGBA16;				// rg = SSAO and SS-SSS. a = skylightmap for translucents.
-const int colortex15Format = RGBA8;				// flat normals and vanilla AO
+const int colortex15Format = RGBA8;					// flat normals and vanilla AO
 */
 
 //no need to clear the buffers, saves a few fps
@@ -78,12 +78,6 @@ uniform int hideGUI;
 
 uniform int framemod8;
 #include "/lib/TAA_jitter.glsl"
-
-vec2 decodeVec2(float a){
-	const vec2 constant1 = 65535. / vec2( 256., 65536.);
-	const float constant2 = 256. / 255.;
-	return fract( a * constant1 ) * constant2 ;
-}
 
 float interleaved_gradientNoise(){
 	return fract(52.9829189*fract(0.06711056*gl_FragCoord.x + 0.00583715*gl_FragCoord.y)+tempOffsets);

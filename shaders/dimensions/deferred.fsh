@@ -26,12 +26,6 @@ flat varying float centerDepth;
 uniform sampler2D colortex1;
 uniform sampler2D colortex4;
 
-vec2 decodeVec2(float a){
-	const vec2 constant1 = 65535. / vec2( 256., 65536.);
-	const float constant2 = 256. / 255.;
-	return fract( a * constant1 ) * constant2 ;
-}
-
 vec3 toLinear(vec3 sRGB){
 	return sRGB * (sRGB * (sRGB * 0.305306011 + 0.682171111) + 0.012522878);
 }

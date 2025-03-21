@@ -34,9 +34,9 @@ uniform vec2 texelSize;
 uniform int framemod8;
 uniform float rainStrength;
 uniform float noPuddleAreas;
+uniform float raining;
 
-float lightmap = clamp((lmtexcoord.w-0.9) * 10.0,0.,1.);
-float isRain = rainStrength * noPuddleAreas;
+float lightmap = clamp((lmtexcoord.w-0.9) * 10.0, 0.0, 1.0);
 
 // #ifdef POM
 varying vec4 vtexcoordam; // .st for add, .pq for mul
@@ -257,14 +257,11 @@ void main() {
 		#endif
 	#endif
 
-	float rainfall = 0.0;
 	float Puddle_shape = 0.0;
 	
 	#if defined Puddles && defined WORLD && !defined ENTITIES && !defined HAND
-		rainfall = isRain * lightmap;
-
 		Puddle_shape = clamp(lightmap - exp(-15.0 * pow(texture2D(noisetex, worldPos.xz * (0.020 * Puddle_Size)).b,5.0)),0.0,1.0);
-		Puddle_shape *= clamp(viewToWorld(normal).y*0.5+0.5,0.0,1.0) * isRain;
+		Puddle_shape *= clamp(viewToWorld(normal).y*0.5+0.5,0.0,1.0) * raining;
 	#endif
 	
 	vec2 adjustedTexCoord = lmtexcoord.xy;
@@ -451,11 +448,6 @@ void main() {
 		NormalTex.z = sqrt(max(1.0 - dot(NormalTex.xy, NormalTex.xy), 0.0));
 		NormalTex.xyz = mix(vec3(0,0,1), NormalTex.xyz, MATERIAL_NORMAL_STRENGTH);
 
-		#ifdef GROUND_RIPPLES
-			vec3 rippleNormal = drawRipples(worldPos.xz * 10.0, frameTimeCounter * 2.0) * 0.2 * isRain * lightmap * clamp(1.0 - length(playerPos) / 16.0, 0.0, 1.0);
-			NormalTex.xyz = normalize(NormalTex.xyz + rippleNormal);
-		#endif
-
 		normal = applyBump(tbnMatrix, NormalTex.xyz, 1.0-Puddle_shape);
 	#endif
 
@@ -466,7 +458,7 @@ void main() {
 	#ifdef WORLD
 		vec4 SpecularTex = texture2D_POMSwitch(specular, adjustedTexCoord.xy, vec4(dcdx,dcdy), ifPOM,textureLOD);
 
-		SpecularTex.r = max(SpecularTex.r, rainfall);
+		SpecularTex.r = max(SpecularTex.r, raining * lightmap);
 		SpecularTex.g = max(SpecularTex.g, max(Puddle_shape*0.02,0.02));
 
 		#define EXCEPTIONAL_BLOCK(id) (id == 266 || id == BLOCK_REDSTONE_ORE_LIT || id == BLOCK_DEEPSLATE_REDSTONE_ORE_LIT)

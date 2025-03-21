@@ -69,8 +69,7 @@ vec4 toClipSpace3(vec3 viewSpacePosition) {
 
 void main() {
 	lmtexcoord.xy = (gl_MultiTexCoord0).xy;
-	vec2 lmcoord = gl_MultiTexCoord1.xy / 240.0;
-	lmtexcoord.zw = lmcoord;
+	lmtexcoord.zw = gl_MultiTexCoord1.xy / 240.0;
 
 	#ifdef DAMAGE_BLOCK_EFFECT
 		vec2 midcoord = (gl_TextureMatrix[0] *  mc_midTexCoord).st;

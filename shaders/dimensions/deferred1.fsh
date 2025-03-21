@@ -29,10 +29,11 @@ void convertHandDepth(inout float depth) {
     ndcDepth /= MC_HAND_DEPTH;
     depth = ndcDepth * 0.5 + 0.5;
 }
+
 vec2 decodeVec2(float a){
-    const vec2 constant1 = 65535. / vec2( 256., 65536.);
+    const vec2 constant1 = 65535. / vec2(256., 65536.);
     const float constant2 = 256. / 255.;
-    return fract( a * constant1 ) * constant2 ;
+    return fract(a * constant1) * constant2 ;
 }
 
 //////////////////////////////VOID MAIN//////////////////////////////
