@@ -1,5 +1,6 @@
 #include "/lib/settings.glsl"
 #include "/lib/util.glsl"
+#include "/lib/dither.glsl"
 
 varying vec2 texcoord;
 uniform vec2 texelSize;
