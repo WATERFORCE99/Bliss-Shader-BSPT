@@ -1,3 +1,13 @@
+2025-3-21 v1.53
+1. Fix shader crash when enable chromatic aberration.
+~ composite12 修复了使用色差时的光影崩溃问题
+2. Improve raindrop on camera effect.
+~ final 优化了相机覆雨的效果
+3. Improve lensflare.
+~ final 优化了镜头光晕效果
+4. Adjust rainbow color.
+~ rainbow 调整了彩虹颜色
+
 2025-3-21 v1.52
 1. Add raindrop filter.
 ~ gameplay_effects 新增雨滴动画滤镜
