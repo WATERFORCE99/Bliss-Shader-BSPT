@@ -14,6 +14,7 @@ uniform float exitWater;
 // uniform float exitPowderSnow;
 uniform int isEyeInWater;
 uniform float raining;
+uniform ivec2 eyeBrightness;
 
 // uniform float currentPlayerHunger;
 // uniform float maxPlayerHunger;
@@ -33,6 +34,8 @@ uniform float raining;
 // uniform bool is_on_ground;
 // uniform bool isSpectator;
 
+float rainExposed = raining * clamp((eyeBrightness.y/240.0 - 0.9) * 10.0, 0.0, 1.0);
+
 vec3 distortedRain(){
 	vec2 uv = texcoord;
 
@@ -45,7 +48,7 @@ vec3 distortedRain(){
 		vec4 dropData = vec4(randNoise(gridCoord * 200.0), randNoise(gridCoord));
 
 		float timeFactor = max(0.0, 1.0 - fract(frameTimeCounter * (dropData.b + 0.1) + dropData.g) * 5.0);
-		float dropShape = (s.x + s.y) * timeFactor * raining * lightmap * (1.0 -exitWater) * (1.0 -exitWater);
+		float dropShape = (s.x + s.y) * timeFactor * rainExposed * (1.0 -exitWater) * (1.0 -exitWater);
 
 		if (dropData.r < (5.0 - r) * 0.08 && dropShape > 0.5) {
 			vec3 normal = normalize(-vec3(cos(p), mix(0.2, 2.0, dropShape - 0.5)));

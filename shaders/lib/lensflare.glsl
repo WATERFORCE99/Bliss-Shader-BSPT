@@ -14,7 +14,7 @@ vec3 lensflare(vec2 uv, vec2 pos) {
 	float n = texture2D(colortex6, vec2((ang - frameTimeCounter / 9.0) * 0.05, dist * 0.1)).x;
 
 	float f0 = 1.0 / (length(main) * 16.0 + 1.0) * 0.2;
-	f0 += f0 * (sin((ang + frameTimeCounter / 20.0 + n * 0.4) * 16.0) * 0.1 + dist * 0.1 + 0.8);
+	f0 += f0 * (sin((ang + frameTimeCounter / 20.0 + n * 0.4) * 16.0) * 0.1 + dist * 0.1 + 2.0);
 
 	vec2 uvd = uv * length(uv) * 16.0;
 	float f1r = max(1.0/(1.0 + 16.0 * pow(length(uvd + 0.8 * pos),1.6)), 0.0) * 0.5;
@@ -37,5 +37,5 @@ vec3 lensflare(vec2 uv, vec2 pos) {
 	c.b += f1b + f2b + f3b;
 	c += vec3(f0);
 
-	return c * vec3(1.4, 1.2, 1.0);
+	return c * vec3(0.5, 0.4, 0.4);
 }

@@ -65,3 +65,9 @@ vec3 worldToView(vec3 worldPos) {
 	pos = gbufferModelView * pos;
 	return pos.xyz;
 }
+
+vec3 toNDC3(vec3 worldPos) {
+	vec4 pos = vec4(worldPos, 1.0);
+	pos = gbufferProjection * gbufferModelView * pos;
+	return pos.xyz/pos.w;
+}

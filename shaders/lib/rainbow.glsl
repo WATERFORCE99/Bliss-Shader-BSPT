@@ -29,9 +29,8 @@ vec3 drawRainbow(vec3 viewPos, vec3 playerPos, float dither) {
 
 		vec3 colorBand = smoothHue(rainbowCoord * 0.95 + 0.05);
         
-		colorBand *= vec3(1.5, 1.0, 1.2);
-		colorBand = pow(colorBand, vec3(1.1));
-		rainbow = colorBand * rainbowFactor * 0.01;
+		colorBand *= vec3(1.5, 0.8, 1.2);
+		rainbow = colorBand * rainbowFactor * 0.02;
 	}
 	return rainbow;
 }
