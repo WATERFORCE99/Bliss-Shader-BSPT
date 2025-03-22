@@ -2,6 +2,11 @@
 #include "/lib/util.glsl"
 #include "/lib/dither.glsl"
 
+uniform vec3 previousCameraPosition;
+uniform mat4 gbufferPreviousModelView;
+
+#include "/lib/projections.glsl"
+
 uniform sampler2D colortex1;
 uniform sampler2D colortex5;
 uniform sampler2D colortex6;
@@ -13,12 +18,6 @@ uniform sampler2D depthtex2;
 #ifdef DISTANT_HORIZONS
 	uniform sampler2D dhDepthTex0;
 #endif
-
-vec4 data = texelFetch2D(colortex1, ivec2(gl_FragCoord.xy), 0);
-vec4 dataUnpacked1 = vec4(decodeVec2(data.z),decodeVec2(data.w)); // normals, lightmaps
-vec2 lmcoord = dataUnpacked1.yz;
-
-float lightmap = clamp((lmcoord.y - 0.9) * 10.0, 0.0, 1.0);
 
 #ifdef OVERWORLD_SHADER
 	uniform int worldTime;
@@ -82,11 +81,6 @@ void doCameraGridLines(inout vec3 color, vec2 UV){
 	if(hideGUI > 0.0) gridLines = 0.0;
 	color = mix(color, vec3(1.0),  gridLines);
 }
-
-uniform vec3 previousCameraPosition;
-uniform mat4 gbufferPreviousModelView;
-
-#include "/lib/projections.glsl"
 
 vec3 tonemap(vec3 col){
 	return col/(1+luma(col));
@@ -173,12 +167,10 @@ void main() {
 
 	#ifdef OVERWORLD_SHADER
 		#ifdef LENS_FLARE
-			if(isEyeInWater == 0){
-				vec4 sunClipPos = gbufferProjection * gbufferModelView * vec4(WsunVec, 1.0);
-				vec3 sunNDC = sunClipPos.xyz / sunClipPos.w;
+			if(isEyeInWater == 0 && WsunVec.y > 0.0){
+				vec3 sunNDC = toNDC3(WsunVec);
 				vec2 sunPos = sunNDC.xy * 0.5 + 0.5;
 
-				float isDay = step(0.0, WsunVec.y);
 				float screenVis = smoothstep(0.5, 0.45, abs(sunPos.x - 0.5)) * smoothstep(0.5, 0.45, abs(sunPos.y - 0.5));
 				float depthVis = step(1.0, texture2D(depthtex0, sunPos).x);
 				#ifdef DISTANT_HORIZONS
@@ -190,12 +182,17 @@ void main() {
 					cloudVis = cloudSunVis(cameraPosition, WsunVec);
 				#endif
 
-				float sunVis = screenVis * depthVis * cloudVis * isDay;
+				float sunVis = screenVis * depthVis * cloudVis;
 
 				vec3 lf = lensflare(texcoord, sunPos) * sunVis;
 				COLOR += lf;
 			}
 		#endif
+	#endif
+
+	#if defined LOW_HEALTH_EFFECT || defined DAMAGE_TAKEN_EFFECT || defined WATER_ON_CAMERA_EFFECT  
+		// for making the fun, more fun
+		applyGameplayEffects(COLOR, texcoord, noise);
 	#endif
 
 	#ifdef MOTION_BLUR
@@ -208,11 +205,6 @@ void main() {
 
 	#ifdef VIGNETTE
 		COLOR *= doVignette(texcoord, noise);
-	#endif
-
-	#if defined LOW_HEALTH_EFFECT || defined DAMAGE_TAKEN_EFFECT || defined WATER_ON_CAMERA_EFFECT  
-		// for making the fun, more fun
-		applyGameplayEffects(COLOR, texcoord, noise);
 	#endif
   
 	#ifdef CAMERA_GRIDLINES

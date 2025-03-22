@@ -147,29 +147,6 @@ vec4 texture2D_bicubic(sampler2D tex, vec2 uv){
 			g1x * texture2D(tex, p3));
 }
 
-// vec3 lenseFlare(vec2 UV){
-//   float noise = blueNoise();
-
-//   float vignetteLength = 0.2;
-//   float vignette =  0.5+length(texcoord-0.5);//min(max(length(texcoord-0.5) - vignetteLength,0.0) / (1.0/(1.0-vignetteLength)),1.0);
-
-//   float aberrationStrength = vignette;//clamp(CHROMATIC_ABERRATION_STRENGTH * 0.01 * (1.0 - vignette),0.0,0.9) * vignette * 0.75;
-
-//   vec2 centeredUV = texcoord - 0.5;
-
-//   vec3 color = vec3(0.0);
-//   color = texture2D(colortex7, texcoord).rgb;
-
-//   vec2 distortedUV = (centeredUV -  (centeredUV ) * aberrationStrength) + 0.5;
-
-//   color += texture2D(colortex7,  distortedUV).rgb;
-//   // color.r = texture2D(colortex7, (centeredUV - (centeredUV + centeredUV*noise) * aberrationStrength) + 0.5).r;
-//   // color.g = texture2D(colortex7, texcoord).g;
-//   // color.b = texture2D(colortex7, (centeredUV + (centeredUV + centeredUV*noise) * aberrationStrength) + 0.5).b;
-
-//   return color;
-// }
-
 void main() {
   /* DRAWBUFFERS:7 */
 	float vignette = (1.5-dot(texcoord-0.5,texcoord-0.5)*2.);

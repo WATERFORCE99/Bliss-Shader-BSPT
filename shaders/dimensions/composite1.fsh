@@ -1069,7 +1069,7 @@ void main() {
 				// Indirect_lighting += Indirect_SSS * ambientColor;
 
 				// #ifdef OVERWORLD_SHADER
-				// 	if(LabSSS > 0.0) Indirect_lighting += (1.0-SkySSS) * LightningPhase * lightningEffect *  pow(lightmap.y,10);
+				// 	if(LabSSS > 0.0) Indirect_lighting += (1.0-SkySSS) * LightningPhase * lightningEffect * pow(lightmap.y,10);
 				// #endif
 			}
 		#endif
