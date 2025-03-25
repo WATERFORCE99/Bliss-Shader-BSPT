@@ -114,16 +114,8 @@ bool intersectCone(float coneHalfAngle, vec3 coneTip , vec3 coneAxis, vec3 rayOr
 
 #include "/lib/DistantHorizons_projections.glsl"
 
-vec4 toClipSpace4(vec3 viewSpacePosition) {
-
-	// mat4 projection = DH_shadowProjectionTweak(gl_ProjectionMatrix);
-
-	return vec4(projMAD(gl_ProjectionMatrix, viewSpacePosition),1.0);
-}
-
 // uniform int renderStage;
 
-// uniform mat4 gbufferModelViewInverse;
 void main() {
 	texcoord.xy = gl_MultiTexCoord0.xy;
 	color = gl_Color;

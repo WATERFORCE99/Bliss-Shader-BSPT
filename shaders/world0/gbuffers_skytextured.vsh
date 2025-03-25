@@ -26,10 +26,11 @@
 
 void main() {
 	gl_Position = ftransform();
-	
+
 	#if RESOURCEPACK_SKY != 0
 		texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).st;
 		color = gl_Color;
+
 		#ifdef TAA_UPSCALING
 			gl_Position.xy = gl_Position.xy * RENDER_SCALE + RENDER_SCALE * gl_Position.w - gl_Position.w;
 		#endif
