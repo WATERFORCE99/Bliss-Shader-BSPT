@@ -211,8 +211,7 @@ vec3 getCloudLighting(
 ){
 	float powderEffect = 1.0 - exp(-3.0*shapeFaded);
 
-	vec3 directScattering = dot(directLightCol, vec3(0.333)) * vec3(1.2);
-	directScattering = directScattering * exp(-10.0 * sunShadowMask) + directLightCol_multi * exp(1.0 - 1.5 * (sunShadowMask + indirectShadowMask * indirectShadowMask)) * powderEffect;
+	vec3 directScattering = directLightCol * exp(-10.0 * sunShadowMask) + directLightCol_multi * exp(1.0 - 1.5 * (sunShadowMask + indirectShadowMask * indirectShadowMask)) * powderEffect;
 	vec3 indirectScattering = indirectLightCol * mix(1.0, exp2(-5.0 * shape), indirectShadowMask * indirectShadowMask * distanceFade);
 
 	return indirectScattering + directScattering;
@@ -424,6 +423,11 @@ vec4 GetVolumetricClouds(
 	float minHeight = CloudLayer0_height;
 	float maxHeight = cloudheight + minHeight;
 
+	#if defined OVERWORLD_SHADER && defined AETHER_FLAG
+		minHeight = CloudLayer0_height - 350.0;
+		maxHeight = cloudheight + minHeight;
+	#endif
+
 	float heightRelativeToClouds = clamp(1.0 - max(cameraPosition.y - minHeight,0.0) / 100.0 ,0.0,1.0);
 
 	float maxdist = far + 16.0*5.0;
@@ -454,6 +458,12 @@ vec4 GetVolumetricClouds(
 	vec3 rayDirection = NormPlayerPos.xyz * (cloudheight/length(NormPlayerPos.xyz/cloudDist)/samples);
 	vec3 rayPosition = getRayOrigin(rayDirection, cameraPosition, dither.y, minHeight, maxHeight);
 
+	#ifdef SKY_GROUND
+		vec3 sampledSkyCol = indirectLightCol;
+	#else
+		vec3 sampledSkyCol = skyFromTex(normalize(rayPosition-cameraPosition), colortex4)/1200.0 * Sky_Brightness;
+	#endif
+
 	// setup for getting distance
 	vec3 playerPos = mat3(gbufferModelViewInverse) * viewPos;
 	#ifdef DISTANT_HORIZONS
@@ -465,11 +475,16 @@ vec4 GetVolumetricClouds(
 
 	float startDistance = length(playerPos);
 
+	#if defined EXCLUDE_WRITE_TO_LUT && defined USE_CUSTOM_CLOUD_LIGHTING_COLORS
+		directLightCol = dot(directLightCol,vec3(0.21, 0.72, 0.07)) * vec3(DIRECTLIGHT_CLOUDS_R,DIRECTLIGHT_CLOUDS_G,DIRECTLIGHT_CLOUDS_B);
+		indirectLightCol = dot(indirectLightCol,vec3(0.21, 0.72, 0.07)) * vec3(INDIRECTLIGHT_CLOUDS_R,INDIRECTLIGHT_CLOUDS_G,INDIRECTLIGHT_CLOUDS_B);
+	#endif
+
 	///------- do color stuff outside of the raymarcher loop
 	vec3 sunScattering = directLightCol * (phaseCloud(SdotV, 0.85) + phaseCloud(SdotV, 0.75)) * 3.14;
 	vec3 sunMultiScattering = 0.8 * directLightCol;// * (phaseCloud(SdotV, 0.35) + phaseCloud(-SdotV, 0.35) * 0.5) * 6.28;
 	vec3 skyScattering = indirectLightCol;
-	
+
 	vec3 distanceEstimation = normalize(NormPlayerPos.xyz * (cloudheight/abs(NormPlayerPos.y)/samples));
 
 	float distanceFade = 1.0 - clamp(exp2(pow(abs(distanceEstimation.y),1.5) * -100.0),0.0,1.0)*heightRelativeToClouds;
@@ -479,12 +494,6 @@ vec4 GetVolumetricClouds(
  	// sunScattering *= distanceFade;
  	// sunMultiScattering *= distanceFade;
  
- 	#ifdef SKY_GROUND
- 		vec3 sampledSkyCol = skyScattering * 0.5;
- 	#else
- 		vec3 sampledSkyCol = skyFromTex(normalize(rayPosition-cameraPosition), colortex4)/1200.0 * Sky_Brightness;
- 	#endif
-
    	////-------  RENDER SMALL CUMULUS CLOUDS
 		vec4 smallCumulusClouds = cloudColor;
 

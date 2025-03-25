@@ -6,10 +6,12 @@ mat2 mm2(float a) {
 	float c = cos(a), s = sin(a);
 	return mat2(c,s,-s,c);
 }
+
 const mat2 m2 = mat2(0.95534, 0.29552, -0.29552, 0.95534);
 float tri(float x) {
 	return clamp(abs(fract(x) - 0.5), 0.01, 0.49);
 }
+
 vec2 tri2(vec2 p) {
 	return vec2(tri(p.x)+tri(p.y),tri(p.y+tri(p.x)));
 }
@@ -38,13 +40,10 @@ float triNoise2d(vec2 pos, float speed) {
 	return clamp(1.0 / pow(rz * 29.0, 1.3), 0.0, 0.55);
 }
 
-float hash21(vec2 n) {
-	return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453);
-}
+vec3 upperColor = vec3(AURORA_UPPER_R, AURORA_UPPER_G, AURORA_UPPER_B);
+vec3 lowerColor = vec3(AURORA_LOWER_R, AURORA_LOWER_G, AURORA_LOWER_B);
 
 vec4 aurora(vec3 dir, float dither) {
-	vec3 upperColor = vec3(AURORA_UPPER_R, AURORA_UPPER_G, AURORA_UPPER_B);
-	vec3 lowerColor = vec3(AURORA_LOWER_R, AURORA_LOWER_G, AURORA_LOWER_B);
 	vec4 outerColor = vec4(0.0);
 	vec4 avgColor = vec4(0.0);
 
@@ -65,31 +64,28 @@ vec4 aurora(vec3 dir, float dither) {
 
 	outerColor *= clamp(dir.y * 15.0 + 0.4, 0.0, 1.0);
 
-	return outerColor * AURORA_BRIGHTNESS;
-
+	return outerColor;
 }
+
 vec3 drawAurora(vec3 rayDir, float dither) {
 
 	vec3 color = vec3(0.0);
-	float fade = smoothstep(0.0, 0.1, abs(rayDir.y))*0.1+0.9;
+	float fade = smoothstep(0.0, 0.1, abs(rayDir.y)) * 0.1+0.9;
 
 	if (rayDir.y > 0.0) {
 		vec4 aur = smoothstep(0.0, 1.5, aurora(rayDir, dither)) * fade;
 		color = color * (1.0 - aur.a) + aur.rgb;
 	}
-
 	return color;
 }
 
-// Get aurora amount
 #ifdef AURORA_SNOWY
-	float aurMult = Night * isSnowy;
+	float applyAurora = Night * isSnowy;
 #else
-	float aurMult = Night;
+	float applyAurora = Night;
 #endif
 
-// Get aurora color
-vec3 aurCol = mix(vec3(AURORA_UPPER_R, AURORA_UPPER_G, AURORA_UPPER_B), vec3(AURORA_LOWER_R, AURORA_LOWER_G, AURORA_LOWER_B), 0.25);
-
-// Aurora emission offset
-vec3 aurOffset = aurMult * aurCol * AURORA_BRIGHTNESS * AUR_ENV_OFFSET;
+// Aurora emission
+vec3 aurDirect = lowerColor * AUR_ENV_OFFSET * applyAurora * 0.2 * max(sin(frameTimeCounter * AURORA_SPEED/1.6), 0.6);
+vec3 aurIndirect = upperColor * AUR_ENV_OFFSET * applyAurora * 0.02 * max(cos(frameTimeCounter * AURORA_SPEED/2.4), 0.8);
+vec3 aurAvg = mix(upperColor, lowerColor, 0.4) * AUR_ENV_OFFSET * applyAurora * 0.5;

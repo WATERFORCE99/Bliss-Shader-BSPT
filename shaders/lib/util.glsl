@@ -1,6 +1,3 @@
-uniform sampler2D noisetex;
-uniform int frameCounter;
-
 const float PI 		= acos(-1.0);
 const float TAU 	= PI * 2.0;
 const float hPI 	= PI * 0.5;
@@ -15,6 +12,7 @@ const float goldenAngle = TAU / PHI / PHI;
 #define clamp01(x) clamp(x, 0.0, 1.0)
 #define max0(x) max(x, 0.0)
 #define min0(x) min(x, 0.0)
+#define min1(x) min(x, 1.0)
 #define max3(a) max(max(a.x, a.y), a.z)
 #define min3(a) min(min(a.x, a.y), a.z)
 #define max4(a, b, c, d) max(max(a, b), max(c, d))
@@ -37,7 +35,7 @@ const float goldenAngle = TAU / PHI / PHI;
 
 #define lumCoeff vec3(0.2125, 0.7154, 0.0721)
 
-float facos(const float sx){
+float facos(const float sx) {
 	float x = clamp(abs( sx ),0.,1.);
 	float a = sqrt( 1. - x ) * ( -0.16882 * x + 1.56734 );
 	return mix(PI - a, a, step(0.0, sx));
@@ -45,19 +43,19 @@ float facos(const float sx){
 	//return c * pi + a * -(c * 2. - 1.); //no conditional version
 }
 
-vec2 sincos(float x){
+vec2 sincos(float x) {
 	return vec2(sin(x), cos(x));
 }
 
-vec2 circlemap(float i, float n){
+vec2 circlemap(float i, float n) {
 	return sincos(i * n * goldenAngle) * sqrt(i);
 }
 
-vec3 circlemapL(float i, float n){
+vec3 circlemapL(float i, float n) {
 	return vec3(sincos(i * n * goldenAngle), sqrt(i));
 }
 
-vec3 calculateRoughSpecular(const float i, const float alpha2, const int steps){
+vec3 calculateRoughSpecular(const float i, const float alpha2, const int steps) {
 
 	float x = (alpha2 * i) / (1.0 - i);
 	float y = i * float(steps) * 64.0 * 64.0 * goldenAngle;
@@ -68,28 +66,33 @@ vec3 calculateRoughSpecular(const float i, const float alpha2, const int steps){
 	return vec3(cos(y) * s, sin(y) * s, c);
 }
 
-vec3 clampNormal(vec3 n, vec3 v){
+vec3 clampNormal(vec3 n, vec3 v) {
 	float NoV = clamp( dot(n, -v), 0., 1. );
 	return normalize( NoV * v + n );
 }
 
-vec3 srgbToLinear(vec3 srgb){
+//faster and actually more precise than pow 2.2
+vec3 toLinear(vec3 sRGB){
+	return sRGB * (sRGB * (sRGB * 0.305306011 + 0.682171111) + 0.012522878);
+}
+
+vec3 srgbToLinear(vec3 srgb) {
 	return mix(
 		srgb / 12.92,
-		pow(.947867 * srgb + .0521327, vec3(2.4) ),
+		pow(.947867 * srgb + .0521327, vec3(2.4)),
 		step( .04045, srgb )
 	);
 }
 
-vec3 linearToSRGB(vec3 linear){
+vec3 linearToSRGB(vec3 linear) {
 	return mix(
 		linear * 12.92,
-		pow(linear, vec3(1./2.4) ) * 1.055 - .055,
-		step( .0031308, linear )
+		pow(linear, vec3(1./2.4)) * 1.055 - .055,
+		step( .0031308, linear)
 	);
 }
 
-vec3 blackbody(float Temp){
+vec3 blackbody(float Temp) {
 	float t = pow(Temp, -1.5);
 	float lt = log(Temp);
 
@@ -103,34 +106,34 @@ vec3 blackbody(float Temp){
 	return srgbToLinear(col);
 }
 
-float calculateHardShadows(float shadowDepth, vec3 shadowPosition, float bias){
+float calculateHardShadows(float shadowDepth, vec3 shadowPosition, float bias) {
 	if(shadowPosition.z >= 1.0) return 1.0;
 
 	return 1.0 - fstep(shadowDepth, shadowPosition.z - bias);
 }
 
-vec3 genUnitVector(vec2 xy){
+vec3 genUnitVector(vec2 xy) {
 	xy.x *= TAU; xy.y = xy.y * 2.0 - 1.0;
 	return vec3(sincos(xy.x) * sqrt(1.0 - xy.y * xy.y), xy.y);
 }
 
-vec2 rotate(vec2 x, float r){
+vec2 rotate(vec2 x, float r) {
 	vec2 sc = sincos(r);
 	return mat2(sc.x, -sc.y, sc.y, sc.x) * x;
 }
 
-vec3 cartToSphere(vec2 coord){
+vec3 cartToSphere(vec2 coord) {
 	coord *= vec2(TAU, PI);
 	vec2 lon = sincos(coord.x) * sin(coord.y);
 	return vec3(lon.x, 2.0/PI*coord.y-1.0, lon.y);
 }
 
-vec2 sphereToCart(vec3 dir){
+vec2 sphereToCart(vec3 dir) {
 	float lonlat = atan(-dir.x, -dir.z);
 	return vec2(lonlat * rTAU +0.5,0.5*dir.y+0.5);
 }
 
-mat3 getRotMat(vec3 x,vec3 y){
+mat3 getRotMat(vec3 x,vec3 y) {
 	float d = dot(x,y);
 	vec3 cr = cross(y,x);
 
@@ -153,7 +156,7 @@ mat3 getRotMat(vec3 x,vec3 y){
 }
 
 // No intersection if returned y component is < 0.0
-vec2 rsi(vec3 position, vec3 direction, float radius){
+vec2 rsi(vec3 position, vec3 direction, float radius) {
 	float PoD = dot(position, direction);
 	float radiusSquared = radius * radius;
 
@@ -164,7 +167,7 @@ vec2 rsi(vec3 position, vec3 direction, float radius){
 	return -PoD + vec2(-delta, delta);
 }
 
-float HaltonSeq3(int index){
+float HaltonSeq3(int index) {
 	float r = 0.;
 	float f = 1.;
 	for (int i = index; i > 0; i /= 3){
@@ -174,7 +177,7 @@ float HaltonSeq3(int index){
 	return r;
 }
 
-float HaltonSeq2(int index){
+float HaltonSeq2(int index) {
 	float r = 0.;
 	float f = 1.;
 	for (int i = index; i > 0; i /= 2){
@@ -194,7 +197,7 @@ float Hammersley(int i) {
 	return float(bits) * 2.3283064365386963e-10; // 1/2^32
 }
 
-vec2 R2_samples(int n){
+vec2 R2_samples(int n) {
 	vec2 alpha = vec2(0.75487765, 0.56984026);
 	return fract(alpha * n);
 }
@@ -203,7 +206,7 @@ float luma(vec3 color) {
 	return dot(color,vec3(0.21, 0.72, 0.07));
 }
 
-vec2 simpleRand22(vec2 p){
+vec2 simpleRand22(vec2 p) {
     mat2 m = mat2(12.9898,.16180,78.233,.31415);
 	return fract(sin(m * p) * vec2(43758.5453, 14142.1));
 }
@@ -215,16 +218,20 @@ float hash11(float p) {
 	return fract(p);
 }
 
-float hash12(vec2 p){
+float hash12(vec2 p) {
 	vec3 p3  = fract(vec3(p.xyx) * 0.1031);
 	p3 += dot(p3, p3.yzx + 19.19);
 	return fract((p3.x + p3.y) * p3.z);
 }
 
-float hash13(vec3 p3){
+float hash13(vec3 p3) {
 	p3  = fract(p3 * 0.1031);
 	p3 += dot(p3, p3.zyx + 31.32);
 	return fract((p3.x + p3.y) * p3.z);
+}
+
+float hash21(vec2 n) {
+	return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453);
 }
 
 vec2 hash22(vec2 p) {
@@ -233,13 +240,13 @@ vec2 hash22(vec2 p) {
 	return fract((p3.xx+p3.yz)*p3.zy);
 }
 
-vec3 hash31(float p){
+vec3 hash31(float p) {
 	vec3 p3 = fract(vec3(p) * vec3(.1031, .1030, .0973));
 	p3 += dot(p3, p3.yzx+33.33);
 	return fract((p3.xxy+p3.yzz)*p3.zyx); 
 }
 
-vec3 decode (vec2 encn){
+vec3 decode (vec2 encn) {
 	vec3 n = vec3(0.0);
 	encn = encn * 2.0 - 1.0;
 	n.xy = abs(encn);
@@ -248,8 +255,27 @@ vec3 decode (vec2 encn){
 	return clamp(normalize(n.xyz),-1.0,1.0);
 }
 
-vec2 decodeVec2(float a){
+vec2 decodeVec2(float a) {
 	const vec2 constant1 = 65535. / vec2( 256., 65536.);
 	const float constant2 = 256. / 255.;
 	return fract( a * constant1 ) * constant2 ;
+}
+
+vec4 encode (vec3 n, vec2 lightmaps) {
+	n.xy = n.xy / dot(abs(n), vec3(1.0));
+	n.xy = n.z <= 0.0 ? (1.0 - abs(n.yx)) * sign(n.xy) : n.xy;
+	vec2 encn = clamp(n.xy * 0.5 + 0.5,-1.0,1.0);
+	
+	return vec4(encn,vec2(lightmaps.x,lightmaps.y));
+}
+
+//encoding by jodie
+float encodeVec2(vec2 a) {
+	const vec2 constant1 = vec2( 1., 256.) / 65535.;
+	vec2 temp = floor( a * 255. );
+	return temp.x*constant1.x+temp.y*constant1.y;
+}
+
+float encodeVec2(float x,float y) {
+	return encodeVec2(vec2(x,y));
 }

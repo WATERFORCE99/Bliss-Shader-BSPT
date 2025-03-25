@@ -127,7 +127,7 @@ vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 s
 	position += increment * (0.34*noise);
 
 	vec2 phaseSun = sky_phase(dot(viewVector, sunVector), 0.8);
-	vec2 phaseMoon = sky_phase(dot(viewVector, moonVector), 0.8) ;
+	vec2 phaseMoon = sky_phase(dot(viewVector, moonVector), 0.8);
 
 	vec3 scatteringSun = vec3(0.0);
 	vec3 scatteringMoon = vec3(0.0);
@@ -136,7 +136,11 @@ vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 s
 	transmittance = vec3(1.0);
 
 	float high_sun = clamp(pow(sunVector.y+0.6,5),0.0,1.0) * 3.0; // make sunrise less blue, and allow sunset to be bluer
-	float low_sun = clamp(((1.0-abs(sunVector.y))*3.) - high_sun,1.0,2.0) ;
+	float low_sun = clamp(((1.0-abs(sunVector.y))*3.) - high_sun,1.0,2.0);
+
+	#if defined OVERWORLD_SHADER && defined TWILIGHT_FOREST_FLAG
+		low_sun = 1.5;
+	#endif
 
 	for (int i = 0; i < iSteps; ++i, position += increment) {
 		vec3 density = sky_density(length(position));

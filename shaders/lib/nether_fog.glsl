@@ -77,7 +77,7 @@ vec4 GetVolumetricFog(
 		float densityVol = cloudVol(progressW);
 
 		//------ PLUME EFFECT
-			float plumeDensity = min(densityVol * pow(min(max(100.0-progressW.y,0.0)/30.0,1.0),4.0), pow(clamp(1.0 - length(progressW-cameraPosition)/far,0.0,1.0),5.0) * NETHER_PLUME_DENSITY);
+			float plumeDensity = min(densityVol * pow(min(max(100.0-progressW.y,0.0)/30.0,1.0),4.0), pow(clamp(1.0 - length(progressW-cameraPosition)/far,0.0,1.0),4.0) * NETHER_PLUME_DENSITY);
 			float plumeVolumeCoeff = exp(-plumeDensity*dd*dL);
 
 			vec3 lighting = vec3(NETHER_PLUME_R, NETHER_PLUME_G, NETHER_PLUME_B)*0.25 * exp(-15.0*densityVol);

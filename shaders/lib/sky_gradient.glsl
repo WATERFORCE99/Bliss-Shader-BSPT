@@ -17,7 +17,6 @@ vec3 drawMoon(vec3 PlayerPos, vec3 WorldSunVec, vec3 Color, inout vec3 occludeSt
 
 	vec3 sunNormal = vec3(dot(WorldSunVec+PlayerPos, vec3(shape2,0,0)), dot(PlayerPos+WorldSunVec, vec3(0,shape2,0)), -dot(WorldSunVec, PlayerPos) * 15.0);
 
-
 	// even has a little tilt approximation haha.... yeah....
 	vec3[8] phase = vec3[8](
 		vec3(-1.0, -0.5, 1.0),
@@ -29,9 +28,8 @@ vec3 drawMoon(vec3 PlayerPos, vec3 WorldSunVec, vec3 Color, inout vec3 occludeSt
 		vec3( 1.0,  0.25, 0.2),
 		vec3( 1.0,  0.25, 0.35)
 	);
-	
+
 	vec3 LightDir = phase[moonPhase];
-	
 
 	return Shape * pow(clamp(dot(sunNormal,LightDir)/5,0.0,1.5),5) * Color * 10.0 + clamp(Shape * 4.0 * pow(shape2/200,2.0),0.0,1.0)*0.004;
 	*/

@@ -1,3 +1,6 @@
+uniform sampler2D noisetex;
+uniform int frameCounter;
+
 float interleaved_gradientNoise_temporal(){
 	vec2 coord = gl_FragCoord.xy;
 	

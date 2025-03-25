@@ -165,8 +165,7 @@ vec4 screenSpaceReflections(
 	// float LOD = mix(0.0, 6.0*pow(roughness,0.1), 1.0-pow(1.0-reflectionLength,5.0));
 	// float LOD = clamp(pow(reflectionLength, pow(1.0-sqrt(roughness),5.0) * 3.0) * 6.0, 0.0, 6.0*pow(roughness,0.1));
 
-	vec3 previousPosition = mat3(gbufferModelViewInverse) * toScreenSpace(raytracePos) + gbufferModelViewInverse[3].xyz + (cameraPosition - previousCameraPosition);
-	previousPosition = mat3(gbufferPreviousModelView) * previousPosition + gbufferPreviousModelView[3].xyz;
+	vec3 previousPosition = toPreviousPos(toScreenSpace(raytracePos));
 	previousPosition.xy = projMAD(gbufferPreviousProjection, previousPosition).xy / -previousPosition.z * 0.5 + 0.5;
 
 	// fix UV pos dragging behind due to hand not having a good previous frame position.
@@ -175,7 +174,7 @@ vec4 screenSpaceReflections(
 	previousPosition.xy = clamp(previousPosition.xy, 0.0, 1.0);
 	reflection.a = 1.0;
 		
-	#ifdef FORWARD_RENDERED_SPECULAR
+	#ifdef FORWARD_SPECULAR
 		// vec2 clampedRes = max(vec2(viewWidth,viewHeight),vec2(1920.0,1080.));
 		// vec2 resScale = vec2(1920.,1080.)/clampedRes;
 		// vec2 bloomTileUV = (((previousPosition.xy/texelSize)*2.0 + 0.5)*texelSize/2.0) / clampedRes*vec2(1920.,1080.);
@@ -275,7 +274,7 @@ vec3 specularReflections(
 
 	,in vec4 flashLight_stuff
 ){
-	#ifdef FORWARD_RENDERED_SPECULAR
+	#ifdef FORWARD_SPECULAR
 		lightmap = pow(min(max(lightmap-0.6,0.0)*2.5,1.0),2.0);
 	#else
 		lightmap = clamp((lightmap-0.8)*7.0, 0.0,1.0);
