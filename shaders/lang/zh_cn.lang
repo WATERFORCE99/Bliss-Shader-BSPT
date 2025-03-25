@@ -1,10 +1,11 @@
 option.SHADER_VERSION_LABEL = Bliss-BSPT by WF99
 	prefix.SHADER_VERSION_LABEL = #
 
-profile.Low=§a性能
-profile.Medium=§b平衡
-profile.High=§c质量
-profile.Extreme=§d极高质量
+profile.veryLow=§a低质量
+profile.Low=§b较低质量
+profile.Medium=§9中等质量
+profile.High=§d较高质量
+profile.veryHigh=§c高质量
 
 screen.World=世界
 screen.Sky=天空配置
@@ -16,7 +17,7 @@ screen.Sky=天空配置
 		suffix.moon_illuminance=LX
 	option.MOONPHASE_BASED_MOONLIGHT=月相亮度水平
 	option.STAR_DENSITY=星星密度
-	option.STAR_ROTATION_MULT=星星旋转速度
+	option.STAR_MOVEMENT_MULT=星星旋转速度
 	option.RAINBOW=彩虹类型
 		value.RAINBOW.0=关
 		value.RAINBOW.1=真实
@@ -258,7 +259,7 @@ screen.HAND_HELD_LIGHT=手持光源/手电筒配置
 screen.FLASHLIGHT_SETTING=手电筒配置
 	option.FLASHLIGHT_RANGE=手电筒照明距离
 	option.FLASHLIGHT_BRIGHTNESS_MULT=手电筒照明亮度
-	option.FLASHLIGHT_BRIGHTNESS_FALLOFF=手电筒照明亮度衰减
+	option.FLASHLIGHT_BRIGHTNESS_FALLOFF_MULT=手电筒照明亮度衰减
 	option.FLASHLIGHT_SPECULAR=手电筒照明高光反射
 	option.FLASHLIGHT_SIZE=手电筒照明尺寸
 	option.FLASHLIGHT_R=手电筒照明红色比重
@@ -289,28 +290,6 @@ screen.Shadows=阴影配置
 		value.shadowDistance.2048 = 128 区块
 		value.shadowDistance.4096 = 256 区块
 		value.shadowDistance.8192 = 512 区块
-
-	option.OPTIMIZED_SHADOW_DISTANCE=最大阴影边界
-		value.OPTIMIZED_SHADOW_DISTANCE.-1=无优化
-		value.OPTIMIZED_SHADOW_DISTANCE.1=优化
-
-	option.entityShadowDistanceMul=实体阴影距离
-		value.entityShadowDistanceMul.0.01 = 阴影距离的 1%
-		value.entityShadowDistanceMul.0.02 = 阴影距离的 2%
-		value.entityShadowDistanceMul.0.03 = 阴影距离的 3%
-		value.entityShadowDistanceMul.0.04 = 阴影距离的 4%
-		value.entityShadowDistanceMul.0.05 = 阴影距离的 5%
-		value.entityShadowDistanceMul.0.10 = 阴影距离的 10%
-		value.entityShadowDistanceMul.0.15 = 阴影距离的 15%
-		value.entityShadowDistanceMul.0.20 = 阴影距离的 20%
-		value.entityShadowDistanceMul.0.25 = 阴影距离的 25%
-		value.entityShadowDistanceMul.0.30 = 阴影距离的 30%
-		value.entityShadowDistanceMul.0.35 = 阴影距离的 35%
-		value.entityShadowDistanceMul.0.40 = 阴影距离的 40%
-		value.entityShadowDistanceMul.0.45 = 阴影距离的 45%
-		value.entityShadowDistanceMul.0.50 = 阴影距离的 50%
-		value.entityShadowDistanceMul.0.75 = 阴影距离的 75%
-		value.entityShadowDistanceMul.1.00 = 阴影距离的 100%
 
 screen.Filtering=阴影过滤配置
 	option.BASIC_SHADOW_FILTER=基础阴影过滤
@@ -389,7 +368,7 @@ screen.Nether_Fog = 下界雾气
 	option.NETHER_PLUME_B = 下界烟柱蓝色补偿
 
 screen.End_Fog = 末地雾气
-	option.END_STORM_DENSTIY = 末地风暴密度
+	option.END_STORM_DENSITY = 末地风暴密度
 	option.END_FOG_R = 末地雾气红色比重
 	option.END_FOG_G = 末地雾气绿色比重
 	option.END_FOG_B = 末地雾气蓝色比重
@@ -435,7 +414,7 @@ screen.Altostratus_Cloud = 高层云配置
 
 screen.Seasons = 季节配置
 	option.Seasons = 四季颜色
-	option.Season_Length = 季节长度 (以日为单位)
+	option.Season_Length = 季节长度 (天)
 	option.Start_Season = 起始季节
 		value.Start_Season.0 = 夏季 (默认)
 		value.Start_Season.1 = 秋季
@@ -563,7 +542,7 @@ screen.Emissives = 发光效果
 	option.Emissive_Brightness = 发光倍率
 	option.Emissive_Curve = 发光曲线
 	option.EMISSIVE_TYPE = 发光模式
-		value.EMISSIVE_TYPE.0 = 不发光
+		value.EMISSIVE_TYPE.0 = 无
 		value.EMISSIVE_TYPE.1 = 硬编码
 		value.EMISSIVE_TYPE.2 = 硬编码 + LabPBR 自发光
 		value.EMISSIVE_TYPE.3 = 仅 LabPBR 自发光
@@ -598,10 +577,12 @@ screen.Porosity=孔隙率/水坑
 	option.MATERIAL_NORMAL_STRENGTH=材质法线强度
 
 	option.RESOURCEPACK_SKY = 资源包天空
-		value.RESOURCEPACK_SKY.0 = 完整光影天空
-		value.RESOURCEPACK_SKY.1 = 资源包天空 + 光影日月
+		value.RESOURCEPACK_SKY.0 = 完整着色器天空
+		value.RESOURCEPACK_SKY.1 = 资源包天空 + 着色器日月
 		value.RESOURCEPACK_SKY.2 = 完整资源包天空
-		value.RESOURCEPACK_SKY.3 = 光影天空 + 资源包日月
+		value.RESOURCEPACK_SKY.3 = 着色器天空 + 资源包日月
+
+	option.ISOLATE_RESOURCEPACK_SKY=独立的资源包天空
 
 	option.DOF_QUALITY=景深 DOF
 		value.DOF_QUALITY.-1=关闭
@@ -615,6 +596,12 @@ screen.Porosity=孔隙率/水坑
 	option.DOF_ANAMORPHIC_RATIO=景深变形比
 		value.MANUAL_FOCUS.-2=自动对焦
 		value.MANUAL_FOCUS.-1=亮度滑块
+	option.DOF_DISPERSION_MULT=景深散射倍率
+	option.focal=焦距
+	option.aperture=光圈
+	option.DoF_Adaptation_Speed=景深虚化自适应速度
+	option.FAR_BLUR_ONLY=仅虚化远处
+	option.REMOVE_HAND_BLUR=忽略手部景深
 
 screen.JITTER_DOF=抖动景深配置
 	option.JITTER_STRENGTH=抖动强度
@@ -641,6 +628,7 @@ screen.GAMEPLAY_EFFECTS=游玩效果配置
 	option.LOW_HEALTH_EFFECT_START=配置低生命值的剩余 HP
 	option.CRITICALLY_LOW_HEALTH_EFFECT_START=配置危险生命值的剩余 HP
 	option.WATER_ON_CAMERA_EFFECT=相机覆水效果
+	option.RAIN_ON_CAMERA_EFFECT=相机覆雨效果
 
 screen.Aerochrome_Mode=Aerochrome 模式
 	option.AEROCHROME_MODE=Aerochrome 模式
@@ -662,11 +650,6 @@ screen.COLOR=色调映射/色彩配置
 	option.Manual_exposure_value=手动曝光值
 	option.EXPOSURE_DARKENING=暗化曝光
 	option.EXPOSURE_BRIGHTENING=亮化曝光
-
-	option.focal=焦距
-	option.aperture=光圈
-	option.DoF_Adaptation_Speed=景深虚化自适应速度
-	option.FAR_BLUR_ONLY=仅虚化远处
 
 	option.Purkinje_strength=浦肯野现象强度
 	option.Purkinje_R=浦肯野 - 红色比重
@@ -692,7 +675,7 @@ screen.EXPERIMENTAL_STUFF=实验性选项
 	option.LARGE_WAVE_DISPLACEMENT=大型波浪
 	option.OLD_LIGHTLEAK_FIX=旧版阳光泄露修复
 	option.LIGHTNING_FLASH=闪电闪烁
-	option.Texture_MipMap_Bias=纹理 MipMap 偏移
+	option.Texture_MipMap_Bias=纹理 Mipmap 偏移
 
 screen.the_end_orb=末地球形天体
 	option.THE_ORB=球形天体
@@ -733,11 +716,35 @@ screen.selection_box_outline=选择框框线
 	option.SELECT_BOX_COL_G=选择框颜色 - 绿色比重
 	option.SELECT_BOX_COL_B=选择框颜色 - 蓝色比重
 
-	option.DIMENSION_FALLBACK_SHADER = 维度备用着色器
-		value.DIMENSION_FALLBACK_SHADER.0 = 主世界-备用
-		value.DIMENSION_FALLBACK_SHADER.1 = 下界-备用
-		value.DIMENSION_FALLBACK_SHADER.2 = 末地-备用
-		value.DIMENSION_FALLBACK_SHADER.3 = 未定义
+	option.USE_CUSTOM_DIFFUSE_LIGHTING_COLORS = 自定义散射光
+screen.DIFFUSE_LIGHTING_COLORS=散射光颜色配置
+	option.DIRECTLIGHT_DIFFUSE_R = 来自直接照明 - 红色比重
+	option.DIRECTLIGHT_DIFFUSE_G = 来自直接照明 - 绿色比重
+	option.DIRECTLIGHT_DIFFUSE_B = 来自直接照明 - 蓝色比重
+	option.INDIRECTLIGHT_DIFFUSE_R = 来自间接照明 - 红色比重
+	option.INDIRECTLIGHT_DIFFUSE_G = 来自间接照明 - 绿色比重
+	option.INDIRECTLIGHT_DIFFUSE_B = 来自间接照明 - 蓝色比重
+	option.USE_CUSTOM_CLOUD_LIGHTING_COLORS = 自定义云层
+screen.CLOUD_LIGHTING_COLORS_LIGHTING_COLORS=云层颜色配置
+	option.DIRECTLIGHT_CLOUDS_R = 来自直接照明 - 红色比重
+	option.DIRECTLIGHT_CLOUDS_G = 来自直接照明 - 绿色比重
+	option.DIRECTLIGHT_CLOUDS_B = 来自直接照明 - 蓝色比重
+	option.INDIRECTLIGHT_CLOUDS_R = 来自间接照明 - 红色比重
+	option.INDIRECTLIGHT_CLOUDS_G = 来自间接照明 - 绿色比重
+	option.INDIRECTLIGHT_CLOUDS_B = 来自间接照明 - 蓝色比重
+	option.USE_CUSTOM_FOG_LIGHTING_COLORS = 自定义雾气
+screen.FOG_LIGHTING_COLORS=雾气颜色配置
+	option.DIRECTLIGHT_FOG_R = 来自直接照明 - 红色比重
+	option.DIRECTLIGHT_FOG_G = 来自直接照明 - 绿色比重
+	option.DIRECTLIGHT_FOG_B = 来自直接照明 - 蓝色比重
+	option.INDIRECTLIGHT_FOG_R = 来自间接照明 - 红色比重
+	option.INDIRECTLIGHT_FOG_G = 来自间接照明 - 绿色比重
+	option.INDIRECTLIGHT_FOG_B = 来自间接照明 - 蓝色比重
+	option.USE_CUSTOM_SKY_GROUND_LIGHTING_COLORS = 自定义地表光
+screen.SKY_GROUND_LIGHTING_COLORS=地表光颜色配置
+	option.SKY_GROUND_R = 地表光 - 红色比重
+	option.SKY_GROUND_G = 地表光 - 绿色比重
+	option.SKY_GROUND_B = 地表光 - 蓝色比重
 
 screen.Mod_support = 支持的模组配置
 screen.DISTANT_HORIZONS_SETTINGS = §2Distant Horizons §f配置
@@ -783,7 +790,7 @@ option.sun_illuminance.comment=配置太阳的亮度.
 option.moon_illuminance.comment=配置月亮的亮度.
 option.MOONPHASE_BASED_MOONLIGHT.comment=开启此选项以根据月相调整每晚的月光亮度.
 option.STAR_DENSITY.comment=配置夜晚星星的密度.
-option.STAR_ROTATION_MULT.comment=配置夜晚星星移动的速度.
+option.STAR_MOVEMENT_MULT.comment=配置夜晚星星移动的速度.
 option.RAINBOW.comment=使用此选项以循环彩虹类型. 真实或全天模式下的彩虹特性均遵循真实的自然规律, 在特定的太阳角度下将不可见. 使用真实模式以令彩虹仅在雨后出现.
 
 option.Sky_Brightness.comment=配置天空的亮度.
@@ -830,7 +837,7 @@ option.indirect_effect.comment=配置间接照明类型以在相互接触的表�
 option.indirect_RTGI.comment=配置全局光照模式以使用光线追踪计算反弹光. 仅在开启 RTAO 时生效.
 
 option.AO_Strength.comment=配置由 SSAO, GTAO, RTAO 渲染的环境光遮蔽强度.
-option.GI_Strength.comment=配置由 (高质量) SSGI 渲染的光线反射强度.
+option.GI_Strength.comment=配置由 (高质量) SSGI 渲染的全局光照强度.
 option.RAY_COUNT.comment=配置光线追踪使用的光线数量, 更高的光线数量有助于提升光照准确度, 降低暗部噪点水平.
 option.STEPS.comment=配置计算每次光照间的间隔, 更高的步进将以视觉效果为代价提高运行性能.
 option.AO_in_sunlight.comment=配置由太阳产生的环境光遮蔽效果.
@@ -841,7 +848,7 @@ option.HANDHELD_LIGHT_RANGE.comment=配置手持光源的照明距离.
 option.FLASHLIGHT.comment=开启此选项以使用手持光源. §a手持光源无法与手电筒同时使用.
 option.FLASHLIGHT_RANGE.comment=配置手电筒的照明距离.
 option.FLASHLIGHT_BRIGHTNESS_MULT.comment=配置手电筒的照明亮度.
-option.FLASHLIGHT_BRIGHTNESS_FALLOFF.comment=配置手电筒的照明亮度梯度淡出的容易程度/速度.
+option.FLASHLIGHT_BRIGHTNESS_FALLOFF_MULT.comment=配置手电筒的照明亮度梯度淡出的容易程度/速度.
 option.FLASHLIGHT_SPECULAR.comment=开启此选项以使手电筒照明能够产生高光反射.
 option.FLASHLIGHT_SIZE.comment=配置手电筒照明光斑的尺寸.
 option.FLASHLIGHT_BOUNCED_INDIRECT.comment=开启此选项以允许手电筒光线反弹.
@@ -853,8 +860,6 @@ option.RENDER_ENTITY_SHADOWS.comment=开启此选项以为所有类型实体渲�
 option.RENDER_PLAYER_SHADOWS.comment=开启此选项以为所有玩家渲染阴影. §a性能开销较低.
 option.shadowMapResolution.comment=配置来自直接光照所产生的阴影质量.
 option.shadowDistance.comment=配置阴影可渲染的最大距离.
-option.OPTIMIZED_SHADOW_DISTANCE.comment=开启此选项使阴影仅在围绕以玩家为中心的球体中渲染以提升性能, 最大渲染区块由渲染距离进行限制. §a性能开销很低.
-option.entityShadowDistanceMul.comment=配置实体阴影的可见距离.
 
 option.BASIC_SHADOW_FILTER.comment=开启此选项以启用基础阴影过滤器.
 option.SHADOW_FILTER_SAMPLE_COUNT.comment=配置基础阴影过滤器质量. 过滤器仅用于软化阴影.
@@ -894,11 +899,11 @@ option.FOG_START_HEIGHT.comment=配置雾气生成的高度.
 option.TOD_Fog_mult.comment=配置一天中特定时段的总体雾气量. 
 
 option.CAVE_FOG.comment=配置仅出现在洞穴等黑暗区域的雾气, 由于着色器的局限性, 可能在一些非洞穴区域启用.
-option.CaveFogFallOff.comment=配置雾气淡出梯度达到最亮部分的容易程度/速度.
+option.CaveFogFallOff.comment=配置雾气衰减的容易程度/速度.
 
 option.NETHER_PLUME_DENSITY.comment=配置下界柱状烟雾的密度.
 
-option.END_STORM_DENSTIY.comment=配置末地总体雾气的密度, 不影响主岛漩涡状雾气.
+option.END_STORM_DENSITY.comment=配置末地总体雾气的密度.
 
 option.VOLUMETRIC_CLOUDS.comment=体积云所有功能的总开关.
 option.CLOUDS_QUALITY.comment=配置体积云渲染分辨率. §a性能开销高.
@@ -980,7 +985,7 @@ option.MATERIAL_WETNESS_TYPE.comment=配置材质在雨天的反射模式. 使�
 
 option.Emissive_Brightness.comment=配置方块发光量或自发光强度.
 option.Emissive_Curve.comment=配置自发光纹理达到最高亮度的容易程度/速度.
-option.EMISSIVE_TYPE.comment=配置自发光纹理如何在世界应用. 硬编码: 由光影决定. LabPBR: 由资源包决定.
+option.EMISSIVE_TYPE.comment=配置自发光纹理如何在世界应用. 硬编码: 由着色器控制. LabPBR: 由资源包控制.
 
 option.LabSSS_Curve.comment=配置 LabSSS 的透光曲线补偿.
 option.sss_density_multiplier.comment=配置次表面散射的强度.
@@ -989,7 +994,7 @@ option.MISC_BLOCK_SSS.comment=开启此选项以启用草与沙子等特定方�
 option.MOB_SSS.comment=开启此选项以启用生物与玩家的次表面散射.
 option.Ambient_SSS.comment=开启此选项以启用来自天空光的次表面散射. 使用 SSAO 时, 本选项的性能开销会很小, 反之如果关闭了则会变大.
 option.ambientsss_brightness.comment=配置天空光次表面散射的亮度. 
-option.SSS_TYPE.comment=配置次表面散射如何在世界应用.  硬编码: 由光影决定. LabSSS: 由资源包决定.
+option.SSS_TYPE.comment=配置次表面散射如何在世界应用.  硬编码: 由着色器控制. LabSSS: 由资源包控制.
 
 option.POM.comment=开启此选项以启用资源包提供的视差信息. 用以在实际没有的区域模拟 3D 几何图形.
 option.MAX_ITERATIONS.comment=配置视差效果的质量. 提高本数值以在近距离渲染完整的视差层.
@@ -997,18 +1002,26 @@ option.POM_DEPTH.comment=配置视差效果的凹陷深度.
 option.MAX_DIST.comment=配置视差效果的最大可见距离.
 option.Adaptive_Step_length.comment=开启此选项以使视差质量随距离而降低. 用以提升性能.
 
-option.Porosity.comment=开启此选项以启用由光影决定的材质孔隙率.
+option.Porosity.comment=开启此选项以启用由着色器控制的材质孔隙率.
 option.Puddles.comment=开启此选项以启用雨天水坑.
 option.Puddle_Size.comment=配置水坑尺寸的缩放倍率.
 
 option.MATERIAL_AO.comment=开启此选项以使材质法线作用与环境光遮蔽效果.
 option.MATERIAL_NORMAL_STRENGTH.comment=配置材质法线的强度水平.
 
-option.RESOURCEPACK_SKY.comment=使用此选项以循环资源包天空支持类型. 配置设置来使用完整的资源包天空, 或保持光影的日月.
+option.RESOURCEPACK_SKY.comment=使用此选项以循环资源包天空支持类型. 配置设置来使用完整的资源包天空, 或保持着色器的日月.
+
+option.ISOLATE_RESOURCEPACK_SKY.comment=开启此选项以使资源包天空不受着色器的影响, 并阻止其产生对地表的光照.
 
 option.DOF_QUALITY.comment=配置景深的相关功能.
 option.MANUAL_FOCUS.comment=配置手动对焦的距离.
 option.DOF_ANAMORPHIC_RATIO.comment=配置景深变形镜头的比重.
+option.DOF_DISPERSION_MULT.comment=配置景深散射效果的强度.
+option.focal.comment=配置镜头的焦距.
+option.aperture.comment=配置镜头的光圈大小.
+option.DoF_Adaptation_Speed.comment=配置景深虚化随距离变化的反应速度.
+option.FAR_BLUR_ONLY.comment=开启此选项以仅虚化远处物体.
+option.REMOVE_HAND_BLUR.comment=开启此选项以在启用景深时不虚化手部.
 
 option.JITTER_STRENGTH.comment=配置抖动景深效果的强度.
 option.FOCUS_LASER_COLOR.comment=配置聚焦点颜色.
@@ -1022,6 +1035,7 @@ option.LOW_HEALTH_EFFECT.comment=开启此选项以启用低生命值效果. §a
 option.LOW_HEALTH_EFFECT_START.comment=配置低生命值的阈值. §aIRIS限定功能.
 option.CRITICALLY_LOW_HEALTH_EFFECT_START.comment=配置危险生命值的阈值. §aIRIS限定功能.
 option.WATER_ON_CAMERA_EFFECT.comment=开启此选项以启用相机覆水效果. §aIRIS限定功能.
+option.RAIN_ON_CAMERA_EFFECT.comment=开启此选项以启用相机覆雨效果. §aIRIS限定功能.
 
 option.AEROCHROME_MODE.comment=开启此选项以启用受Chrome浏览器启发而开发的 Aerochrome 红外胶片效果.
 option.AEROCHROME_PINKNESS.comment=配置 Aerochrome 模式的颜色. 数值越高越接近粉色, 反之越接近红色.
@@ -1042,11 +1056,6 @@ option.Manual_exposure_value.comment=配置手动曝光值. 仅在关闭自动�
 option.EXPOSURE_DARKENING.comment=配置曝光的暗化水平. 用以调节画面质量.
 option.EXPOSURE_BRIGHTENING.comment=配置曝光的亮化水平. 用以调节画面质量.
 
-option.focal.comment=配置镜头的焦距.
-option.aperture.comment=配置镜头的光圈大小.
-option.DoF_Adaptation_Speed.comment=配置景深虚化随距离变化的反应速度.
-option.FAR_BLUR_ONLY.comment=开启此选项以仅虚化远处物体.
-
 option.Purkinje_strength.comment=配置在暗处时淡化色彩并强化明暗的效果强度.
 option.Purkinje_Multiplier.comment=配置在暗处时淡化色彩并强化明暗的效果倍率.
 
@@ -1065,7 +1074,7 @@ option.FORCE_TRANSLUCENT_GLASS.comment=开启此选项以强制玻璃透光. 用
 option.LARGE_WAVE_DISPLACEMENT.comment=WIP选项. 开启此选项以应用大型波浪法线.
 option.OLD_LIGHTLEAK_FIX.comment=开启此选项以替换为旧版洞穴阳光泄露修复.
 option.LIGHTNING_FLASH.comment=开启此选项以启用全局覆盖的闪电闪烁. 用以在使用 Optifine 时避免在使用一些改变天空盒颜色资源包时影响闪电闪烁的BUG.
-option.Texture_MipMap_Bias.comment=配置纹理 MipMap 的级别. 使用较低的值可以得到更精细的纹理, 而较高的值则会以损失纹理细节而获得更高的性能.
+option.Texture_MipMap_Bias.comment=配置纹理 Mipmap 的级别. 使用较低的值可以得到更精细的纹理, 而较高的值则会以损失纹理细节而获得更高的性能.
 
 option.THE_ORB.comment=WIP选项. 开启此选项以在末地天空中放置一个球形天体.
 
@@ -1073,7 +1082,10 @@ option.DEBUG_VIEW.comment=配置 DEBUG 视图模式. 正常游玩请勿使用.
 
 option.SELECT_BOX.comment=开启此选项以启用可自定义色彩的选择框.
 
-option.DIMENSION_FALLBACK_SHADER.comment=WIP选项. 配置用于 DEBUG 的维度备用着色器
+option.USE_CUSTOM_DIFFUSE_LIGHTING_COLORS.comment = 开启此选项以启用自定义色彩的散射光.
+option.USE_CUSTOM_CLOUD_LIGHTING_COLORS.comment = 开启此选项以启用自定义色彩的云层.
+option.USE_CUSTOM_FOG_LIGHTING_COLORS.comment = 开启此选项以启用自定义色彩的雾气.
+option.USE_CUSTOM_SKY_GROUND_LIGHTING_COLORS.comment = 开启此选项以启用自定义色彩的地表光.
 
 option.DH_OVERDRAW_PREVENTION.comment=开启此选项以防止着色器的一些元素过度绘制导致视觉问题.
 option.OVERDRAW_MAX_DISTANCE.comment=配置防止过度绘制的最大距离. 建议保持默认.
