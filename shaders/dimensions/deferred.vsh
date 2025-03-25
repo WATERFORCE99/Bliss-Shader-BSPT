@@ -43,6 +43,7 @@ uniform float eyeAltitude;
 uniform float near;
 // uniform float far;
 uniform float frameTime;
+uniform int frameCounter;
 uniform float rainStrength;
 
 vec3 sunVec = normalize(mat3(gbufferModelViewInverse) * sunPosition);
@@ -125,7 +126,7 @@ void main() {
 		vec3 pos = vec3(0.0,1.0,0.0);
 		pos.xy += normalize(sample3x3[i]) * vec2(0.3183,0.9000);
 
-		averageSkyCol_Clouds += mix(1.5 * (skyCloudsFromTex(pos,colortex4).rgb/maxIT/150.0), aurOffset, 0.1);
+		averageSkyCol_Clouds += 1.5 * (skyCloudsFromTex(pos,colortex4).rgb/maxIT/150.0);
 		averageSkyCol += 1.5 * (skyFromTex(pos,colortex4).rgb/maxIT/150.0);
    	}
 	
@@ -136,6 +137,10 @@ void main() {
 	vec3 minimumlight = MIN_LIGHT_AMOUNT * vec3(0.01) + nightVision * 0.05;
 	averageSkyCol_Clouds = max(normalize(averageSkyCol_Clouds + 1e-6) * min(luma(averageSkyCol_Clouds) * 3.0,2.5),0.0);
 	averageSkyCol = max(averageSkyCol * PLANET_GROUND_BRIGHTNESS,0.0) + minimumlight;
+
+	#ifdef USE_CUSTOM_SKY_GROUND_LIGHTING_COLORS
+		averageSkyCol = luma(averageSkyCol) * vec3(SKY_GROUND_R,SKY_GROUND_G,SKY_GROUND_B);
+	#endif
 
 ////////////////////////////////////////
 /// --- SUNLIGHT/MOONLIGHT STUFF --- ///
@@ -154,6 +159,10 @@ void main() {
 	// lightSourceColor = sunVis >= 1e-5 ? sunColor * sunVis : moonColor * moonVis;
 	lightSourceColor = sunColor * sunVis + moonColor * moonVis;
 
+	#ifdef TWILIGHT_FOREST_FLAG
+		lightSourceColor = vec3(0.0);
+		moonColor = vec3(0.0);
+	#endif
 #endif
 
 //////////////////////////////////

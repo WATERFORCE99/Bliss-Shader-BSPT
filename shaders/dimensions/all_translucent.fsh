@@ -97,15 +97,12 @@ uniform int framemod8;
 uniform float viewWidth;
 uniform float viewHeight;
 
-uniform mat4 gbufferPreviousModelView;
-uniform vec3 previousCameraPosition;
-
 uniform vec3 sunColor;
 
 uniform float waterEnteredAltitude;
 
 #include "/lib/Shadow_Params.glsl"
-#include "/lib/color_transforms.glsl"
+#include "/lib/tonemaps.glsl"
 #include "/lib/projections.glsl"
 #include "/lib/sky_gradient.glsl"
 #include "/lib/waterBump.glsl"
@@ -193,25 +190,6 @@ vec2 CleanSample(
 	float y =  sin(theta) * spiralShape;
 
 	return vec2(x, y);
-}
-
-vec4 encode (vec3 n, vec2 lightmaps){
-	n.xy = n.xy / dot(abs(n), vec3(1.0));
-	n.xy = n.z <= 0.0 ? (1.0 - abs(n.yx)) * sign(n.xy) : n.xy;
-	vec2 encn = clamp(n.xy * 0.5 + 0.5,-1.0,1.0);
-	
-	return vec4(encn,vec2(lightmaps.x,lightmaps.y));
-}
-
-//encoding by jodie
-float encodeVec2(vec2 a){
-	const vec2 constant1 = vec2( 1., 256.) / 65535.;
-	vec2 temp = floor( a * 255. );
-	return temp.x*constant1.x+temp.y*constant1.y;
-}
-
-float encodeVec2(float x,float y){
-	return encodeVec2(vec2(x,y));
 }
 
 float ld(float dist) {
@@ -330,380 +308,394 @@ uniform vec3 eyePosition;
 /* RENDERTARGETS:2,7,11,14 */
 
 void main() {
-if (gl_FragCoord.x * texelSize.x < 1.0  && gl_FragCoord.y * texelSize.y < 1.0 ){
-	
-	vec3 FragCoord = gl_FragCoord.xyz;
+	if(gl_FragCoord.x * texelSize.x < 1.0  && gl_FragCoord.y * texelSize.y < 1.0){
 
-	vec2 tempOffset = offsets[framemod8];
+		vec3 FragCoord = gl_FragCoord.xyz;
 
-	vec3 viewPos = toScreenSpace(FragCoord*vec3(texelSize/RENDER_SCALE,1.0)-vec3(vec2(tempOffset)*texelSize*0.5, 0.0));
+		vec2 tempOffset = offsets[framemod8];
 
-	vec3 feetPlayerPos = mat3(gbufferModelViewInverse) * viewPos + gbufferModelViewInverse[3].xyz;
-	
+		vec3 viewPos = toScreenSpace(FragCoord*vec3(texelSize/RENDER_SCALE,1.0)-vec3(vec2(tempOffset)*texelSize*0.5, 0.0));
+
+		vec3 feetPlayerPos = toWorldSpace(viewPos);
+
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////// MATERIAL MASKS ////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 	
-	float MATERIALS = normalMat.w;
+		float MATERIALS = normalMat.w;
 
-	// 1.0 = water mask
-	// 0.9 = entity mask
-	// 0.8 = reflective entities
-	// 0.7 = reflective blocks
-	// 0.3 = hand mask
+		// 1.0 = water mask
+		// 0.9 = entity mask
+		// 0.8 = reflective entities
+		// 0.7 = glass
+		// 0.6 = slime & honey
+		// 0.5 = ice
+		// 0.4 = nether portal
+		// 0.3 = hand mask
 
-	#ifdef HAND
-		MATERIALS = 0.3;
-	#endif
+		#ifdef HAND
+			MATERIALS = 0.3;
+		#endif
 
-	// bool isHand = abs(MATERIALS - 0.1) < 0.01;
-	bool isWater = MATERIALS > 0.99;
-	bool isReflectiveEntity = abs(MATERIALS - 0.8) < 0.01;
-	bool isReflective = abs(MATERIALS - 0.7) < 0.01 || isWater || isReflectiveEntity;
-	bool isEntity = abs(MATERIALS - 0.9) < 0.01 || isReflectiveEntity;
+		// bool isHand = abs(MATERIALS - 0.1) < 0.01;
+		bool isWater = MATERIALS > 0.99;
+
+		bool isReflectiveEntity = abs(MATERIALS - 0.8) < 0.01;
+		bool isGlass = abs(MATERIALS - 0.7) < 0.01;
+		bool isSlime = abs(MATERIALS - 0.6) < 0.01;
+		bool isIce = abs(MATERIALS - 0.5) < 0.01;
+		bool isNetherPortal = abs(MATERIALS - 0.4) < 0.01;
+		bool isReflective = isWater || isGlass || isSlime || isIce || isNetherPortal || isReflectiveEntity;
+		bool isEntity = abs(MATERIALS - 0.9) < 0.01 || isReflectiveEntity;
 
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////// ALBEDO /////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-	gl_FragData[0] = texture2D(texture, lmtexcoord.xy, Texture_MipMap_Bias) * color;
+		gl_FragData[0] = texture2D(texture, lmtexcoord.xy, Texture_MipMap_Bias) * color;
 
-	float UnchangedAlpha = gl_FragData[0].a;
+		float UnchangedAlpha = gl_FragData[0].a;
 
-	vec3 Albedo = toLinear(gl_FragData[0].rgb);
+		vec3 Albedo = toLinear(gl_FragData[0].rgb);
 
-	#ifdef Vanilla_like_water
-		if (isWater) Albedo *= sqrt(luma(Albedo));
-	#else
-		if (isWater){
-			Albedo = vec3(0.0);
-			gl_FragData[0].a = 1.0/255.0;
+		if(isReflective && !isWater && !isSlime){
+			gl_FragData[0].a *= 0.5;
 		}
-	#endif
 
-	#ifdef WhiteWorld
-		gl_FragData[0].rgb = vec3(0.5);
-		gl_FragData[0].a = 1.0;
-	#endif
+		if(isWater){
+			#ifdef Vanilla_like_water
+				Albedo *= sqrt(luma(Albedo));
+			#else
+				Albedo = vec3(0.0);
+				gl_FragData[0].a = 1.0/255.0;
+			#endif
+		}
 
-	#ifdef ENTITIES
-		Albedo.rgb = mix(Albedo.rgb, entityColor.rgb, clamp(entityColor.a*1.5,0,1));
-	#endif
+		#ifdef WhiteWorld
+			gl_FragData[0].rgb = vec3(0.5);
+			gl_FragData[0].a = 1.0;
+		#endif
 
-	vec4 GLASS_TINT_COLORS = vec4(Albedo, UnchangedAlpha);
-	
-	#ifdef BIOME_TINT_WATER
-		if (isWater) GLASS_TINT_COLORS.rgb = toLinear(color.rgb);
-	#endif
+		#ifdef ENTITIES
+			Albedo.rgb = mix(Albedo.rgb, entityColor.rgb, clamp(entityColor.a*1.5,0,1));
+		#endif
+
+		vec4 GLASS_TINT_COLORS = vec4(Albedo, UnchangedAlpha);
+
+		#ifdef BIOME_TINT_WATER
+			if(isWater) GLASS_TINT_COLORS.rgb = toLinear(color.rgb);
+		#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////// NORMALS ///////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-	vec3 normal = normalMat.xyz; // in viewSpace
+		vec3 normal = normalMat.xyz; // in viewSpace
 
-	#ifdef LARGE_WAVE_DISPLACEMENT
-		if (isWater){
-			normal = viewToWorld(normal) ;
-			normal.xz = shitnormal.xy;
-			normal = worldToView(normal);
-		}
-	#endif
-	
-	vec3 worldSpaceNormal = viewToWorld(normal).xyz;
-	vec2 TangentNormal = vec2(0); // for refractions
-	
-	vec3 tangent2 = normalize(cross(tangent.rgb,normal)*tangent.w);
-	mat3 tbnMatrix = mat3(tangent.x, tangent2.x, normal.x,
-						tangent.y, tangent2.y, normal.y,
-						tangent.z, tangent2.z, normal.z);
+		#ifdef LARGE_WAVE_DISPLACEMENT
+			if (isWater){
+				normal = viewToWorld(normal) ;
+				normal.xz = shitnormal.xy;
+				normal = worldToView(normal);
+			}
+		#endif
 
-	vec3 NormalTex = vec3(texture2D(normals, lmtexcoord.xy, Texture_MipMap_Bias).xy,0.0);
-	NormalTex.xy = NormalTex.xy*2.0-1.0;
-	NormalTex.z = clamp(sqrt(1.0 - dot(NormalTex.xy, NormalTex.xy)),0.0,1.0);
+		vec3 worldSpaceNormal = viewToWorld(normal).xyz;
+		vec2 TangentNormal = vec2(0); // for refractions
 
-	#ifndef HAND
-		if (isWater){
-			vec3 playerPos = mat3(gbufferModelViewInverse) * viewPos + gbufferModelViewInverse[3].xyz;
-			vec3 worldPos = playerPos + cameraPosition;
-			vec3 waterPos = playerPos;
+		vec3 tangent2 = normalize(cross(tangent.rgb,normal)*tangent.w);
+		mat3 tbnMatrix = mat3(tangent.x, tangent2.x, normal.x,
+							tangent.y, tangent2.y, normal.y,
+							tangent.z, tangent2.z, normal.z);
 
-			vec3 flowDir = normalize(worldSpaceNormal*10.0) * frameTimeCounter * WATER_WAVE_SPEED * (2.0 + rainStrength);
+		vec3 NormalTex = vec3(texture2D(normals, lmtexcoord.xy, Texture_MipMap_Bias).xy,0.0);
+		NormalTex.xy = NormalTex.xy*2.0-1.0;
+		NormalTex.z = clamp(sqrt(1.0 - dot(NormalTex.xy, NormalTex.xy)),0.0,1.0);
+
+		#ifndef HAND
+			if(isWater){
+				vec3 playerPos = toWorldSpace(viewPos);
+				vec3 worldPos = playerPos + cameraPosition;
+				vec3 waterPos = playerPos;
+
+				vec3 flowDir = normalize(worldSpaceNormal*10.0) * frameTimeCounter * WATER_WAVE_SPEED * (2.0 + rainStrength);
 			
-			vec2 newPos = worldPos.xy + abs(flowDir.xz);
-			newPos = mix(newPos, worldPos.zy + abs(flowDir.zx), clamp(abs(worldSpaceNormal.x),0.0,1.0));
-			newPos = mix(newPos, worldPos.xz, clamp(abs(worldSpaceNormal.y),0.0,1.0));
-			waterPos.xy = newPos;
+				vec2 newPos = worldPos.xy + abs(flowDir.xz);
+				newPos = mix(newPos, worldPos.zy + abs(flowDir.zx), clamp(abs(worldSpaceNormal.x),0.0,1.0));
+				newPos = mix(newPos, worldPos.xz, clamp(abs(worldSpaceNormal.y),0.0,1.0));
+				waterPos.xy = newPos;
 		
-			waterPos.xyz = getParallaxDisplacement(waterPos, playerPos);
+				waterPos.xyz = getParallaxDisplacement(waterPos, playerPos);
 			
-			vec3 bump = normalize(getWaveNormal(waterPos, playerPos, false));
+				vec3 bump = normalize(getWaveNormal(waterPos, playerPos, false));
 
-			#ifdef WATER_RIPPLES
-				vec3 rippleNormal = drawRipples(worldPos.xz * 5.0, frameTimeCounter) * 0.5 * raining * lightmap * clamp(1.0 - length(playerPos) / 128.0, 0.0, 1.0);
-				bump = normalize(bump + rippleNormal);
-			#endif
+				#if defined OVERWORLD_SHADER && defined WATER_RIPPLES
+					vec3 rippleNormal = drawRipples(worldPos.xz * 5.0, frameTimeCounter) * 0.5 * raining * lightmap * clamp(1.0 - length(playerPos) / 128.0, 0.0, 1.0);
+					bump = normalize(bump + rippleNormal);
+				#endif
 
-			float bumpmult = WATER_WAVE_STRENGTH + 0.5 * rainStrength;
-			bump = bump * vec3(bumpmult, bumpmult, bumpmult) + vec3(0.0f, 0.0f, 1.0f - bumpmult);
+				float bumpmult = WATER_WAVE_STRENGTH + 0.5 * rainStrength;
+				bump = bump * bumpmult + vec3(0.0, 0.0, 1.0 - bumpmult);
 
-			NormalTex.xyz = bump;
-		}
-	#endif
+				NormalTex.xyz = bump;
+			}
+		#endif
 
-	// tangent space normals for refraction
-	TangentNormal = NormalTex.xy;
+		// tangent space normals for refraction
+		TangentNormal = NormalTex.xy;
 
-	normal = applyBump(tbnMatrix, NormalTex.xyz, 1.0);
-	worldSpaceNormal = normalize(viewToWorld(normal).xyz);
+		normal = applyBump(tbnMatrix, NormalTex.xyz, 1.0);
+		worldSpaceNormal = normalize(viewToWorld(normal).xyz);
 
-	// TangentNormal = clamp(TangentNormal + (blueNoise()*2.0-1.0)*0.005,-1.0,1.0);
-	float nameTagMask = 0.0;
+		// TangentNormal = clamp(TangentNormal + (blueNoise()*2.0-1.0)*0.005,-1.0,1.0);
+		float nameTagMask = 0.0;
 
-	#if defined ENTITIES && defined IS_IRIS
-		if(NAMETAG > 0) nameTagMask = 0.1;
-	#endif
+		#if defined ENTITIES && defined IS_IRIS
+			if(NAMETAG > 0) nameTagMask = 0.1;
+		#endif
 
-	gl_FragData[2] = vec4(encodeVec2(TangentNormal*0.5+0.5), encodeVec2(GLASS_TINT_COLORS.rg), encodeVec2(GLASS_TINT_COLORS.ba), encodeVec2(0.0, nameTagMask));
+		gl_FragData[2] = vec4(encodeVec2(TangentNormal*0.5+0.5), encodeVec2(GLASS_TINT_COLORS.rg), encodeVec2(GLASS_TINT_COLORS.ba), encodeVec2(0.0, nameTagMask));
 
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////// SPECULARS /////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-	vec3 SpecularTex = texture2D(specular, lmtexcoord.xy, Texture_MipMap_Bias).rga;
+		vec3 SpecularTex = texture2D(specular, lmtexcoord.xy, Texture_MipMap_Bias).rga;
 
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////// DIFFUSE LIGHTING //////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-	vec2 lightmap = lmtexcoord.zw;
+		vec2 lightmap = lmtexcoord.zw;
 
-	// lightmap.y = 1.0;
-	
-	#ifndef OVERWORLD_SHADER
-		lightmap.y = 1.0;
-	#endif
-	
-	#if defined Hand_Held_lights && !defined LPV_ENABLED
-		#ifdef IS_IRIS
-			vec3 playerCamPos = eyePosition;
-		#else
-			vec3 playerCamPos = cameraPosition;
+		// lightmap.y = 1.0;
+
+		#ifndef OVERWORLD_SHADER
+			lightmap.y = 1.0;
 		#endif
+
+		#if defined Hand_Held_lights && !defined LPV_ENABLED
+			#ifdef IS_IRIS
+				vec3 playerCamPos = eyePosition;
+			#else
+				vec3 playerCamPos = cameraPosition;
+			#endif
 		
-		if(HELD_ITEM_BRIGHTNESS > 0.0){ 
-			float pointLight = clamp(1.0-length((feetPlayerPos+cameraPosition)-playerCamPos)/HANDHELD_LIGHT_RANGE,0.0,1.0);
-			lightmap.x  = mix(lightmap.x , HELD_ITEM_BRIGHTNESS, pointLight*pointLight);
-		}
-	#endif
-
-	vec3 Indirect_lighting = vec3(0.0);
-	vec3 MinimumLightColor = vec3(1.0);
-
-	vec3 Direct_lighting = vec3(0.0);
-
-	#ifdef OVERWORLD_SHADER
-		vec3 DirectLightColor = lightCol.rgb/2400.0;
-
-		if(!isWater && isEyeInWater == 1){
-			float distanceFromWaterSurface = cameraPosition.y - waterEnteredAltitude;
-			float waterdepth = max(-(feetPlayerPos.y + distanceFromWaterSurface),0.0);
- 
-			DirectLightColor *= exp(-vec3(Water_Absorb_R, Water_Absorb_G, Water_Absorb_B) * (waterdepth/abs(WsunVec.y)));
-			DirectLightColor *= pow(waterCaustics(feetPlayerPos + cameraPosition, WsunVec)*WATER_CAUSTICS_BRIGHTNESS, WATER_CAUSTICS_STRENGTH);
-		}
-
-		float NdotL = clamp((-15 + dot(normal, normalize(WsunVec*mat3(gbufferModelViewInverse)))*255.0) / 240.0  ,0.0,1.0);
-		float Shadows = 1.0;
-
-		float shadowMapFalloff = smoothstep(0.0, 1.0, min(max(1.0 - length(feetPlayerPos) / (shadowDistance+16),0.0)*5.0,1.0));
-		float shadowMapFalloff2 = smoothstep(0.0, 1.0, min(max(1.0 - length(feetPlayerPos) / shadowDistance,0.0)*5.0,1.0));
-
-		float LM_shadowMapFallback = min(max(lightmap.y-0.8, 0.0) * 25,1.0);
-
-		vec3 shadowPlayerPos = mat3(gbufferModelViewInverse) * viewPos + gbufferModelViewInverse[3].xyz;
-
-		Shadows = ComputeShadowMap(DirectLightColor, shadowPlayerPos, shadowMapFalloff, blueNoise());
-
-		Shadows *= mix(LM_shadowMapFallback, 1.0, shadowMapFalloff2);
-
-		Shadows *= GetCloudShadow(feetPlayerPos+cameraPosition, WsunVec);
-
-		Direct_lighting = DirectLightColor * NdotL * Shadows;
-
-		vec3 AmbientLightColor = averageSkyCol_Clouds/900.0;
-
-		vec3 indirectNormal = worldSpaceNormal / dot(abs(worldSpaceNormal),vec3(1.0));
-		float SkylightDir = clamp(indirectNormal.y*0.7+0.3,0.0,1.0);
-
-		float skylight = mix(0.2 + 2.3*(1.0-lightmap.y), 2.5, SkylightDir);
-		AmbientLightColor *= skylight;
-
-		Indirect_lighting = doIndirectLighting(AmbientLightColor, MinimumLightColor, lightmap.y);
-	#endif
-
-	#ifdef NETHER_SHADER
-		Indirect_lighting = volumetricsFromTex(worldSpaceNormal, colortex4, 0).rgb / 1200.0 / 1.5;
-	#endif
-
-	#ifdef END_SHADER
-		float vortexBounds = clamp(vortexBoundRange - length(feetPlayerPos+cameraPosition), 0.0,1.0);
-		vec3 lightPos = LightSourcePosition(feetPlayerPos+cameraPosition, cameraPosition,vortexBounds);
-
-		float lightningflash = texelFetch2D(colortex4,ivec2(1,1),0).x/150.0;
-		vec3 lightColors = LightSourceColors(vortexBounds, lightningflash);
-		
-		float end_NdotL = clamp(dot(worldSpaceNormal, normalize(-lightPos))*0.5+0.5,0.0,1.0);
-		end_NdotL *= end_NdotL;
-
-		float fogShadow = GetEndFogShadow(feetPlayerPos+cameraPosition, lightPos);
-		float endPhase = endFogPhase(lightPos);
-
-		Direct_lighting += lightColors * endPhase * end_NdotL * fogShadow;
-
-		vec3 AmbientLightColor = vec3(0.3,0.6,1.0) ;
-			
-		Indirect_lighting = AmbientLightColor + 0.7 * AmbientLightColor * dot(worldSpaceNormal, normalize(feetPlayerPos));
-		Indirect_lighting *= 0.1;
-	#endif
-
-	///////////////////////// BLOCKLIGHT LIGHTING OR LPV LIGHTING OR FLOODFILL COLORED LIGHTING
-
-	#ifdef IS_LPV_ENABLED
-		vec3 normalOffset = vec3(0.0);
-
-		if (any(greaterThan(abs(viewToWorld(normalMat.xyz).xyz), vec3(1.0e-6))))
-			normalOffset = 0.5*worldSpaceNormal;
-
-		#if LPV_NORMAL_STRENGTH > 0
-			if (any(greaterThan(abs(normal), vec3(1.0e-6)))) {
-				vec3 texNormalOffset = -normalOffset + worldSpaceNormal;
-				normalOffset = mix(normalOffset, texNormalOffset, (LPV_NORMAL_STRENGTH*0.01));
+			if(HELD_ITEM_BRIGHTNESS > 0.0){ 
+				float pointLight = clamp(1.0-length((feetPlayerPos+cameraPosition)-playerCamPos)/HANDHELD_LIGHT_RANGE,0.0,1.0);
+				lightmap.x  = mix(lightmap.x , HELD_ITEM_BRIGHTNESS, pointLight*pointLight);
 			}
 		#endif
 
-		vec3 lpvPos = GetLpvPosition(feetPlayerPos) + normalOffset;
-	#else
-		const vec3 lpvPos = vec3(0.0);
-	#endif
+		vec3 Indirect_lighting = vec3(0.0);
+		vec3 MinimumLightColor = vec3(1.0);
 
-	Indirect_lighting += doBlockLightLighting(vec3(TORCH_R,TORCH_G,TORCH_B), lightmap.x, feetPlayerPos, lpvPos, worldSpaceNormal);
+		vec3 Direct_lighting = vec3(0.0);
 
-	vec4 flashLightSpecularData = vec4(0.0);
-	#ifdef FLASHLIGHT
-		Indirect_lighting += calculateFlashlight(FragCoord.xy*texelSize/RENDER_SCALE, viewPos, vec3(0.0), worldSpaceNormal, flashLightSpecularData, false);
-	#endif
+		#ifdef OVERWORLD_SHADER
+			vec3 DirectLightColor = lightCol.rgb/2400.0;
+			vec3 AmbientLightColor = averageSkyCol_Clouds/900.0;
 
-	vec3 FinalColor = (Indirect_lighting + Direct_lighting) * Albedo;
+			#ifdef USE_CUSTOM_DIFFUSE_LIGHTING_COLORS
+				DirectLightColor = luma(DirectLightColor) * vec3(DIRECTLIGHT_DIFFUSE_R,DIRECTLIGHT_DIFFUSE_G,DIRECTLIGHT_DIFFUSE_B);
+				AmbientLightColor = luma(AmbientLightColor) * vec3(INDIRECTLIGHT_DIFFUSE_R,INDIRECTLIGHT_DIFFUSE_G,INDIRECTLIGHT_DIFFUSE_B);
+			#endif
 
-	#if EMISSIVE_TYPE == 2 || EMISSIVE_TYPE == 3
-		Emission(FinalColor, Albedo, SpecularTex.b);
-	#endif
+			if(!isWater && isEyeInWater == 1){
+				float distanceFromWaterSurface = cameraPosition.y - waterEnteredAltitude;
+				float waterdepth = max(-(feetPlayerPos.y + distanceFromWaterSurface),0.0);
+ 
+				DirectLightColor *= exp(-vec3(Water_Absorb_R, Water_Absorb_G, Water_Absorb_B) * (waterdepth/abs(WsunVec.y)));
+				DirectLightColor *= pow(waterCaustics(feetPlayerPos + cameraPosition, WsunVec)*WATER_CAUSTICS_BRIGHTNESS, WATER_CAUSTICS_STRENGTH);
+			}
+
+			float NdotL = clamp((-15 + dot(normal, normalize(WsunVec*mat3(gbufferModelViewInverse)))*255.0) / 240.0  ,0.0,1.0);
+			float Shadows = 1.0;
+
+			float shadowMapFalloff = smoothstep(0.0, 1.0, min(max(1.0 - length(feetPlayerPos) / (shadowDistance+16),0.0)*5.0,1.0));
+			float shadowMapFalloff2 = smoothstep(0.0, 1.0, min(max(1.0 - length(feetPlayerPos) / shadowDistance,0.0)*5.0,1.0));
+
+			float LM_shadowMapFallback = min(max(lightmap.y-0.8, 0.0) * 25,1.0);
+
+			vec3 shadowPlayerPos = toWorldSpace(viewPos);
+
+			Shadows = ComputeShadowMap(DirectLightColor, shadowPlayerPos, shadowMapFalloff, blueNoise());
+			Shadows *= mix(LM_shadowMapFallback, 1.0, shadowMapFalloff2);
+			Shadows *= GetCloudShadow(feetPlayerPos+cameraPosition, WsunVec);
+
+			Direct_lighting = DirectLightColor * NdotL * Shadows;
+
+			vec3 indirectNormal = worldSpaceNormal / dot(abs(worldSpaceNormal),vec3(1.0));
+			float SkylightDir = clamp(indirectNormal.y*0.7+0.3,0.0,1.0);
+
+			float skylight = mix(0.2 + 2.3*(1.0-lightmap.y), 2.5, SkylightDir);
+			AmbientLightColor *= skylight;
+
+			Indirect_lighting = doIndirectLighting(AmbientLightColor, MinimumLightColor, lightmap.y);
+		#endif
+
+		#ifdef NETHER_SHADER
+			Indirect_lighting = volumetricsFromTex(worldSpaceNormal, colortex4, 0).rgb / 1200.0 / 1.5;
+		#endif
+
+		#ifdef END_SHADER
+			float vortexBounds = clamp(vortexBoundRange - length(feetPlayerPos+cameraPosition), 0.0,1.0);
+			vec3 lightPos = LightSourcePosition(feetPlayerPos+cameraPosition, cameraPosition,vortexBounds);
+
+			float lightningflash = texelFetch2D(colortex4,ivec2(1,1),0).x/150.0;
+			vec3 lightColors = LightSourceColors(vortexBounds, lightningflash);
+		
+			float end_NdotL = clamp(dot(worldSpaceNormal, normalize(-lightPos))*0.5+0.5,0.0,1.0);
+			end_NdotL *= end_NdotL;
+
+			float fogShadow = GetEndFogShadow(feetPlayerPos+cameraPosition, lightPos);
+			float endPhase = endFogPhase(lightPos);
+
+			Direct_lighting += lightColors * endPhase * end_NdotL * fogShadow;
+
+			vec3 AmbientLightColor = vec3(0.3,0.6,1.0) ;
+			
+			Indirect_lighting = AmbientLightColor + 0.7 * AmbientLightColor * dot(worldSpaceNormal, normalize(feetPlayerPos));
+			Indirect_lighting *= 0.1;
+		#endif
+
+	///////////////////////// BLOCKLIGHT LIGHTING OR LPV LIGHTING OR FLOODFILL COLORED LIGHTING
+
+		#ifdef IS_LPV_ENABLED
+			vec3 normalOffset = vec3(0.0);
+
+			if(any(greaterThan(abs(viewToWorld(normalMat.xyz).xyz), vec3(1.0e-6))))
+				normalOffset = 0.5*worldSpaceNormal;
+
+			#if LPV_NORMAL_STRENGTH > 0
+				if(any(greaterThan(abs(normal), vec3(1.0e-6)))) {
+					vec3 texNormalOffset = -normalOffset + worldSpaceNormal;
+					normalOffset = mix(normalOffset, texNormalOffset, (LPV_NORMAL_STRENGTH*0.01));
+				}
+			#endif
+
+			vec3 lpvPos = GetLpvPosition(feetPlayerPos) + normalOffset;
+		#else
+			const vec3 lpvPos = vec3(0.0);
+		#endif
+
+		Indirect_lighting += doBlockLightLighting(vec3(TORCH_R,TORCH_G,TORCH_B), lightmap.x, feetPlayerPos, lpvPos, worldSpaceNormal);
+
+		vec4 flashLightSpecularData = vec4(0.0);
+		#ifdef FLASHLIGHT
+			Indirect_lighting += calculateFlashlight(FragCoord.xy*texelSize/RENDER_SCALE, viewPos, vec3(0.0), worldSpaceNormal, flashLightSpecularData, false);
+		#endif
+
+		vec3 FinalColor = (Indirect_lighting + Direct_lighting) * Albedo;
+		#if EMISSIVE_TYPE == 2 || EMISSIVE_TYPE == 3
+			Emission(FinalColor, Albedo, SpecularTex.b);
+		#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////// SPECULAR LIGHTING /////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-	#ifdef DAMAGE_BLOCK_EFFECT
-		#undef FORWARD_SPECULAR
-	#endif
-
-	#ifdef FORWARD_SPECULAR
-
-		float harcodedF0 = 0.02;
-		
-		// if nothing is chosen, no smoothness and no reflectance
-		vec2 specularValues = vec2(1.0, 0.0); 
-		
-		// hardcode specular values for select blocks like glass, water, and slime
-		if(isReflective) specularValues = vec2(1.0, harcodedF0);
-
-		// detect if the specular texture is used, if it is, overwrite hardcoded values
-		if(SpecularTex.r > 0.0 && SpecularTex.g <= 1.0) specularValues = SpecularTex.rg;
-		
-		float f0 = isReflective ? max(specularValues.g, harcodedF0) : specularValues.g;
-		bool isHand = false;
-
-		#ifdef HAND
-			isHand = true;
-			f0 = max(specularValues.g, harcodedF0);
+		#ifdef DAMAGE_BLOCK_EFFECT
+			#undef FORWARD_SPECULAR
 		#endif
 
-		float roughness = specularValues.r; 
+		#ifdef FORWARD_SPECULAR
 
-		if(UnchangedAlpha <= 0.0 && !isReflective) f0 = 0.0;
+			float harcodedF0 = 0.02;
 
-		if (f0 > 0.0){
-			if(isReflective) f0 = max(f0, harcodedF0);
+			// if nothing is chosen, no smoothness and no reflectance
+			vec2 specularValues = vec2(1.0, 0.0); 
 
-			float reflectance = 0.0;
+			// hardcode specular values for select blocks like glass, water, and slime
+			if(isReflective) specularValues = vec2(1.0, harcodedF0);
 
-			#ifndef OVERWORLD_SHADER
-				vec3 WsunVec = vec3(0.0);
-				vec3 DirectLightColor = WsunVec;
-				float Shadows = 0.0;
+			// detect if the specular texture is used, if it is, overwrite hardcoded values
+			if(SpecularTex.r > 0.0 && SpecularTex.g <= 1.0) specularValues = SpecularTex.rg;
+		
+			float f0 = isReflective ? max(specularValues.g, harcodedF0) : specularValues.g;
+			bool isHand = false;
+
+			#ifdef HAND
+				isHand = true;
+				f0 = max(specularValues.g, harcodedF0);
 			#endif
 
-			vec3 specularReflections = specularReflections(viewPos, normalize(feetPlayerPos), WsunVec, vec3(blueNoise(), vec2(interleaved_gradientNoise_temporal())), worldSpaceNormal, roughness, f0, Albedo, FinalColor*gl_FragData[0].a, DirectLightColor * Shadows, lightmap.y, isHand, isWater, reflectance, flashLightSpecularData);
+			float roughness = specularValues.r; 
 
-			gl_FragData[0].a = gl_FragData[0].a + (1.0-gl_FragData[0].a) * reflectance;
+			if(UnchangedAlpha <= 0.0 && !isReflective) f0 = 0.0;
+
+			if(f0 > 0.0){
+				if(isReflective) f0 = max(f0, harcodedF0);
+
+				float reflectance = 0.0;
+
+				#ifndef OVERWORLD_SHADER
+					vec3 WsunVec = vec3(0.0);
+					vec3 DirectLightColor = WsunVec;
+					float Shadows = 0.0;
+				#endif
+
+				vec3 specularReflections = specularReflections(viewPos, normalize(feetPlayerPos), WsunVec, vec3(blueNoise(), vec2(interleaved_gradientNoise_temporal())), worldSpaceNormal, roughness, f0, Albedo, FinalColor * gl_FragData[0].a, DirectLightColor * Shadows, lightmap.y, isHand, isWater, reflectance, flashLightSpecularData);
+
+				gl_FragData[0].a = gl_FragData[0].a + (1.0-gl_FragData[0].a) * reflectance;
 		
-			// invert the alpha blending darkening on the color so you can interpolate between diffuse and specular and keep buffer blending
-			gl_FragData[0].rgb = clamp(specularReflections / gl_FragData[0].a * 0.1,0.0,65000.0);
-		}else{
-			gl_FragData[0].rgb = clamp(FinalColor * 0.1,0.0,65000.0);
-		}
-	#else
-		gl_FragData[0].rgb = FinalColor*0.1;
-	#endif
-
-	#ifdef ENTITIES
-		// do not allow specular to be very visible in these regions on entities
-		// this helps with specular on slimes, and entities with skin overlays like piglins/players
-		if(!gl_FrontFacing) {
-			gl_FragData[0] = vec4(FinalColor*0.1, UnchangedAlpha);
-		}
-	#endif
-	
-	#if defined DISTANT_HORIZONS && defined DH_OVERDRAW_PREVENTION && !defined HAND
-		#if OVERDRAW_MAX_DISTANCE == 0
-			float maxOverdrawDistance = far;
+				// invert the alpha blending darkening on the color so you can interpolate between diffuse and specular and keep buffer blending
+				float colorFactor = (isGlass || isSlime) ? 0.5 : 0.2;
+				gl_FragData[0].rgb = clamp(specularReflections / gl_FragData[0].a * 0.1,0.0,65000.0) * colorFactor;
+			}else{
+				gl_FragData[0].rgb = clamp(FinalColor * 0.1,0.0,65000.0);
+			}
 		#else
-			float maxOverdrawDistance = OVERDRAW_MAX_DISTANCE;
+			gl_FragData[0].rgb = FinalColor * 0.1;
 		#endif
 
-		bool WATER = texture2D(colortex7, gl_FragCoord.xy*texelSize).a > 0.0 && length(feetPlayerPos) > clamp(far-16*4, 16, maxOverdrawDistance) && texture2D(depthtex1, gl_FragCoord.xy*texelSize).x >= 1.0;
+		#ifdef ENTITIES
+			// do not allow specular to be very visible in these regions on entities
+			// this helps with specular on slimes, and entities with skin overlays like piglins/players
+			if(!gl_FrontFacing) {
+				gl_FragData[0] = vec4(FinalColor * 0.1, UnchangedAlpha);
+			}
+		#endif
 
-		if(WATER) gl_FragData[0].a = 0.0;
-	#endif
-
-	gl_FragData[1] = vec4(Albedo, MATERIALS);
-
-	#if DEBUG_VIEW == debug_DH_WATER_BLENDING
-		if(gl_FragCoord.x*texelSize.x < 0.47) gl_FragData[0] = vec4(0.0);
-	#elif DEBUG_VIEW == debug_NORMALS
-		gl_FragData[0].rgb = worldSpaceNormal * 0.1;
-		gl_FragData[0].a = 1;
-	#elif DEBUG_VIEW == debug_INDIRECT
-		gl_FragData[0].rgb = Indirect_lighting * 0.1;
-	#elif DEBUG_VIEW == debug_DIRECT
-		gl_FragData[0].rgb = Direct_lighting * 0.1;
-	#endif
-
-	gl_FragData[3] = vec4(encodeVec2(lightmap.x, lightmap.y), 1, 1, 1);
-
-	#if defined ENTITIES && defined IS_IRIS
-		if(NAMETAG > 0) {
-			// WHY DO THEY HAVE TO AHVE LIGHTING AAAAAAUGHAUHGUAHG
-			#ifndef OVERWORLD_SHADER
-				lightmap.y = 0.0;
+		#if defined DISTANT_HORIZONS && defined DH_OVERDRAW_PREVENTION && !defined HAND
+			#if OVERDRAW_MAX_DISTANCE == 0
+				float maxOverdrawDistance = far;
+			#else
+				float maxOverdrawDistance = OVERDRAW_MAX_DISTANCE;
 			#endif
-			
-			vec3 nameTagLighting = Albedo.rgb * max(max(lightmap.y*lightmap.y*lightmap.y , lightmap.x*lightmap.x*lightmap.x), 0.025);
-			
-			// in vanilla they have a special blending mode/no blending, or something. i cannot change the buffer blend mode without changing the rest of the entities :/
-			gl_FragData[0] = vec4(nameTagLighting.rgb * 0.1, UnchangedAlpha  * 0.75);
-		}
-	#endif
+
+			bool WATER = texture2D(colortex7, gl_FragCoord.xy*texelSize).a > 0.0 && length(feetPlayerPos) > clamp(far-16*4, 16, maxOverdrawDistance) && texture2D(depthtex1, gl_FragCoord.xy*texelSize).x >= 1.0;
+
+			if(WATER) gl_FragData[0].a = 0.0;
+		#endif
+
+		gl_FragData[1] = vec4(Albedo, MATERIALS);
+
+		#if DEBUG_VIEW == debug_DH_WATER_BLENDING
+			if(gl_FragCoord.x*texelSize.x < 0.47) gl_FragData[0] = vec4(0.0);
+		#elif DEBUG_VIEW == debug_NORMALS
+			gl_FragData[0].rgb = worldSpaceNormal * 0.1;
+			gl_FragData[0].a = 1;
+		#elif DEBUG_VIEW == debug_INDIRECT
+			gl_FragData[0].rgb = Indirect_lighting * 0.1;
+		#elif DEBUG_VIEW == debug_DIRECT
+			gl_FragData[0].rgb = Direct_lighting * 0.1;
+		#endif
+
+		gl_FragData[3] = vec4(encodeVec2(lightmap.x, lightmap.y), 1, 1, 1);
+
+		#if defined ENTITIES && defined IS_IRIS
+			if(NAMETAG > 0) {
+				// WHY DO THEY HAVE TO AHVE LIGHTING AAAAAAUGHAUHGUAHG
+				#ifndef OVERWORLD_SHADER
+					lightmap.y = 0.0;
+				#endif
+
+				vec3 nameTagLighting = Albedo.rgb * max(max(lightmap.y*lightmap.y*lightmap.y , lightmap.x*lightmap.x*lightmap.x), 0.025);
+
+				// in vanilla they have a special blending mode/no blending, or something. i cannot change the buffer blend mode without changing the rest of the entities :/
+				gl_FragData[0] = vec4(nameTagLighting.rgb * 0.1, UnchangedAlpha  * 0.75);
+			}
+		#endif
 	}
 }

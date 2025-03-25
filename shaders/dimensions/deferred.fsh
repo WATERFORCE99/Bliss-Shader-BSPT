@@ -26,10 +26,6 @@ flat varying float centerDepth;
 uniform sampler2D colortex1;
 uniform sampler2D colortex4;
 
-vec3 toLinear(vec3 sRGB){
-	return sRGB * (sRGB * (sRGB * 0.305306011 + 0.682171111) + 0.012522878);
-}
-
 uniform float frameTime;
 uniform float frameTimeCounter;
 uniform float rainStrength;
@@ -44,6 +40,7 @@ uniform ivec2 eyeBrightnessSmooth;
 // uniform ivec2 eyeBrightness;
 uniform float caveDetection;
 uniform int isEyeInWater;
+uniform float nightVision;
 
 vec4 lightCol = vec4(lightSourceColor, float(sunElevation > 1e-5)*2-1.);
 
@@ -125,7 +122,6 @@ gl_FragData[0] = vec4(0.0);
 
 float mixhistory = 0.06;
 
-
 #ifdef OVERWORLD_SHADER
 
 	//////////////////////////////////////////////
@@ -153,32 +149,32 @@ float mixhistory = 0.06;
 	vec3 AmbientLightTint = vec3(AmbientLight_R, AmbientLight_G, AmbientLight_B);
 
 	// --- the color of the atmosphere + the average color of the atmosphere.
-	vec3 skyGroundCol = skyFromTex(vec3(0, -1 ,0), colortex4).rgb + aurOffset;// * clamp(WsunVec.y*2.0,0.2,1.0);
+	vec3 skyGroundCol = skyFromTex(vec3(0, -1 ,0), colortex4).rgb + aurAvg;// * clamp(WsunVec.y*2.0,0.2,1.0);
 
 	/// --- Save light values
-	if (gl_FragCoord.x < 1. && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1 )
+	if (gl_FragCoord.x < 1. && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1)
 	gl_FragData[0] = vec4(averageSkyCol_Clouds * AmbientLightTint,1.0);
 
-	if (gl_FragCoord.x > 1. && gl_FragCoord.x < 2.  && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1 )
+	if (gl_FragCoord.x > 1. && gl_FragCoord.x < 2.  && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1)
 	gl_FragData[0] = vec4((skyGroundCol/150.0) * AmbientLightTint,1.0);
 
 	#ifdef ambientLight_only
-		if (gl_FragCoord.x > 6. && gl_FragCoord.x < 7.  && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1 )
+		if (gl_FragCoord.x > 6. && gl_FragCoord.x < 7.  && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1)
 		gl_FragData[0] = vec4(0.0,0.0,0.0,1.0);
 
-		if (gl_FragCoord.x > 8. && gl_FragCoord.x < 9.  && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1 )
+		if (gl_FragCoord.x > 8. && gl_FragCoord.x < 9.  && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1)
 		gl_FragData[0] = vec4(0.0,0.0,0.0,1.0);
 
-		if (gl_FragCoord.x > 13. && gl_FragCoord.x < 14.  && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1 )
+		if (gl_FragCoord.x > 13. && gl_FragCoord.x < 14.  && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1)
 		gl_FragData[0] = vec4(0.0,0.0,0.0,1.0);
 	#else
-		if (gl_FragCoord.x > 6. && gl_FragCoord.x < 7.  && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1 )
+		if (gl_FragCoord.x > 6. && gl_FragCoord.x < 7.  && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1)
 		gl_FragData[0] = vec4(lightSourceColor,1.0);
 
-		if (gl_FragCoord.x > 8. && gl_FragCoord.x < 9.  && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1 )
+		if (gl_FragCoord.x > 8. && gl_FragCoord.x < 9.  && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1)
 		gl_FragData[0] = vec4(sunColor,1.0);
 
-		if (gl_FragCoord.x > 9. && gl_FragCoord.x < 10.  && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1 )
+		if (gl_FragCoord.x > 9. && gl_FragCoord.x < 10.  && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1)
 		gl_FragData[0] = vec4(moonColor,1.0);
 	#endif
 
@@ -236,8 +232,8 @@ if (gl_FragCoord.x > 18.+257. && gl_FragCoord.y > 1. && gl_FragCoord.x < 18+257+
 	vec3 viewPos = mat3(gbufferModelView)*viewVector*1024.0;
 	float noise = interleaved_gradientNoise_temporal();
 
-	WsunVec = normalize(mat3(gbufferModelViewInverse) * sunPosition + gbufferModelViewInverse[3].xyz);// * ( float(sunElevation > 1e-5)*2.0-1.0 );
-	vec3 WmoonVec = normalize(mat3(gbufferModelViewInverse) * moonPosition + gbufferModelViewInverse[3].xyz);// * ( );
+	WsunVec = normalize(toWorldSpace(sunPosition));// * (float(sunElevation > 1e-5)*2.0-1.0);
+	vec3 WmoonVec = normalize(toWorldSpace(moonPosition));
 
 	if(dot(-WmoonVec, WsunVec) < 0.9999) WmoonVec = -WmoonVec;
 
@@ -280,7 +276,7 @@ if (gl_FragCoord.x > 18.+257. && gl_FragCoord.y > 1. && gl_FragCoord.x < 18+257+
 
 		vec4 VL_Fog = GetVolumetricFog(mat3(gbufferModelView)*viewVector*256., noise, 1.0-noise);
 
-		BackgroundColor += VL_Fog.rgb + vec3(0.5,0.75,1.0);
+		BackgroundColor += VL_Fog.rgb + vec3(0.5,0.75,1.0) * nightVision;
 
 	  	gl_FragData[0] = vec4(BackgroundColor*8.0, 1.0);
 
@@ -340,12 +336,11 @@ if (gl_FragCoord.x > 18.+257. && gl_FragCoord.y > 1. && gl_FragCoord.x < 18+257+
 vec3 frameHistory = texelFetch2D(colortex4,ivec2(gl_FragCoord.xy),0).rgb;
 vec3 currentFrame = gl_FragData[0].rgb*150.;
 
-
 gl_FragData[0].rgb = clamp(mix(frameHistory, currentFrame, mixhistory),0.0,65000.);
 
 //Exposure values
-if (gl_FragCoord.x > 10. && gl_FragCoord.x < 11.  && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1 )
+if (gl_FragCoord.x > 10. && gl_FragCoord.x < 11.  && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1)
 gl_FragData[0] = vec4(exposure, avgBrightness, avgL2,1.0);
-if (gl_FragCoord.x > 14. && gl_FragCoord.x < 15.  && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1 )
+if (gl_FragCoord.x > 14. && gl_FragCoord.x < 15.  && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1)
 gl_FragData[0] = vec4(rodExposure, centerDepth,0.0, 1.0);
 }

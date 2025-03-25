@@ -17,13 +17,12 @@ uniform float frameTimeCounter;
 
 uniform int hideGUI;
 
-#include "/lib/color_transforms.glsl"
+#include "/lib/tonemaps.glsl"
 #include "/lib/color_dither.glsl"
 #include "/lib/res_params.glsl"
 
 /*
-vec4 SampleTextureCatmullRom(sampler2D tex, vec2 uv, vec2 texSize )
-{
+vec4 SampleTextureCatmullRom(sampler2D tex, vec2 uv, vec2 texSize) {
     // We're going to sample a a 4x4 grid of texels surrounding the target UV coordinate. We'll do this by rounding
     // down the sample location to get the exact center of our "starting" texel. The starting texel will be at
     // location [1, 1] in the grid, where [0, 0] is the top left corner.
@@ -154,27 +153,27 @@ vec3 chromaticAberration(vec2 UV){
 
 void main() {
 
-  /* DRAWBUFFERS:7 */
-  
-  #ifdef CHROMATIC_ABERRATION
-	  vec3 color = chromaticAberration(texcoord);
-  #else
-	  vec3 color = texture2D(colortex7,texcoord).rgb;
-  #endif
+	/* DRAWBUFFERS:7 */
+
+	#ifdef CHROMATIC_ABERRATION
+		vec3 color = chromaticAberration(texcoord);
+	#else
+		vec3 color = texture2D(colortex7,texcoord).rgb;
+	#endif
 
 	#ifdef CONTRAST_ADAPTATIVE_SHARPENING
-    color = contrastAdaptiveSharpening(color, texcoord);
+		color = contrastAdaptiveSharpening(color, texcoord);
 	#endif
-  
-  color = saturationAndCrosstalk(color);
-  
-  #ifdef LUMINANCE_CURVE
-	  color = luminanceCurve(color);
-  #endif
 
-  #ifdef COLOR_GRADING_ENABLED
-	  color = colorGrading(color);
-  #endif
-  
+	color = saturationAndCrosstalk(color);
+
+	#ifdef LUMINANCE_CURVE
+		color = luminanceCurve(color);
+	#endif
+
+	#ifdef COLOR_GRADING_ENABLED
+		color = colorGrading(color);
+	#endif
+
 	gl_FragData[0].rgb = clamp(int8Dither(color, texcoord),0.0,1.0);
 }

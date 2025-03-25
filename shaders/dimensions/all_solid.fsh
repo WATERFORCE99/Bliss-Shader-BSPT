@@ -103,25 +103,6 @@ mat3 inverseMatrix(mat3 m) {
 				b21, (-a21 * a00 + a01 * a20), (a11 * a00 - a01 * a10)) / det;
 }
 
-vec4 encode (vec3 n, vec2 lightmaps){
-	n.xy = n.xy / dot(abs(n), vec3(1.0));
-	n.xy = n.z <= 0.0 ? (1.0 - abs(n.yx)) * sign(n.xy) : n.xy;
-	vec2 encn = clamp(n.xy * 0.5 + 0.5,-1.0,1.0);
-	
-	return vec4(encn,vec2(lightmaps.x,lightmaps.y));
-}
-
-//encoding by jodie
-float encodeVec2(vec2 a){
-	const vec2 constant1 = vec2( 1., 256.) / 65535.;
-	vec2 temp = floor( a * 255. );
-	return temp.x*constant1.x+temp.y*constant1.y;
-}
-
-float encodeVec2(float x,float y){
-	return encodeVec2(vec2(x,y));
-}
-
 #ifdef MC_NORMAL_MAP
 	vec3 applyBump(mat3 tbnMatrix, vec3 bump, float puddle_values){
 		float bumpmult = clamp(puddle_values,0.0,1.0);
@@ -138,10 +119,6 @@ float encodeVec2(float x,float y){
 		return texture2DGradARB(texture,fract(coord)*vtexcoordam.pq+vtexcoordam.st,dcdx,dcdy);
 	}
 #endif
-
-vec3 toLinear(vec3 sRGB){
-	return sRGB * (sRGB * (sRGB * 0.305306011 + 0.682171111) + 0.012522878);
-}
 
 const vec2[8] offsets = vec2[8](vec2(1./8.,-3./8.),
 							vec2(-1.,3.)/8.,
@@ -228,7 +205,7 @@ void main() {
 	vec2 tempOffset = offsets[framemod8];
 
 	vec3 fragpos = toScreenSpace(FragCoord*vec3(texelSize/RENDER_SCALE,1.0)-vec3(vec2(tempOffset)*texelSize*0.5, 0.0));
-	vec3 playerPos = mat3(gbufferModelViewInverse) * fragpos  + gbufferModelViewInverse[3].xyz;
+	vec3 playerPos = toWorldSpace(fragpos);
 	vec3 worldPos = playerPos + cameraPosition;
 
 	float torchlightmap = lmtexcoord.z;
@@ -246,10 +223,9 @@ void main() {
  		}
  	#endif
 
-		// if(HELD_ITEM_BRIGHTNESS > 0.0) torchlightmap = max(torchlightmap, HELD_ITEM_BRIGHTNESS * clamp( pow(max(1.0-length(worldPos-playerCamPos)/HANDHELD_LIGHT_RANGE,0.0),1.5),0.0,1.0));
 		if(HELD_ITEM_BRIGHTNESS > 0.0){ 
-			float pointLight = clamp(1.0-(length(worldPos-playerCamPos)-1)/HANDHELD_LIGHT_RANGE,0.0,1.0);
- 			torchlightmap = mix(torchlightmap, HELD_ITEM_BRIGHTNESS, pointLight);
+			float pointLight = clamp(1.0-(length(worldPos-playerCamPos)-1.0)/HANDHELD_LIGHT_RANGE,0.0,1.0);
+			torchlightmap = mix(torchlightmap, HELD_ITEM_BRIGHTNESS, pointLight * pointLight);
 		}
 
 		#ifdef HAND

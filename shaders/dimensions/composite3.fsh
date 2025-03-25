@@ -45,9 +45,6 @@ uniform float far;
 uniform float near;
 uniform float farPlane;
 
-uniform mat4 gbufferPreviousModelView;
-uniform vec3 previousCameraPosition;
-
 uniform int hideGUI;
 uniform int dhRenderDistance;
 uniform int isEyeInWater;
@@ -73,10 +70,6 @@ uniform float eyeAltitude;
 
 float ld(float depth) {
 	return 1.0 / (zMults.y - depth * zMults.z);		// (-depth * (far - near)) = (2.0 * near)/ld - far - near
-}
-
-vec3 toLinear(vec3 sRGB){
-	return sRGB * (sRGB * (sRGB * 0.305306011 + 0.682171111) + 0.012522878);
 }
 
 #include "/lib/DistantHorizons_projections.glsl"
@@ -263,8 +256,7 @@ vec4 VLTemporalFiltering(vec3 viewPos, in float referenceDepth, sampler2D depth)
 	vec2 VLtexCoord = offsetTexcoord * VL_RENDER_RESOLUTION;
 
 	// get previous frames position stuff for UV
-	vec3 playerPos = mat3(gbufferModelViewInverse) * viewPos + gbufferModelViewInverse[3].xyz + (cameraPosition - previousCameraPosition);
-	vec3 previousPosition = mat3(gbufferPreviousModelView) * playerPos + gbufferPreviousModelView[3].xyz;
+	vec3 previousPosition = toPreviousPos(viewPos);
 	previousPosition = toClipSpace3Prev(previousPosition);
 
 	vec2 velocity = previousPosition.xy - offsetTexcoord;
@@ -336,12 +328,12 @@ void main() {
 	#endif
 
 	vec3 viewPos = toScreenSpace_DH(texcoord/RENDER_SCALE, z, DH_depth0);
-	vec3 playerPos = mat3(gbufferModelViewInverse) * viewPos + gbufferModelViewInverse[3].xyz;
+	vec3 playerPos = toWorldSpace(viewPos);
 
 	vec3 playerPos_normalized = normVec(playerPos);
 
 	vec3 viewPos_alt = toScreenSpace(vec3(texcoord/RENDER_SCALE, z2));
-	vec3 playerPos_alt = mat3(gbufferModelViewInverse) * viewPos_alt + gbufferModelViewInverse[3].xyz;
+	vec3 playerPos_alt = toWorldSpace(viewPos_alt);
 
 	float linearDistance = length(playerPos);
 	float linearDistance_cylinder = length(playerPos.xz);

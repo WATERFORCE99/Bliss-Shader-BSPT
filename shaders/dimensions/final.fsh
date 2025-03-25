@@ -2,9 +2,6 @@
 #include "/lib/util.glsl"
 #include "/lib/dither.glsl"
 
-uniform vec3 previousCameraPosition;
-uniform mat4 gbufferPreviousModelView;
-
 #include "/lib/projections.glsl"
 
 uniform sampler2D colortex1;
@@ -44,7 +41,7 @@ uniform float aspectRatio;
 
 uniform int hideGUI;
 
-#include "/lib/color_transforms.glsl"
+#include "/lib/tonemaps.glsl"
 #include "/lib/color_dither.glsl"
 #include "/lib/res_params.glsl"
 #include "/lib/lensflare.glsl"
@@ -82,13 +79,6 @@ void doCameraGridLines(inout vec3 color, vec2 UV){
 	color = mix(color, vec3(1.0),  gridLines);
 }
 
-vec3 tonemap(vec3 col){
-	return col/(1+luma(col));
-}
-vec3 invTonemap(vec3 col){
-	return col/(1-luma(col));
-}
-
 vec3 doMotionBlur(vec2 texcoord, float depth, float noise, bool hand){
   
 	float samples = 4.0;
@@ -98,9 +88,8 @@ vec3 doMotionBlur(vec2 texcoord, float depth, float noise, bool hand){
 	if(hand) blurMult = 0.0;
 
 	vec3 viewPos = toScreenSpace(vec3(texcoord, depth));
-	viewPos = mat3(gbufferModelViewInverse) * viewPos + gbufferModelViewInverse[3].xyz + (cameraPosition - previousCameraPosition);
 
-	vec3 previousPosition = mat3(gbufferPreviousModelView) * viewPos + gbufferPreviousModelView[3].xyz;
+	vec3 previousPosition = toPreviousPos(viewPos);
 	previousPosition = toClipSpace3(previousPosition);
 
 	vec2 velocity = texcoord - previousPosition.xy;

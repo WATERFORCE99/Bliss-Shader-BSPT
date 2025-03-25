@@ -12,58 +12,10 @@ flat varying int dh_material_id;
 
 uniform float far;
 // uniform int hideGUI;
-uniform mat4 gbufferModelView;
-uniform mat4 gbufferModelViewInverse;
 
-vec3 viewToWorld(vec3 viewPosition) {
-	vec4 pos;
-	pos.xyz = viewPosition;
-	pos.w = 0.0;
-	pos = gbufferModelViewInverse * pos;
-	return pos.xyz;
-}
+#include "/lib/projections.glsl"
 
-vec3 worldToView(vec3 worldPos) {
-	vec4 pos = vec4(worldPos, 0.0);
-	pos = gbufferModelView * pos;
-	return pos.xyz;
-}
-
-vec4 encode (vec3 n, vec2 lightmaps){
-	n.xy = n.xy / dot(abs(n), vec3(1.0));
-	n.xy = n.z <= 0.0 ? (1.0 - abs(n.yx)) * sign(n.xy) : n.xy;
-	vec2 encn = clamp(n.xy * 0.5 + 0.5,-1.0,1.0);
-	
-	return vec4(encn,vec2(lightmaps.x,lightmaps.y));
-}
-
-//encoding by jodie
-float encodeVec2(vec2 a){
-	const vec2 constant1 = vec2( 1., 256.) / 65535.;
-	vec2 temp = floor( a * 255. );
-	return temp.x*constant1.x+temp.y*constant1.y;
-}
-
-float encodeVec2(float x,float y){
-	return encodeVec2(vec2(x,y));
-}
-
-// uniform sampler2D depthtex0;
-// uniform vec2 texelSize;
-
-#define diagonal3(m) vec3((m)[0].x, (m)[1].y, m[2].z)
-#define  projMAD(m, v) (diagonal3(m) * (v) + (m)[3].xyz)
-
-uniform mat4 gbufferProjection;
-uniform mat4 gbufferProjectionInverse;
-uniform vec3 cameraPosition;
-
-vec3 toScreenSpace(vec3 p) {
-	vec4 iProjDiag = vec4(gbufferProjectionInverse[0].x, gbufferProjectionInverse[1].y, gbufferProjectionInverse[2].zw);
-	vec3 feetPlayerPos = p * 2. - 1.;
-	vec4 viewPos = iProjDiag * feetPlayerPos.xyzz + gbufferProjectionInverse[3];
-	return viewPos.xyz / viewPos.w;
-}
+uniform sampler2D noisetex;
 
 uniform float frameTimeCounter;
 

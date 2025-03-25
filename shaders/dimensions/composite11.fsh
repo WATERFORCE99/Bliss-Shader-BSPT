@@ -35,12 +35,11 @@ uniform int hideGUI;
 uniform int framemod8;
 #include "/lib/TAA_jitter.glsl"
 
-
 uniform mat4 gbufferModelViewInverse;
 uniform mat4 gbufferProjectionInverse;
 vec4 Weather_properties = Moon_Weather_properties;
 
-#include "/lib/color_transforms.glsl"
+#include "/lib/tonemaps.glsl"
 #include "/lib/color_dither.glsl"
 // #include "/lib/biome_specifics.glsl"
 #include "/lib/bokeh.glsl"
@@ -48,9 +47,11 @@ vec4 Weather_properties = Moon_Weather_properties;
 float cdist(vec2 coord) {
 	return max(abs(coord.s-0.5),abs(coord.t-0.5))*2.0;
 }
+
 float blueNoise(){
 	return fract(texelFetch2D(noisetex, ivec2(gl_FragCoord.xy)%512, 0).a + 1.0/1.6180339887 * frameCounter);
 }
+
 float ld(float depth) {
 	return (2.0 * near) / (far + near - depth * (far - near));		// (-depth * (far - near)) = (2.0 * near)/ld - far - near
 }
@@ -83,13 +84,33 @@ float bloomWeight(){
 
 	return result;
 }
-vec3 invTonemap(vec3 col){
-	return col/(1-luma(col));
+
+const mat3 ACESInputMat =
+mat3(0.59719, 0.35458, 0.04823,
+	0.07600, 0.90834, 0.01566,
+	0.02840, 0.13383, 0.83777
+);
+
+// ODT_SAT => XYZ => D60_2_D65 => sRGB
+const mat3 ACESOutputMat =
+mat3( 1.60475, -0.53108, -0.07367,
+	-0.10208,  1.10813, -0.00605,
+	-0.00327, -0.07276,  1.07602
+);
+
+vec3 LinearTosRGB(in vec3 color){
+	vec3 x = color * 12.92f;
+	vec3 y = 1.055f * pow(clamp(color,0.0,1.0), vec3(1.0f / 2.4f)) - 0.055f;
+
+	vec3 clr = color;
+	clr.r = color.r < 0.0031308f ? x.r : y.r;
+	clr.g = color.g < 0.0031308f ? x.g : y.g;
+	clr.b = color.b < 0.0031308f ? x.b : y.b;
+
+	return clr;
 }
-#define linear_to_srgb(x) (pow(x, vec3(1.0/2.2)))
 
 uniform sampler2D colortex6;
-
 
 float w0(float a){
     return (1.0/6.0)*(a*(a*(-a + 3.0) - 3.0) + 1.0);

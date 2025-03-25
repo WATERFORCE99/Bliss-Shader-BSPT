@@ -36,6 +36,7 @@ uniform int isEyeInWater;
 
 uniform sampler2D texture;
 uniform sampler2D colortex4;
+uniform sampler2D noisetex;
 
 #ifdef IS_LPV_ENABLED
 	uniform usampler1D texBlockData;
@@ -43,6 +44,7 @@ uniform sampler2D colortex4;
 	uniform sampler3D texLpv2;
 #endif
 
+uniform int frameCounter;
 uniform float frameTimeCounter;
 #include "/lib/Shadow_Params.glsl"
 
@@ -55,7 +57,6 @@ uniform float nightVision;
 
 flat varying float HELD_ITEM_BRIGHTNESS;
 
-uniform vec3 previousCameraPosition;
 #include "/lib/projections.glsl"
 
 #ifdef OVERWORLD_SHADER
@@ -81,10 +82,6 @@ uniform vec3 previousCameraPosition;
 #include "/lib/diffuse_lighting.glsl"
 #include "/lib/sky_gradient.glsl"
 
-vec3 toLinear(vec3 sRGB){
-	return sRGB * (sRGB * (sRGB * 0.305306011 + 0.682171111) + 0.012522878);
-}
-
 uniform int framemod8;
 #include "/lib/TAA_jitter.glsl"
 
@@ -92,16 +89,6 @@ uniform int framemod8;
 float phaseg(float x, float g){
 	float gg = g * g;
 	return (gg * -0.25 + 0.25) * pow(-2.0 * (g * x) + (gg + 1.0), -1.5) / 3.14;
-}
-
-//encoding by jodie
-float encodeVec2(vec2 a){
-	const vec2 constant1 = vec2( 1., 256.) / 65535.;
-	vec2 temp = floor( a * 255. );
-	return temp.x*constant1.x+temp.y*constant1.y;
-}
-float encodeVec2(float x,float y){
-	return encodeVec2(vec2(x,y));
 }
 
 // #undef BASIC_SHADOW_FILTER
@@ -167,22 +154,6 @@ float encodeVec2(float x,float y){
 #if defined DAMAGE_BLOCK_EFFECT && defined POM
 	#extension GL_ARB_shader_texture_lod : enable
 
-	mat3 inverseMatrix(mat3 m) {
-		float a00 = m[0][0], a01 = m[0][1], a02 = m[0][2];
-		float a10 = m[1][0], a11 = m[1][1], a12 = m[1][2];
-		float a20 = m[2][0], a21 = m[2][1], a22 = m[2][2];
-
-		float b01 = a22 * a11 - a12 * a21;
-		float b11 = -a22 * a10 + a12 * a20;
-		float b21 = a21 * a10 - a11 * a20;
-
-		float det = a00 * b01 + a01 * b11 + a02 * b21;
-
-		return mat3(b01, (-a22 * a01 + a02 * a21), (a12 * a01 - a02 * a11),
-					b11, (a22 * a00 - a02 * a20), (-a12 * a00 + a02 * a10),
-					b21, (-a21 * a00 + a01 * a20), (a11 * a00 - a01 * a10)) / det;
-	}
-
 	const float MAX_OCCLUSION_DISTANCE = MAX_DIST;
 	const float MIX_OCCLUSION_DISTANCE = MAX_DIST*0.9;
 	const int MAX_OCCLUSION_POINTS = MAX_ITERATIONS;
@@ -242,7 +213,7 @@ void main() {
 	vec2 adjustedTexCoord = lmtexcoord.xy;
 	#ifdef POM
 		vec3 fragpos = toScreenSpace(gl_FragCoord.xyz*vec3(texelSize/RENDER_SCALE,1.0)-vec3(0.0));
-		vec3 worldpos = mat3(gbufferModelViewInverse) * fragpos  + gbufferModelViewInverse[3].xyz + cameraPosition;
+		vec3 worldpos = toWorldSpaceCamera(fragpos);
 
 		vec3 normal = normalMat.xyz;
 		vec3 tangent2 = normalize(cross(tangent.rgb,normal)*tangent.w);
@@ -264,10 +235,10 @@ void main() {
 	 		if (viewVector.z < 0.0 && depthmap < 0.9999 && depthmap > 0.00001) {	
 
 				#ifdef Adaptive_Step_length
-					vec3 interval = (viewVector.xyz /-viewVector.z/MAX_OCCLUSION_POINTS * POM_DEPTH) * clamp(1.0-pow(depthmap,2),0.1,1.0);
+					vec3 interval = (viewVector.xyz/-viewVector.z/MAX_OCCLUSION_POINTS * POM_DEPTH) * clamp(1.0-pow(depthmap,2),0.1,1.0);
 					used_POM_DEPTH = 1.0;
 				#else
-					vec3 interval = viewVector.xyz/-viewVector.z/ MAX_OCCLUSION_POINTS*POM_DEPTH;
+					vec3 interval = viewVector.xyz/-viewVector.z/MAX_OCCLUSION_POINTS * POM_DEPTH;
 				#endif
 				vec3 coord = vec3(vtexcoord.st, 1.0);
 
@@ -335,7 +306,7 @@ void main() {
 		#endif
 
 		if(HELD_ITEM_BRIGHTNESS > 0.0){ 
-			float pointLight = clamp(1.0 - (length(worldPos-playerCamPos) - 1.0)/HANDHELD_LIGHT_RANGE,0.0,1.0);
+			float pointLight = clamp(1.0-(length(worldPos-playerCamPos)-1.0)/HANDHELD_LIGHT_RANGE,0.0,1.0);
 			lightmap.x = mix(lightmap.x, HELD_ITEM_BRIGHTNESS, pointLight * pointLight);
 		}
 
@@ -365,9 +336,16 @@ void main() {
 
 		#ifdef OVERWORLD_SHADER
 			directLightColor =  lightCol.rgb/2400.0;
+			AmbientLightColor = averageSkyCol_Clouds / 900.0;
+
+			#ifdef USE_CUSTOM_DIFFUSE_LIGHTING_COLORS
+				directLightColor = luma(directLightColor) * vec3(DIRECTLIGHT_DIFFUSE_R,DIRECTLIGHT_DIFFUSE_G,DIRECTLIGHT_DIFFUSE_B);
+				AmbientLightColor = luma(AmbientLightColor) * vec3(INDIRECTLIGHT_DIFFUSE_R,INDIRECTLIGHT_DIFFUSE_G,INDIRECTLIGHT_DIFFUSE_B);
+			#endif
+
 			float Shadows = 1.0;
 
-			vec3 shadowPlayerPos = mat3(gbufferModelViewInverse) * viewPos + gbufferModelViewInverse[3].xyz;
+			vec3 shadowPlayerPos = toWorldSpace(viewPos);
 
 			float shadowMapFalloff = smoothstep(0.0, 1.0, min(max(1.0 - length(shadowPlayerPos) / (shadowDistance+16),0.0)*5.0,1.0));
 			float shadowMapFalloff2 = smoothstep(0.0, 1.0, min(max(1.0 - length(shadowPlayerPos) / (shadowDistance+11),0.0)*5.0,1.0));
@@ -389,8 +367,6 @@ void main() {
 			// #ifndef LINES
 				// Direct_lighting *= phaseg(clamp(dot(feetPlayerPos_normalized, WsunVec),0.0,1.0), 0.65)*2 + 0.5;
 			// #endif
-
-			AmbientLightColor = averageSkyCol_Clouds / 900.0;
 
 			#ifdef IS_IRIS
 				AmbientLightColor *= 2.5;

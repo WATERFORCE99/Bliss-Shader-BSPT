@@ -12,7 +12,6 @@ Read the terms of modification and sharing before changing something below pleas
 !! DO NOT REMOVE !!
 */
 
-
 #if defined HAND || !defined MC_NORMAL_MAP
 	#undef POM
 #endif
@@ -262,7 +261,7 @@ void main() {
 
 		// low
 		#ifdef MISC_BLOCK_SSS
-			if(mc_Entity.x == BLOCK_SSS_WEIRD || mc_Entity.x == BLOCK_GRASS) SSSAMOUNT = max(0.25 * (1-length(position)/64.0), 0.01);
+			if(mc_Entity.x == BLOCK_SSS_WEIRD || mc_Entity.x == BLOCK_GRASS) SSSAMOUNT = 0.25;
 		#endif
 
 		#ifdef ENTITIES

@@ -4,7 +4,7 @@
 
 /*
 const int colortex0Format = RGBA16F;				// low res clouds (deferred->composite2) + low res VL (composite5->composite15)
-const int colortex1Format = RGBA16;					// terrain gbuffer (gbuffer->composite2)
+const int colortex1Format = RGBA16;				// terrain gbuffer (gbuffer->composite2)
 const int colortex2Format = RGBA16F;				// forward + transparencies (gbuffer->composite4)
 const int colortex3Format = R11F_G11F_B10F;			// frame buffer + bloom (deferred6->final)
 const int colortex4Format = RGBA16F;				// light values and skyboxes (everything)
@@ -15,10 +15,9 @@ const int colortex9Format = RGBA8;					// rain in alpha
 const int colortex10Format = RGBA16F;				// resourcepack Skies
 const int colortex11Format = RGBA16; 				// unchanged translucents albedo, alpha and tangent normals
 const int colortex12Format = RGBA16F;				// DISTANT HORIZONS + VANILLA MIXED DEPTHs
-
 const int colortex13Format = RGBA16F;				// low res VL (composite5->composite15)
 const int colortex14Format = RGBA16;				// rg = SSAO and SS-SSS. a = skylightmap for translucents.
-const int colortex15Format = RGBA8;					// flat normals and vanilla AO
+const int colortex15Format = RGBA8;				// flat normals and vanilla AO
 */
 
 //no need to clear the buffers, saves a few fps
@@ -64,8 +63,6 @@ uniform float frameTimeCounter;
 uniform float viewHeight;
 uniform float viewWidth;
 
-uniform vec3 previousCameraPosition;
-uniform mat4 gbufferPreviousModelView;
 uniform mat4 gbufferPreviousModelViewInverse;
 
 uniform int hideGUI;
@@ -74,6 +71,7 @@ uniform int hideGUI;
 	uniform float CriticalDamageTaken;
 #endif
 
+#include "/lib/tonemaps.glsl"
 #include "/lib/projections.glsl"
 
 uniform int framemod8;
@@ -97,14 +95,6 @@ vec4 fp10Dither(vec4 color ,float dither){
 
 vec3 toClipSpace3Prev(vec3 viewSpacePosition){
 	return projMAD(gbufferPreviousProjection, viewSpacePosition) / -viewSpacePosition.z * 0.5 + 0.5;
-}
-
-vec3 tonemap(vec3 col){
-	return col/(1+luma(col));
-}
-
-vec3 invTonemap(vec3 col){
-	return col/(1-luma(col));
 }
 
 void convertHandDepth(inout float depth){
@@ -181,7 +171,7 @@ vec4 smoothfilter(in sampler2D tex, in vec2 uv){
 
 	uv = iuv + (fuv*fuv)*(3.0-2.0*fuv);
 	uv = (uv - 0.5)/textureResolution;
-	
+
 	return texture2D(tex, uv);
 }
 
@@ -193,7 +183,7 @@ vec2 smoothfilterUV(in vec2 uv){
 
 	uv = iuv + (fuv*fuv)*(3.0-2.0*fuv);
 	uv = (uv - 0.5)/textureResolution;
-	
+
 	return uv;
 }
 
@@ -240,7 +230,7 @@ vec3 closestToCamera5taps(vec2 texcoord, sampler2D depth){
 	dmin = dmin.z > dtl.z ? dtl : dmin;
 	dmin = dmin.z > dbl.z ? dbl : dmin;
 	dmin = dmin.z > dbr.z ? dbr : dmin;
-	
+
 	#ifdef TAA_UPSCALING
 		dmin.xy = dmin.xy/RENDER_SCALE;
 	#endif
@@ -292,10 +282,9 @@ vec4 computeTAA(vec2 texcoord, bool hand){
 		vec3 closestToCamera = closestToCamera5taps(adjTC, depthtex0);
 		vec3 viewPos = toScreenSpace(closestToCamera);
 	#endif
-	
-	vec3 playerPos = mat3(gbufferModelViewInverse) * viewPos + gbufferModelViewInverse[3].xyz + (cameraPosition - previousCameraPosition);
-	vec3 previousPosition = mat3(gbufferPreviousModelView) * playerPos + gbufferPreviousModelView[3].xyz;
-	
+
+	vec3 previousPosition = toPreviousPos(viewPos);
+
 	#ifdef DISTANT_HORIZONS
 		previousPosition = toClipSpace3Prev_DH(previousPosition, depthCheck);
 	#else
@@ -303,9 +292,9 @@ vec4 computeTAA(vec2 texcoord, bool hand){
 	#endif
 
 	vec2 velocity = previousPosition.xy - closestToCamera.xy;
-	
+
 	previousPosition.xy = texcoord + (hand ? vec2(0.0) : velocity);
-	
+
 	// sample current frame, and make sure it is de-jittered
 	// vec3 currentFrame = smoothfilter(colortex3, adjTC + jitter).rgb;
 	vec3 currentFrame = texelFetch2D(colortex3, ivec2((adjTC + jitter)/texelSize), 0).rgb;
@@ -318,7 +307,7 @@ vec4 computeTAA(vec2 texcoord, bool hand){
 		vec3 colMax = texture2D(colortex0, adjTC).rgb;
 		vec3 colMin = texture2D(colortex6, adjTC).rgb;
 	#else
-		//Assuming the history color is a blend of the 3x3 neighborhood, we clamp the history to the min and max of each channel in the 3x3 neighborhood
+		// Assuming the history color is a blend of the 3x3 neighborhood, we clamp the history to the min and max of each channel in the 3x3 neighborhood
 		vec3 col0 = currentFrame; // can use this because its the center sample.
 		vec3 col1 = texture2D(colortex3, adjTC + vec2( texelSize.x,	 texelSize.y)).rgb;
 		vec3 col2 = texture2D(colortex3, adjTC + vec2( texelSize.x,	-texelSize.y)).rgb;
@@ -345,21 +334,21 @@ vec4 computeTAA(vec2 texcoord, bool hand){
 	vec3 clampedframeHistory = clamp(frameHistory, colMin, colMax);
 
 	float blendingFactor = BLEND_FACTOR;
-	
+
 	if(hand) blendingFactor = clamp(length(velocity/texelSize),blendingFactor,1.0);
-	
+
 	////// Increases blending factor when far from AABB, reduces ghosting
 	blendingFactor = clamp(blendingFactor + luma(abs(clampedframeHistory - frameHistory)/clampedframeHistory),0.0,1.0);
-	
+
 	////// Blend current pixel with clamped history, apply fast tonemap beforehand to reduce flickering
 	vec3 finalResult = invTonemap(mix(tonemap(clampedframeHistory), tonemap(currentFrame), blendingFactor));
-   
+
 	#ifdef DAMAGE_TAKEN_EFFECT
 		////// when this triggers, do a funny trailing effect.
 		if(CriticalDamageTaken > 0.01) finalResult = mix(finalResult, frameHistory, sqrt(CriticalDamageTaken)*0.8);
 	#endif
 	#ifdef SCREENSHOT_MODE
-		// when this is on, do "infinite frame accumulation	"
+		// when this is on, do "infinite frame accumulation"
 		if (hideGUI == 0) return vec4(finalResult, 1.0);
 
 		vec4 superSampledHistory = texture2D(colortex5, previousPosition.xy);
@@ -375,11 +364,11 @@ void main() {
 /* DRAWBUFFERS:5 */
 	#ifdef TAA
 		vec2 taauTC = clamp(texcoord*RENDER_SCALE, vec2(0.0), RENDER_SCALE - texelSize*2.0);
-		
+
 		float dataUnpacked = decodeVec2(texelFetch2D(colortex1,ivec2(gl_FragCoord.xy*RENDER_SCALE),0).w).y; 
-		
+
 		bool hand = abs(dataUnpacked-0.75) < 0.01 && texture2D(depthtex1,taauTC).x < 1.0;
-		
+
 		vec4 color = computeTAA(smoothfilterUV(texcoord), hand);
 
 		#ifdef SCREENSHOT_MODE

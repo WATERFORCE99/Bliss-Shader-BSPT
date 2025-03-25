@@ -1,6 +1,6 @@
 #include "/lib/settings.glsl"
 #include "/lib/res_params.glsl"
-#include "/lib/color_transforms.glsl"
+#include "/lib/tonemaps.glsl"
 #include "/lib/projections.glsl"
 #include "/lib/util.glsl"
 #include "/lib/dither.glsl"
@@ -37,11 +37,6 @@ varying vec2 lightmapCoords;
 flat varying int isWater;
 
 // uniform float far;
-
-uniform vec3 previousCameraPosition;
-
-// uniform mat4 gbufferModelView;
-uniform mat4 gbufferPreviousModelView;
 
 // uniform sampler2D colortex4;
 flat varying vec3 averageSkyCol_Clouds;
@@ -139,23 +134,6 @@ vec3 rayTrace(vec3 dir, vec3 position,float dither, float fresnel, bool inwater)
 	return vec3(1.1);
 }
 
-vec4 encode (vec3 n, vec2 lightmaps){
-	n.xy = n.xy / dot(abs(n), vec3(1.0));
-	n.xy = n.z <= 0.0 ? (1.0 - abs(n.yx)) * sign(n.xy) : n.xy;
-	vec2 encn = clamp(n.xy * 0.5 + 0.5,-1.0,1.0);
-	
-	return vec4(encn,vec2(lightmaps.x,lightmaps.y));
-}
-
-//encoding by jodie
-float encodeVec2(vec2 a){
-	const vec2 constant1 = vec2( 1., 256.) / 65535.;
-	vec2 temp = floor( a * 255. );
-	return temp.x*constant1.x+temp.y*constant1.y;
-}
-float encodeVec2(float x,float y){
-	return encodeVec2(vec2(x,y));
-}
 vec3 applyBump(mat3 tbnMatrix, vec3 bump, float puddle_values){
 	float bumpmult = puddle_values;
 	bump = bump * vec3(bumpmult, bumpmult, bumpmult) + vec3(0.0f, 0.0f, 1.0f - bumpmult);
@@ -182,7 +160,7 @@ void main() {
 			vec3 worldSpaceNormals =  mat3(gbufferModelViewInverse) * normals;
 
 			vec3 viewPos = pos.xyz;
-			vec3 playerPos = mat3(gbufferModelViewInverse) * viewPos + gbufferModelViewInverse[3].xyz;
+			vec3 playerPos = toWorldSpace(viewPos);
 			float transition = exp(-25* pow(clamp(1.0 - length(playerPos)/(far-8),0.0,1.0),2));
 
 		#ifdef DH_OVERDRAW_PREVENTION
@@ -244,7 +222,7 @@ void main() {
 		float Shadows = 1.0;
 
 		#ifdef DISTANT_HORIZONS_SHADOWMAP
-			vec3 feetPlayerPos_shadow = mat3(gbufferModelViewInverse) * pos.xyz + gbufferModelViewInverse[3].xyz;
+			vec3 feetPlayerPos_shadow = toWorldSpace(pos.xyz);
 
 			vec3 projectedShadowPosition = mat3(shadowModelView) * feetPlayerPos_shadow  + shadowModelView[3].xyz;
 			projectedShadowPosition = diagonal3(shadowProjection) * projectedShadowPosition + shadowProjection[3].xyz;
@@ -300,7 +278,7 @@ void main() {
 		vec4 Reflections = vec4(0.0);
 		vec3 BackgroundReflection = FinalColor; 
 		vec3 SunReflection = vec3(0.0);
-		
+
 		float roughness = 0.0;
 		float f0 = 0.02;
 		// f0 = 0.9;
@@ -318,8 +296,7 @@ void main() {
 		#if defined FORWARD_ENVIORNMENT_REFLECTION && defined DH_SCREENSPACE_REFLECTIONS
 			vec3 rtPos = rayTrace(reflectedVector, viewPos, interleaved_gradientNoise_temporal(), fresnel, false);
 			if (rtPos.z < 1.){
-				vec3 previousPosition = mat3(gbufferModelViewInverse) * DH_toScreenSpace(rtPos) + gbufferModelViewInverse[3].xyz + cameraPosition-previousCameraPosition;
-				previousPosition = mat3(gbufferPreviousModelView) * previousPosition + gbufferPreviousModelView[3].xyz;
+				vec3 previousPosition = toPreviousPos(DH_toScreenSpace(rtPos));
 				previousPosition.xy = projMAD(dhPreviousProjection, previousPosition).xy / -previousPosition.z * 0.5 + 0.5;
 				previousPosition.xy = clamp(previousPosition.xy, 0.0, 1.0);
 				Reflections.a = 1.0;

@@ -37,8 +37,6 @@ varying vec3 flatnormal;
 	varying vec3 shitnormal;
 #endif
 
-uniform mat4 gbufferModelViewInverse;
-uniform mat4 gbufferModelView;
 varying vec3 viewVector;
 
 flat varying int glass;
@@ -51,7 +49,6 @@ attribute vec4 mc_Entity;
 
 uniform vec3 sunPosition;
 uniform vec3 moonPosition;
-uniform vec3 cameraPosition;
 uniform float sunElevation;
 
 varying vec4 tangent_other;
@@ -72,12 +69,7 @@ uniform vec2 texelSize;
 uniform int framemod8;
 #include "/lib/TAA_jitter.glsl"
 
-#define diagonal3(m) vec3((m)[0].x, (m)[1].y, m[2].z)
-#define projMAD(m, v) (diagonal3(m) * (v) + (m)[3].xyz)
-
-vec4 toClipSpace3(vec3 viewSpacePosition) {
-	return vec4(projMAD(gl_ProjectionMatrix, viewSpacePosition),-viewSpacePosition.z);
-}
+#include "/lib/projections.glsl"
 
 float getWave (vec3 pos, float range){
 	return pow(1.0-texture2D(noisetex, (pos.xz + frameTimeCounter * WATER_WAVE_SPEED)/150.0).b,2) * WATER_WAVE_STRENGTH / range;
@@ -118,7 +110,7 @@ void main() {
 
 	#ifdef LARGE_WAVE_DISPLACEMENT
 		if(mc_Entity.x == 8.0) {
-			vec3 displacedPos = mat3(gbufferModelViewInverse) * position + gbufferModelViewInverse[3].xyz + cameraPosition;
+			vec3 displacedPos = toWorldSpaceCamera(position);
 			#ifdef DISTANT_HORIZONS
 				float range = min(1.0 + pow(length(displacedPos - cameraPosition) / min(far,256.0),2.0), 256.0);
 			#else
@@ -132,7 +124,7 @@ void main() {
 	#endif
 
 	// vec3 position = mat3(gl_ModelViewMatrix) * vec3(gl_Vertex) + gl_ModelViewMatrix[3].xyz;
-   	vec3 worldpos = mat3(gbufferModelViewInverse) * position + gbufferModelViewInverse[3].xyz;
+   	vec3 worldpos = toWorldSpace(position);
 	#ifdef PLANET_CURVATURE
 		float curvature = length(worldpos) / (16*8);
 		worldpos.y -= curvature*curvature * CURVATURE_AMOUNT;
@@ -140,7 +132,7 @@ void main() {
 
 	position = mat3(gbufferModelView) * worldpos + gbufferModelView[3].xyz;
 
- 	gl_Position = toClipSpace3(position);
+ 	gl_Position = toClipSpace4alt(position);
 
 	HELD_ITEM_BRIGHTNESS = 0.0;
 
@@ -151,7 +143,10 @@ void main() {
 	// 1.0 = water mask
 	// 0.9 = entity mask
 	// 0.8 = reflective entities
-	// 0.7 = reflective blocks
+	// 0.7 = glass
+	// 0.6 = slime & honey
+	// 0.5 = ice
+	// 0.4 = nether portal
 	float mat = 0.0;
 
 	// water mask
@@ -165,8 +160,17 @@ void main() {
 		if (entityId == 1803) mat = 0.8;
 	#endif
 
-	// translucent blocks
-	if (mc_Entity.x >= 301 && mc_Entity.x <= 321) mat = 0.7;
+	// glass
+	if (mc_Entity.x >= 301 && mc_Entity.x <= 317) mat = 0.7;
+
+	// slime & honey
+	if (mc_Entity.x == 318 || mc_Entity.x == 319) mat = 0.6;
+
+	// ice
+	if (mc_Entity.x == 320) mat = 0.5;
+
+	// nether portal
+	if (mc_Entity.x == 321) mat = 0.4;
 
 	#if defined ENTITIES && defined IS_IRIS
 		NAMETAG = 0;

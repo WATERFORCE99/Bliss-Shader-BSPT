@@ -22,23 +22,25 @@ uniform vec2 texelSize;
 uniform vec3 sunPosition;
 uniform vec3 moonPosition;
 uniform mat4 gbufferModelViewInverse;
-
-//////////////////////////////VOID MAIN//////////////////////////////
-//////////////////////////////VOID MAIN//////////////////////////////
-//////////////////////////////VOID MAIN//////////////////////////////
-//////////////////////////////VOID MAIN//////////////////////////////
-//////////////////////////////VOID MAIN//////////////////////////////
-
-
 uniform float frameTimeCounter;
+
 #include "/lib/Shadow_Params.glsl"
 #include "/lib/sky_gradient.glsl"
+
+//////////////////////////////VOID MAIN//////////////////////////////
+//////////////////////////////VOID MAIN//////////////////////////////
+//////////////////////////////VOID MAIN//////////////////////////////
+//////////////////////////////VOID MAIN//////////////////////////////
+//////////////////////////////VOID MAIN//////////////////////////////
 
 void main() {
 	gl_Position = ftransform();
 
 	// gl_Position.xy = (gl_Position.xy*0.5+0.5)*0.51*2.0-1.0;
 	gl_Position.xy = (gl_Position.xy*0.5+0.5)*(0.01+VL_RENDER_RESOLUTION)*2.0-1.0;
+
+	lightCol.rgb = vec3(0.0);
+	averageSkyCol = vec3(0.0);
 
 	#ifdef OVERWORLD_SHADER
 		lightCol.rgb = texelFetch2D(colortex4,ivec2(6,37),0).rgb;
@@ -58,15 +60,11 @@ void main() {
 	#endif
 
 	#ifdef NETHER_SHADER
-		lightCol.rgb = vec3(0.0);
-		averageSkyCol = vec3(0.0);
 		averageSkyCol_Clouds = volumetricsFromTex(vec3(0.0,1.0,0.0), colortex4, 6).rgb;
 	#endif
 
 	#ifdef END_SHADER
-		lightCol.rgb = vec3(0.0);
-		averageSkyCol = vec3(0.0);
-		averageSkyCol_Clouds = vec3(15);
+		averageSkyCol_Clouds = vec3(15.0);
 	#endif
 
 	lightCol.a = float(sunElevation > 1e-5)*2.0 - 1.0;
@@ -80,5 +78,5 @@ void main() {
 	
 	refractedSunVec = refract(WsunVec, -vec3(0.0,1.0,0.0), 1.0/1.33333);
 
-	exposure = texelFetch2D(colortex4,ivec2(10,37),0).r;
+	exposure = texelFetch2D(colortex4, ivec2(10,37),0).r;
 }

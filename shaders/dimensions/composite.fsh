@@ -43,9 +43,6 @@ uniform vec2 texelSize;
 uniform float frameTimeCounter;
 uniform float rainStrength;
 
-uniform vec3 previousCameraPosition;
-uniform mat4 gbufferPreviousModelView;
-
 uniform float viewWidth;
 uniform float aspectRatio;
 uniform float viewHeight;
@@ -202,29 +199,9 @@ vec2 SSAO(
 	return vec2(finaalAO, finalSSS);
 }
 
-vec4 encode (vec3 n, vec2 lightmaps){
-	n.xy = n.xy / dot(abs(n), vec3(1.0));
-	n.xy = n.z <= 0.0 ? (1.0 - abs(n.yx)) * sign(n.xy) : n.xy;
-	vec2 encn = clamp(n.xy * 0.5 + 0.5,-1.0,1.0);
-	
-	return vec4(encn,vec2(lightmaps.x,lightmaps.y));
-}
-
-//encoding by jodie
-float encodeVec2(vec2 a){
-	const vec2 constant1 = vec2( 1., 256.) / 65535.;
-	vec2 temp = floor( a * 255. );
-	return temp.x*constant1.x+temp.y*constant1.y;
-}
-
-float encodeVec2(float x,float y){
-	return encodeVec2(vec2(x,y));
-}
-
 float ld(float dist) {
 	return (2.0 * near) / (far + near - dist * (far - near));
 }
-
 
 #include "/lib/sky_gradient.glsl"
 

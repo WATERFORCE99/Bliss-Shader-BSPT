@@ -31,9 +31,6 @@ uniform float sunElevation;
 // uniform float far;
 uniform float near;
 
-uniform mat4 gbufferPreviousModelView;
-uniform vec3 previousCameraPosition;
-
 #ifdef VIVECRAFT
  	uniform bool vivecraftIsVR;
  	uniform vec3 vivecraftRelativeMainHandPos;
@@ -57,7 +54,7 @@ uniform float caveDetection;
 // uniform int dhRenderDistance;
 #define DHVLFOG
 
-#include "/lib/color_transforms.glsl"
+#include "/lib/tonemaps.glsl"
 #include "/lib/color_dither.glsl"
 #include "/lib/projections.glsl"
 #include "/lib/res_params.glsl"
@@ -115,6 +112,7 @@ float invLinZ (float lindepth){
 	#include "/lib/climate_settings.glsl"
 	#include "/lib/volumetricClouds.glsl"
 	#include "/lib/overworld_fog.glsl"
+	#include "/lib/aurora.glsl"
 #endif
 
 #ifdef NETHER_SHADER
@@ -143,7 +141,7 @@ void waterVolumetrics_notoverworld(inout vec3 inColor, vec3 rayStart, vec3 rayEn
 	estEndDepth *= maxZ;
 	estSunDepth *= maxZ;
 
-	vec3 wpos = mat3(gbufferModelViewInverse) * rayStart  + gbufferModelViewInverse[3].xyz;
+	vec3 wpos = toWorldSpace(rayStart);
 	vec3 dVWorld = (wpos-gbufferModelViewInverse[3].xyz);
 
 	vec3 absorbance = vec3(1.0);
@@ -208,7 +206,7 @@ vec4 waterVolumetrics(vec3 rayStart, vec3 rayEnd, float rayLength, vec2 dither, 
 		float d = (pow(expFactor, float(i+dither.x)/float(spCount))/expFactor - 1.0/expFactor)/(1-1.0/expFactor);		// exponential step position (0-1)
 		float dd = pow(expFactor, float(i+dither.y)/float(spCount)) * log(expFactor) / float(spCount)/(expFactor-1.0);	//step length (derivative)
 		
-		vec3 progressW = gbufferModelViewInverse[3].xyz+cameraPosition + d*dVWorld;
+		vec3 progressW = gbufferModelViewInverse[3].xyz + cameraPosition + d*dVWorld;
 		
 		float distanceFromWaterSurface = max(-(progressW.y - waterEnteredAltitude),0.0);
 
@@ -281,13 +279,6 @@ float fogPhase2(float lightPoint){
 	return exponential;
 }
 
-//encoding by jodie
-float encodeVec2(vec2 a){
-	const vec2 constant1 = vec2( 1., 256.) / 65535.;
-	vec2 temp = floor( a * 255. );
-	return temp.x*constant1.x+temp.y*constant1.y;
-}
-
 uniform int framemod8;
 #include "/lib/TAA_jitter.glsl"
 
@@ -330,7 +321,7 @@ vec4 raymarchTest(
 	int SAMPLECOUNT = 8;
 
 	//project pixel position into projected shadowmap space
-	vec3 wpos =  mat3(gbufferModelViewInverse) * viewPosition + gbufferModelViewInverse[3].xyz;
+	vec3 wpos =  toWorldSpace(viewPosition);
 	vec3 dVWorld = wpos - gbufferModelViewInverse[3].xyz;
 	vec3 dVWorldN = normalize(dVWorld);
 
@@ -341,7 +332,7 @@ vec4 raymarchTest(
 	// float cloudRange = max(minHeight - cameraPosition.y,0.0);
 	float cloudRange = max(minHeight - cameraPosition.y, 0.0);
 
-	vec3 rayDirection = dVWorldN.xyz * ( (maxHeight - minHeight) / length(alterCoords(dVWorldN, false)) / SAMPLECOUNT);
+	vec3 rayDirection = dVWorldN.xyz * ((maxHeight - minHeight) / length(alterCoords(dVWorldN, false)) / SAMPLECOUNT);
 	
 	// float cloudRange = mix(max(cameraPosition.y - maxHeight,0.0), max(minHeight - cameraPosition.y,0.0), clamp(rayDirection.y,0.0,1.0));
 
@@ -349,7 +340,7 @@ vec4 raymarchTest(
 
 	float dL = length(rayDirection);
 	
-	// vec3 rayDirection = dVWorldN.xyz * ( (maxHeight - minHeight) / abs(dVWorldN.y) / SAMPLECOUNT);
+	// vec3 rayDirection = dVWorldN.xyz * ((maxHeight - minHeight) / abs(dVWorldN.y) / SAMPLECOUNT);
 	// float flip = mix(max(cameraPosition.y - maxHeight,0.0), max(minHeight - cameraPosition.y,0.0), clamp(rayDirection.y,0.0,1.0));
 	// vec3 rayProgress = rayDirection*dither.x + cameraPosition + (rayDirection / abs(rayDirection.y)) *flip;
 	// float dL = length(rayDirection);
@@ -392,7 +383,7 @@ void main() {
 	float noise_2 = blueNoise();
 	float noise_1 = max(1.0 - R2_dither(),0.0015);
 	// float noise_2 = interleaved_gradientNoise_temporal();
-	vec2 bnoise = blueNoise(gl_FragCoord.xy ).rg;
+	vec2 bnoise = blueNoise(gl_FragCoord.xy).rg;
 
 	int seed = (frameCounter*5)%40000;
 	vec2 r2_sequence = R2_samples(seed).xy;
@@ -404,17 +395,17 @@ void main() {
 	bool iswater = texture2D(colortex7,tc).a > 0.99;
 
 	float depth = texelFetch2D(depthtex0, ivec2(tc/texelSize),0).x;
-	
+
 	float z0 = depth < 0.56 ? convertHandDepth(depth) : depth;
 
 	float DH_z0 = 0.0;
 	#ifdef DISTANT_HORIZONS
 		DH_z0 = texelFetch2D(dhDepthTex, ivec2(tc/texelSize),0).x;
 	#endif
-	
+
 	vec3 viewPos0 = toScreenSpace_DH(tc/RENDER_SCALE, z0, DH_z0);
 	vec3 viewPos0_water = toScreenSpace(vec3(tc/RENDER_SCALE, z0));
-	vec3 playerPos = mat3(gbufferModelViewInverse) * viewPos0 + gbufferModelViewInverse[3].xyz;
+	vec3 playerPos = toWorldSpace(viewPos0);
 	vec3 playerPos_normalized = normalize(playerPos);
 
 	float dirtAmount = Dirt_Amount;
@@ -429,9 +420,7 @@ void main() {
 	float cloudPlaneDistance = 0.0;
 
 	#ifdef OVERWORLD_SHADER
-		// z0 = texture2D(depthtex0, tc + jitter/VL_RENDER_RESOLUTION).x;
-		// viewPos0 = toScreenSpace_DH(tc/RENDER_SCALE, z0, DH_z0);
-		vec4 VolumetricClouds = GetVolumetricClouds(viewPos0, BN, WsunVec, directLightColor, indirectLightColor, cloudPlaneDistance);
+		vec4 VolumetricClouds = GetVolumetricClouds(viewPos0, BN, WsunVec, directLightColor + aurDirect, indirectLightColor + aurIndirect, cloudPlaneDistance);
 
 		#ifdef CAVE_FOG
   	  		float skyhole = pow(clamp(1.0-pow(max(playerPos_normalized.y - 0.6,0.0)*5.0,2.0),0.0,1.0),2)* caveDetection;
@@ -449,23 +438,12 @@ void main() {
 	#endif
 
 	if (isEyeInWater == 1){
-		// vec3 underWaterFog =  waterVolumetrics(vec3(0.0), viewPos0, length(viewPos0), BN, totEpsilon, scatterCoef, indirectLightColor_dynamic, directLightColor , dot(normalize(viewPos0), normalize(sunVec* lightCol.a )));
-		// VolumetricFog = vec4(underWaterFog, 1.0);
-
 		vec4 underWaterFog =  waterVolumetrics(vec3(0.0), viewPos0_water, length(viewPos0_water), BN, totEpsilon, scatterCoef, indirectLightColor_dynamic, directLightColor , dot(normalize(viewPos0_water), normalize(sunVec* lightCol.a )));
-		
-		// VolumetricFog.rgb = underWaterFog.rgb;
+
 		VolumetricFog = vec4(underWaterFog.rgb, 1.0);
 	}
 
 	// VolumetricFog = raymarchTest(viewPos0, BN);
 
 	gl_FragData[0] = clamp(VolumetricFog, 0.0, 65000.0);
-	
-	// vec4 currentFrame = VolumetricFog;
-	// vec4 previousFrame = texture2D(colortex10, gl_FragCoord.xy * texelSize);
-
-	// vec4 temporallyFilteredVL = VLTemporalFiltering(viewPos0, z0 >= 1.0, VolumetricFog);
-
-	// gl_FragData[1] = temporallyFilteredVL;
 }
