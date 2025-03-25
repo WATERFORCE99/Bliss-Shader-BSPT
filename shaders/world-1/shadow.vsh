@@ -34,7 +34,7 @@ Read the terms of modification and sharing before changing something below pleas
 	uniform int renderStage;
 	uniform vec3 chunkOffset;
 	uniform vec3 cameraPosition;
-    uniform int currentRenderedItemId;
+	uniform int currentRenderedItemId;
 	uniform int blockEntityId;
 	uniform int entityId;
 
