@@ -48,8 +48,8 @@ const bool colortex15Clear = false;
 	*/
 #endif
 
-varying vec2 texcoord;
-flat varying float tempOffsets;
+in vec2 texcoord;
+flat in float tempOffsets;
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
 uniform sampler2D colortex3;

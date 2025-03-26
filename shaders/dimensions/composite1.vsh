@@ -3,24 +3,24 @@
 #include "/lib/util.glsl"
 
 #ifdef END_SHADER
-	flat varying float Flashing;
+	flat out float Flashing;
 #endif
 
 flat out vec4 dailyWeatherParams0;
 flat out vec4 dailyWeatherParams1;
 
-flat varying vec3 WsunVec;
-flat varying vec3 WmoonVec;
-flat varying vec3 unsigned_WsunVec;
-flat varying vec3 averageSkyCol_Clouds;
-flat varying vec4 lightCol;
-flat varying vec3 moonCol;
-flat varying vec3 albedoSmooth;
+flat out vec3 WsunVec;
+flat out vec3 WmoonVec;
+flat out vec3 unsigned_WsunVec;
+flat out vec3 averageSkyCol_Clouds;
+flat out vec4 lightCol;
+flat out vec3 moonCol;
+flat out vec3 albedoSmooth;
 
-flat varying float exposure;
+flat out float exposure;
 
 flat out vec2 TAA_Offset;
-flat varying vec3 zMults;
+flat out vec3 zMults;
 uniform sampler2D colortex4;
 
 // uniform float far;

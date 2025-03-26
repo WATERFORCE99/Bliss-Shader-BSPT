@@ -1,16 +1,16 @@
 #include "/lib/settings.glsl"
 
-varying vec4 color;
-varying vec2 texcoord;
+in vec4 color;
+in vec2 texcoord;
 
 uniform sampler2D texture;
 uniform sampler2D normals;
 uniform sampler2D noisetex;
 
-flat varying float exposure;
+flat in float exposure;
 
-varying vec4 tangent;
-varying vec4 normalMat;
+in vec4 tangent;
+in vec4 normalMat;
 uniform float frameTimeCounter;
 
 vec3 toLinear(vec3 sRGB){

@@ -1,9 +1,9 @@
 #include "/lib/settings.glsl"
 #include "/lib/res_params.glsl"
 
-flat varying vec4 exposure;
-flat varying vec2 rodExposureDepth;
-varying vec2 texcoord;
+flat in vec4 exposure;
+flat in vec2 rodExposureDepth;
+in vec2 texcoord;
 
 const bool colortex5MipmapEnabled = true;
 // uniform sampler2D colortex4;
@@ -53,7 +53,7 @@ float blueNoise(){
 }
 
 float ld(float depth) {
-	return (2.0 * near) / (far + near - depth * (far - near));		// (-depth * (far - near)) = (2.0 * near)/ld - far - near
+	return (2.0 * near) / (far + near - depth * (far - near));
 }
 
 // uniform float viewWidth;
@@ -113,42 +113,42 @@ vec3 LinearTosRGB(in vec3 color){
 uniform sampler2D colortex6;
 
 float w0(float a){
-    return (1.0/6.0)*(a*(a*(-a + 3.0) - 3.0) + 1.0);
+	return (1.0/6.0)*(a*(a*(-a + 3.0) - 3.0) + 1.0);
 }
 
 float w1(float a){
-    return (1.0/6.0)*(a*a*(3.0*a - 6.0) + 4.0);
+	return (1.0/6.0)*(a*a*(3.0*a - 6.0) + 4.0);
 }
 
 float w2(float a){
-    return (1.0/6.0)*(a*(a*(-3.0*a + 3.0) + 3.0) + 1.0);
+	return (1.0/6.0)*(a*(a*(-3.0*a + 3.0) + 3.0) + 1.0);
 }
 
 float w3(float a){
-    return (1.0/6.0)*(a*a*a);
+	return (1.0/6.0)*(a*a*a);
 }
 
 float g0(float a){
-    return w0(a) + w1(a);
+	return w0(a) + w1(a);
 }
 
 float g1(float a){
-    return w2(a) + w3(a);
+	return w2(a) + w3(a);
 }
 
 float h0(float a){
-    return -1.0 + w1(a) / (w0(a) + w1(a));
+	return -1.0 + w1(a) / (w0(a) + w1(a));
 }
 
 float h1(float a){
-    return 1.0 + w3(a) / (w2(a) + w3(a));
+	return 1.0 + w3(a) / (w2(a) + w3(a));
 }
 
 vec4 texture2D_bicubic(sampler2D tex, vec2 uv){
 	vec4 texelSize = vec4(texelSize,1.0/texelSize);
 	uv = uv*texelSize.zw;
-	vec2 iuv = floor( uv );
-	vec2 fuv = fract( uv );
+	vec2 iuv = floor(uv);
+	vec2 fuv = fract(uv);
 
 	float g0x = g0(fuv.x);
 	float g1x = g1(fuv.x);
@@ -170,6 +170,7 @@ vec4 texture2D_bicubic(sampler2D tex, vec2 uv){
 
 void main() {
   /* DRAWBUFFERS:7 */
+
 	float vignette = (1.5-dot(texcoord-0.5,texcoord-0.5)*2.);
 	vec3 col = texture2D(colortex5,texcoord).rgb;
 
@@ -183,18 +184,18 @@ void main() {
 		#elif MANUAL_FOCUS > 0
 			float focus = MANUAL_FOCUS;
 		#endif
+
 		#if DOF_QUALITY < 5
-		float pcoc = min(abs(aperture * (focal/100.0 * (z - focus)) / (z * (focus - focal/100.0))),texelSize.x*15.0);
+			float pcoc = min(abs(aperture * (focal/100.0 * (z - focus)) / (z * (focus - focal/100.0))),texelSize.x*15.0);
+
 		#ifdef FAR_BLUR_ONLY
 			pcoc *= float(z > focus);
 		#endif
+
 		#ifdef REMOVE_HAND_BLUR
  			pcoc *= float(z > 0.56);
  		#endif
-		// float noise = blueNoise()*6.28318530718;
-		// mat2 noiseM = mat2( cos( noise ), -sin( noise ),
-		// 				sin( noise ), cos( noise )
-		// 				);
+
 		vec3 bcolor = vec3(0.);
 		float nb = 0.0;
 		vec2 bcoord = vec2(0.0);
@@ -226,7 +227,7 @@ void main() {
 	vec3 bloomTile4 = texture2D_bicubic(colortex6, bloomTileUV/32.+vec2(0.4375*resScale.x+6.5*texelSize.x,.0)).rgb; //1/64 res
 	vec3 bloomTile5 = texture2D_bicubic(colortex6, bloomTileUV/64.+vec2(0.46875*resScale.x+8.5*texelSize.x,.0)).rgb; //1/128 res
 	vec3 bloomTile6 = texture2D_bicubic(colortex6, bloomTileUV/128.+vec2(0.484375*resScale.x+10.5*texelSize.x,.0)).rgb; //1/256 res
-	
+
 	#ifdef OLD_BLOOM
 		vec3 bloom = (bloomTile0 + bloomTile1 + bloomTile2 + bloomTile3 + bloomTile4 + bloomTile5 + bloomTile6) / 7.0;
 		vec3 fogBloom = bloom;
@@ -249,9 +250,9 @@ void main() {
  	float VL_abs = texture2D(colortex7, texcoord*RENDER_SCALE).r;
 
   	VL_abs = clamp((1.0-VL_abs)*BLOOMY_FOG*0.75*(1.0+rainStrength) * (1.0-purkinje*0.3),0.0,1.0)*clamp(1.0-pow(cdist(texcoord.xy),15.0),0.0,1.0);
-	
+
 	col = (mix(col, fogBloom, VL_abs) + bloom*lightScat) * exposure.rgb;
-	
+
   	float lum = dot(col, vec3(0.15,0.3,0.55));
 	float lum2 = dot(col, vec3(0.85,0.7,0.45));
 	float rodLum = lum2*200.0;
@@ -268,7 +269,7 @@ void main() {
 	#endif
 
 	gl_FragData[0].rgb = clamp(int8Dither(col,texcoord),0.0,1.0);
-	
+
 	#if DOF_QUALITY == 5
 		#if FOCUS_LASER_COLOR == 0 // Red
 			vec3 laserColor = vec3(25, 0, 0);

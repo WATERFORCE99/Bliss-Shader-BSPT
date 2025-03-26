@@ -2,19 +2,19 @@
 #include "/lib/res_params.glsl"
 #include "/lib/util.glsl"
 
-flat varying vec4 lightCol;
-flat varying vec3 averageSkyCol;
-flat varying vec3 averageSkyCol_Clouds;
+flat out vec4 lightCol;
+flat out vec3 averageSkyCol;
+flat out vec3 averageSkyCol_Clouds;
 
 #if defined LPV_VL_FOG_ILLUMINATION && defined IS_LPV_ENABLED
-	flat varying float exposure;
+	flat out float exposure;
 #endif
 
 flat out vec4 dailyWeatherParams0;
 flat out vec4 dailyWeatherParams1;
 
-flat varying vec3 WsunVec;
-flat varying vec3 refractedSunVec;
+flat out vec3 WsunVec;
+flat out vec3 refractedSunVec;
 
 uniform vec2 texelSize;
 

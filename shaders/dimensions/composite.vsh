@@ -10,12 +10,6 @@ uniform float sunElevation;
 uniform vec3 sunPosition;
 uniform mat4 gbufferModelViewInverse;
 
-
-flat varying vec3 zMults;
-
-uniform float far;
-uniform float near;
-
 #include "/lib/res_params.glsl"
 
 uniform int framemod8;
@@ -25,9 +19,6 @@ void main() {
 	gl_Position = ftransform();
 
 	WsunVec = (float(sunElevation > 1e-5)*2-1.)*normalize(mat3(gbufferModelViewInverse) * sunPosition);
-	
-
-	zMults = vec3(1.0/(far * near),far+near,far-near);
 
 	TAA_Offset = vec2(0.0);
 	#ifdef TAA

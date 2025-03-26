@@ -2,13 +2,13 @@
 #include "/lib/util.glsl"
 #include "/lib/dither.glsl"
 
-flat varying vec3 zMults;
+flat in vec3 zMults;
 
 flat in vec2 TAA_Offset;
 flat in vec3 WsunVec;
 
 #ifdef OVERWORLD_SHADER
-	flat varying vec3 skyGroundColor;
+	flat in vec3 skyGroundColor;
 #endif
 
 uniform sampler2D depthtex0;

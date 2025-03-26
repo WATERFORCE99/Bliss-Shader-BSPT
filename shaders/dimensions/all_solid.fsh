@@ -8,10 +8,10 @@
 #include "/lib/projections.glsl"
 #include "/lib/dither.glsl"
 
-varying vec4 lmtexcoord;
+in vec4 lmtexcoord;
 #include "/lib/ripples.glsl"
 
-flat varying int NameTags;
+flat in int NameTags;
 
 #if defined HAND || !defined MC_NORMAL_MAP
 	#undef POM
@@ -21,7 +21,7 @@ flat varying int NameTags;
 	#define MC_NORMAL_MAP
 #endif
 
-varying float VanillaAO;
+in float VanillaAO;
 
 const float mincoord = 1.0/4096.0;
 const float maxcoord = 1.0-mincoord;
@@ -33,14 +33,13 @@ const int MAX_OCCLUSION_POINTS = MAX_ITERATIONS;
 uniform vec2 texelSize;
 uniform int framemod8;
 uniform float rainStrength;
-uniform float noPuddleAreas;
-uniform float raining;
+uniform float isRaining;
 
 float lightmap = clamp((lmtexcoord.w-0.9) * 10.0, 0.0, 1.0);
 
 // #ifdef POM
-varying vec4 vtexcoordam; // .st for add, .pq for mul
-varying vec4 vtexcoord;
+in vec4 vtexcoordam; // .st for add, .pq for mul
+in vec4 vtexcoord;
 
 vec2 dcdx = dFdx(vtexcoord.st*vtexcoordam.pq)*exp2(Texture_MipMap_Bias);
 vec2 dcdy = dFdy(vtexcoord.st*vtexcoordam.pq)*exp2(Texture_MipMap_Bias);
@@ -48,15 +47,15 @@ vec2 dcdy = dFdy(vtexcoord.st*vtexcoordam.pq)*exp2(Texture_MipMap_Bias);
 
 #include "/lib/res_params.glsl"
 
-varying vec4 color;
+in vec4 color;
 
 uniform float wetness;
-varying vec4 normalMat;
+in vec4 normalMat;
 
 #ifdef MC_NORMAL_MAP
 	uniform sampler2D normals;
-	varying vec4 tangent;
-	varying vec3 FlatNormals;
+	in vec4 tangent;
+	in vec3 FlatNormals;
 #endif
 
 uniform sampler2D specular;
@@ -78,14 +77,14 @@ uniform vec4 entityColor;
 
 // in vec3 velocity;
 
-flat varying float blockID;
-flat varying int PORTAL;
-flat varying int SIGN;
-flat varying float SSSAMOUNT;
-flat varying float EMISSIVE;
-flat varying int LIGHTNING;
+flat in float blockID;
+flat in int PORTAL;
+flat in int SIGN;
+flat in float SSSAMOUNT;
+flat in float EMISSIVE;
+flat in int LIGHTNING;
 
-flat varying float HELD_ITEM_BRIGHTNESS;
+flat in float HELD_ITEM_BRIGHTNESS;
 
 mat3 inverseMatrix(mat3 m) {
 	float a00 = m[0][0], a01 = m[0][1], a02 = m[0][2];
@@ -180,7 +179,7 @@ void convertHandDepth(inout float depth) {
 #endif
 
 void main() {
-		
+
 	vec3 FragCoord = gl_FragCoord.xyz;
 	#ifdef HAND
 		convertHandDepth(FragCoord.z);
@@ -234,12 +233,12 @@ void main() {
 	#endif
 
 	float Puddle_shape = 0.0;
-	
+
 	#if defined Puddles && defined WORLD && !defined ENTITIES && !defined HAND
 		Puddle_shape = clamp(lightmap - exp(-15.0 * pow(texture2D(noisetex, worldPos.xz * (0.020 * Puddle_Size)).b,5.0)),0.0,1.0);
-		Puddle_shape *= clamp(viewToWorld(normal).y*0.5+0.5,0.0,1.0) * raining;
+		Puddle_shape *= clamp(viewToWorld(normal).y*0.5+0.5,0.0,1.0) * isRaining;
 	#endif
-	
+
 	vec2 adjustedTexCoord = lmtexcoord.xy;
 
 	#if defined POM && defined WORLD && !defined ENTITIES && !defined HAND
@@ -252,8 +251,6 @@ void main() {
 		float falloff = min(max(1.0-dist/MAX_OCCLUSION_DISTANCE,0.0) * 2.0,1.0);
 
 		falloff = pow(1.0-pow(1.0-falloff,1.0),2.0);
-
-		// falloff =  1;
 
 		float maxdist = MAX_OCCLUSION_DISTANCE;
 		if(!ifPOM) maxdist = 0.0;
@@ -357,11 +354,11 @@ void main() {
 		}
 		#endif
 	#endif
-	
+
 	#ifdef WhiteWorld
 		Albedo.rgb = vec3(0.5);
 	#endif
-		
+	
 	#ifdef AEROCHROME_MODE
 		float gray = dot(Albedo.rgb, vec3(0.2, 1.0, 0.07));
 		if(
@@ -434,7 +431,7 @@ void main() {
 	#ifdef WORLD
 		vec4 SpecularTex = texture2D_POMSwitch(specular, adjustedTexCoord.xy, vec4(dcdx,dcdy), ifPOM,textureLOD);
 
-		SpecularTex.r = max(SpecularTex.r, raining * lightmap);
+		SpecularTex.r = max(SpecularTex.r, isRaining * lightmap);
 		SpecularTex.g = max(SpecularTex.g, max(Puddle_shape*0.02,0.02));
 
 		#define EXCEPTIONAL_BLOCK(id) (id == 266 || id == BLOCK_REDSTONE_ORE_LIT || id == BLOCK_DEEPSLATE_REDSTONE_ORE_LIT)

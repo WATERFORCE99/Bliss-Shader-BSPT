@@ -4,24 +4,24 @@
 
 #define ReflectedFog
 
-flat varying vec3 averageSkyCol_Clouds;
-flat varying vec3 averageSkyCol;
+flat in vec3 averageSkyCol_Clouds;
+flat in vec3 averageSkyCol;
 
-flat varying vec3 lightSourceColor;
-flat varying vec3 sunColor;
-flat varying vec3 moonColor;
-// flat varying vec3 zenithColor;
-// flat varying vec3 rayleighAborbance; 
+flat in vec3 lightSourceColor;
+flat in vec3 sunColor;
+flat in vec3 moonColor;
+// flat in vec3 zenithColor;
+// flat in vec3 rayleighAborbance; 
 
-// flat varying vec3 WsunVec;
+// flat in vec3 WsunVec;
 
-flat varying vec2 tempOffsets;
+flat in vec2 tempOffsets;
 
-flat varying float exposure;
-flat varying float avgBrightness;
-flat varying float rodExposure;
-flat varying float avgL2;
-flat varying float centerDepth;
+flat in float exposure;
+flat in float avgBrightness;
+flat in float rodExposure;
+flat in float avgL2;
+flat in float centerDepth;
 
 uniform sampler2D colortex1;
 uniform sampler2D colortex4;
@@ -86,8 +86,8 @@ float invLinZ (float lindepth){
 	flat in vec4 dailyWeatherParams0;
 	flat in vec4 dailyWeatherParams1;
 
-	flat varying vec4 CurrentFrame_dailyWeatherParams0;
-	flat varying vec4 CurrentFrame_dailyWeatherParams1;
+	flat in vec4 CurrentFrame_dailyWeatherParams0;
+	flat in vec4 CurrentFrame_dailyWeatherParams1;
 
 	#define VL_CLOUDS_DEFERRED
 

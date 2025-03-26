@@ -1,8 +1,8 @@
 #include "/lib/res_params.glsl"
 #include "/lib/util.glsl"
 
-varying vec2 texcoord;
-flat varying float tempOffsets;
+out vec2 texcoord;
+flat out float tempOffsets;
 
 uniform int frameCounter;
 uniform int framemod8;

@@ -6,28 +6,28 @@
 uniform float frameTimeCounter;
 #include "/lib/Shadow_Params.glsl"
 
-flat varying vec3 averageSkyCol_Clouds;
-flat varying vec3 averageSkyCol;
+flat out vec3 averageSkyCol_Clouds;
+flat out vec3 averageSkyCol;
 
-flat varying vec3 sunColor;
-flat varying vec3 moonColor;
-flat varying vec3 lightSourceColor;
-flat varying vec3 zenithColor;
+flat out vec3 sunColor;
+flat out vec3 moonColor;
+flat out vec3 lightSourceColor;
+flat out vec3 zenithColor;
 
-flat varying vec2 tempOffsets;
+flat out vec2 tempOffsets;
 
-flat varying float exposure;
-flat varying float avgBrightness;
-flat varying float rodExposure;
-flat varying float avgL2;
-flat varying float centerDepth;
+flat out float exposure;
+flat out float avgBrightness;
+flat out float rodExposure;
+flat out float avgL2;
+flat out float centerDepth;
 
 flat out vec4 dailyWeatherParams0;
 flat out vec4 dailyWeatherParams1;
 
 uniform int hideGUI;
-flat varying vec4 CurrentFrame_dailyWeatherParams0;
-flat varying vec4 CurrentFrame_dailyWeatherParams1;
+flat out vec4 CurrentFrame_dailyWeatherParams0;
+flat out vec4 CurrentFrame_dailyWeatherParams1;
 
 uniform sampler2D colortex4;
 uniform sampler2D colortex6;

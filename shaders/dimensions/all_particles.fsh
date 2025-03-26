@@ -55,7 +55,7 @@ uniform float rainStrength;
 uniform float waterEnteredAltitude;
 uniform float nightVision;
 
-flat varying float HELD_ITEM_BRIGHTNESS;
+flat in float HELD_ITEM_BRIGHTNESS;
 
 #include "/lib/projections.glsl"
 
@@ -158,8 +158,8 @@ float phaseg(float x, float g){
 	const float MIX_OCCLUSION_DISTANCE = MAX_DIST*0.9;
 	const int MAX_OCCLUSION_POINTS = MAX_ITERATIONS;
 
-	varying vec4 vtexcoordam; // .st for add, .pq for mul
-	varying vec4 vtexcoord;
+	in vec4 vtexcoordam; // .st for add, .pq for mul
+	in vec4 vtexcoord;
 
 	vec2 dcdx = dFdx(vtexcoord.st*vtexcoordam.pq)*exp2(Texture_MipMap_Bias);
 	vec2 dcdy = dFdy(vtexcoord.st*vtexcoordam.pq)*exp2(Texture_MipMap_Bias);
@@ -168,8 +168,8 @@ float phaseg(float x, float g){
 	const float maxcoord = 1.0-mincoord;
 
 	uniform sampler2D normals;
-	varying vec4 tangent;
-	varying vec4 normalMat;
+	in vec4 tangent;
+	in vec4 normalMat;
 
 	vec4 readNormal(in vec2 coord) {
 		return texture2DGradARB(normals,fract(coord)*vtexcoordam.pq+vtexcoordam.st,dcdx,dcdy);

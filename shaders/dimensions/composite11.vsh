@@ -1,11 +1,11 @@
 #include "/lib/settings.glsl"
 
-varying vec2 texcoord;
+out vec2 texcoord;
 
 uniform sampler2D colortex4;
 
-flat varying vec4 exposure;
-flat varying vec2 rodExposureDepth;
+flat out vec4 exposure;
+flat out vec2 rodExposureDepth;
 
 //////////////////////////////VOID MAIN//////////////////////////////
 //////////////////////////////VOID MAIN//////////////////////////////

@@ -1,14 +1,14 @@
 #include "/lib/settings.glsl"
 #include "/lib/util.glsl"
 
-varying vec4 pos;
-varying vec4 localPos;
-varying vec4 gcolor;
-varying vec2 lightmapCoords;
-varying vec4 normals_and_materials;
-flat varying float SSSAMOUNT;
-flat varying float EMISSIVE;
-flat varying int dh_material_id;
+in vec4 pos;
+in vec4 localPos;
+in vec4 gcolor;
+in vec2 lightmapCoords;
+in vec4 normals_and_materials;
+flat in float SSSAMOUNT;
+flat in float EMISSIVE;
+flat in int dh_material_id;
 
 uniform float far;
 // uniform int hideGUI;

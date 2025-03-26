@@ -21,9 +21,9 @@ const bool colortex5MipmapEnabled = true;
 		uniform sampler2DShadow shadowtex1;
 	#endif
 
-	flat varying vec3 averageSkyCol_Clouds;
-	flat varying vec4 lightCol;
-	flat varying vec3 moonCol;
+	flat in vec3 averageSkyCol_Clouds;
+	flat in vec4 lightCol;
+	flat in vec3 moonCol;
 
 	#include "/lib/lightning_stuff.glsl"
 #endif
@@ -35,7 +35,7 @@ const bool colortex5MipmapEnabled = true;
 
 #ifdef END_SHADER
 	uniform vec3 lightningEffect;
-	flat varying float Flashing;
+	flat in float Flashing;
 #endif
 
 uniform int hideGUI;
@@ -78,7 +78,7 @@ uniform float updateFadeTime;
 uniform float near;
 uniform float farPlane;
 
-flat varying vec3 zMults;
+flat in vec3 zMults;
 
 uniform vec2 texelSize;
 uniform vec2 viewSize;
@@ -101,11 +101,11 @@ uniform ivec2 eyeBrightnessSmooth;
 uniform float nightVision;
 
 uniform vec3 sunVec;
-flat varying vec3 WsunVec;
-flat varying vec3 unsigned_WsunVec;
-flat varying vec3 WmoonVec;
-flat varying float exposure;
-flat varying vec3 albedoSmooth;
+flat in vec3 WsunVec;
+flat in vec3 unsigned_WsunVec;
+flat in vec3 WmoonVec;
+flat in float exposure;
+flat in vec3 albedoSmooth;
 
 #ifdef IS_LPV_ENABLED
 	uniform int heldItemId;

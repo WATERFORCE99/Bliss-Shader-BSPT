@@ -6,10 +6,10 @@
 	#undef IS_LPV_ENABLED
 // #endif
 
-flat varying vec4 lightCol;
-flat varying vec3 averageSkyCol;
-flat varying vec3 averageSkyCol_Clouds;
-flat varying float exposure;
+flat in vec4 lightCol;
+flat in vec3 averageSkyCol;
+flat in vec3 averageSkyCol_Clouds;
+flat in float exposure;
 
 // uniform int dhRenderDistance;
 uniform sampler2D depthtex0;
@@ -27,7 +27,7 @@ uniform sampler2D colortex7;
 uniform sampler2D colortex11;
 uniform sampler2D colortex14;
 
-flat varying vec3 WsunVec;
+flat in vec3 WsunVec;
 uniform vec3 sunVec;
 uniform float sunElevation;
 
@@ -36,9 +36,9 @@ uniform float near;
 
 uniform float frameTimeCounter;
 
-// varying vec2 texcoord;
+// in vec2 texcoord;
 uniform vec2 texelSize;
-// flat varying vec2 TAA_Offset;
+// flat in vec2 TAA_Offset;
 
 uniform int isEyeInWater;
 uniform float rainStrength;
@@ -73,7 +73,7 @@ float linearizeDepthFast(const in float depth, const in float near, const in flo
 		uniform sampler2DShadow shadowtex1;
 	#endif
 
-	flat varying vec3 refractedSunVec;
+	flat in vec3 refractedSunVec;
 	
 	flat in vec4 dailyWeatherParams0;
 	flat in vec4 dailyWeatherParams1;

@@ -2,7 +2,7 @@
 #include "/lib/util.glsl"
 #include "/lib/dither.glsl"
 
-varying vec2 texcoord;
+in vec2 texcoord;
 uniform vec2 texelSize;
 
 uniform sampler2D colortex7;

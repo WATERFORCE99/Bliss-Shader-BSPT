@@ -1,8 +1,8 @@
 #include "/lib/settings.glsl"
 #include "/lib/res_params.glsl"
 
-varying vec4 pos;
-varying vec4 gcolor;
+out vec4 pos;
+out vec4 gcolor;
 
 uniform vec2 texelSize;
 uniform int framemod8;
@@ -20,7 +20,6 @@ uniform int framemod4_DH;
 #define DH_TAA_OVERRIDE
 #include "/lib/TAA_jitter.glsl"
 
-
 void main() {
 	gl_Position = ftransform();
 
@@ -30,10 +29,10 @@ void main() {
 	#if defined TAA && defined DH_TAA_JITTER
 		gl_Position.xy += offsets[framemod4_DH] * gl_Position.w*texelSize;
 	#endif
-	
+
 	pos = gl_ModelViewMatrix * gl_Vertex;
 	gcolor = gl_Color;
-	
+
 	#if DOF_QUALITY == 5
 		vec2 jitter = clamp(jitter_offsets[frameCounter % 64], -1.0, 1.0);
 		jitter = rotate(radians(float(frameCounter))) * jitter;
@@ -41,11 +40,11 @@ void main() {
 		jitter.x *= DOF_ANAMORPHIC_RATIO;
 
 		#if MANUAL_FOCUS == -2
-		float focusMul = 0;
+			float focusMul = 0;
 		#elif MANUAL_FOCUS == -1
-		float focusMul = gl_Position.z + (far / 3.0) - mix(pow(512.0, screenBrightness), 512.0 * screenBrightness, 0.25);
+			float focusMul = gl_Position.z + (far / 3.0) - mix(pow(512.0, screenBrightness), 512.0 * screenBrightness, 0.25);
 		#else
-		float focusMul = gl_Position.z + (far / 3.0) - MANUAL_FOCUS;
+			float focusMul = gl_Position.z + (far / 3.0) - MANUAL_FOCUS;
 		#endif
 
 		vec2 totalOffset = (jitter * JITTER_STRENGTH) * focusMul * 1e-2;

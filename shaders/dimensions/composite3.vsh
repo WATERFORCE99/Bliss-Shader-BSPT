@@ -1,11 +1,11 @@
 #include "/lib/settings.glsl"
 
-varying vec2 texcoord;
-flat varying vec3 zMults;
+out vec2 texcoord;
+flat out vec3 zMults;
 
 #ifdef BorderFog
 	uniform sampler2D colortex4;
-	flat varying vec3 skyGroundColor;
+	flat out vec3 skyGroundColor;
 #endif
 
 flat out vec3 WsunVec;

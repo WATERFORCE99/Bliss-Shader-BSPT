@@ -2,20 +2,20 @@
 #include "/lib/res_params.glsl"
 #include "/lib/util.glsl"
 
-flat varying vec4 lightCol;
-flat varying vec3 averageSkyCol;
-flat varying vec3 averageSkyCol_Clouds;
+flat out vec4 lightCol;
+flat out vec3 averageSkyCol;
+flat out vec3 averageSkyCol_Clouds;
 
 flat out vec4 dailyWeatherParams0;
 flat out vec4 dailyWeatherParams1;
 
-flat varying vec3 WsunVec;
-flat varying vec3 refractedSunVec;
+flat out vec3 WsunVec;
+flat out vec3 refractedSunVec;
 
-// flat varying float tempOffsets;
+// flat out float tempOffsets;
 
 uniform sampler2D colortex4;
-flat varying float exposure;
+flat out float exposure;
 
 uniform float sunElevation;
 uniform vec2 texelSize;

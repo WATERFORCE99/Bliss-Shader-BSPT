@@ -13,35 +13,35 @@ Read the terms of modification and sharing before changing something below pleas
 !! DO NOT REMOVE !!
 */
 
-varying vec4 lmtexcoord;
-varying vec4 color;
+out vec4 lmtexcoord;
+out vec4 color;
 
 uniform sampler2D colortex4;
 uniform sampler2D noisetex;
 
 #ifdef OVERWORLD_SHADER
-	flat varying vec3 averageSkyCol_Clouds;
-	flat varying vec4 lightCol;
-	flat varying vec3 WsunVec;
+	flat out vec3 averageSkyCol_Clouds;
+	flat out vec4 lightCol;
+	flat out vec3 WsunVec;
 
 	flat out vec4 dailyWeatherParams0;
 	flat out vec4 dailyWeatherParams1;
 #endif
 
-varying vec4 normalMat;
-varying vec3 binormal;
-varying vec4 tangent;
-varying vec3 flatnormal;
+out vec4 normalMat;
+out vec3 binormal;
+out vec4 tangent;
+out vec3 flatnormal;
 
 #ifdef LARGE_WAVE_DISPLACEMENT
-	varying vec3 shitnormal;
+	out vec3 shitnormal;
 #endif
 
-varying vec3 viewVector;
+out vec3 viewVector;
 
-flat varying int glass;
+flat out int glass;
 #if defined ENTITIES && defined IS_IRIS
-	flat varying int NAMETAG;
+	flat out int NAMETAG;
 #endif
 
 attribute vec4 at_tangent;
@@ -51,7 +51,7 @@ uniform vec3 sunPosition;
 uniform vec3 moonPosition;
 uniform float sunElevation;
 
-varying vec4 tangent_other;
+out vec4 tangent_other;
 
 uniform int frameCounter;
 // uniform float far;
@@ -63,7 +63,7 @@ uniform float screenBrightness;
 
 uniform int heldItemId;
 uniform int heldItemId2;
-flat varying float HELD_ITEM_BRIGHTNESS;
+flat out float HELD_ITEM_BRIGHTNESS;
 
 uniform vec2 texelSize;
 uniform int framemod8;

@@ -34,31 +34,24 @@ uniform float sunElevation;
 uniform vec2 texelSize;
 uniform int framemod8;
 uniform float frameTimeCounter;
-uniform vec3 cameraPosition;
-uniform mat4 gbufferModelViewInverse;
-uniform mat4 gbufferModelView;
 uniform ivec2 eyeBrightnessSmooth;
 
 uniform int heldItemId;
 uniform int heldItemId2;
-flat varying float HELD_ITEM_BRIGHTNESS;
+flat out float HELD_ITEM_BRIGHTNESS;
 
 #include "/lib/TAA_jitter.glsl"
 
-#define diagonal3(m) vec3((m)[0].x, (m)[1].y, m[2].z)
-#define projMAD(m, v) (diagonal3(m) * (v) + (m)[3].xyz)
-vec4 toClipSpace3(vec3 viewSpacePosition) {
-	return vec4(projMAD(gl_ProjectionMatrix, viewSpacePosition),-viewSpacePosition.z);
-}
+#include "/lib/projections.glsl"
 
 #ifdef DAMAGE_BLOCK_EFFECT
-	varying vec4 vtexcoordam; // .st for add, .pq for mul
-	varying vec4 vtexcoord;
+	out vec4 vtexcoordam; // .st for add, .pq for mul
+	out vec4 vtexcoord;
 
 	attribute vec4 mc_midTexCoord;
-	varying vec4 tangent;
+	out vec4 tangent;
 	attribute vec4 at_tangent;
-	varying vec4 normalMat;
+	out vec4 normalMat;
 #endif
 
 //////////////////////////////VOID MAIN//////////////////////////////
@@ -69,17 +62,17 @@ vec4 toClipSpace3(vec3 viewSpacePosition) {
 
 void main() {
 	lmtexcoord.xy = (gl_MultiTexCoord0).xy;
-	lmtexcoord.zw = gl_MultiTexCoord1.xy / 240.0;
+	lmtexcoord.zw = gl_MultiTexCoord1.xy/240.0;
 
 	#ifdef DAMAGE_BLOCK_EFFECT
-		vec2 midcoord = (gl_TextureMatrix[0] *  mc_midTexCoord).st;
+		vec2 midcoord = (gl_TextureMatrix[0] * mc_midTexCoord).st;
 		vec2 texcoordminusmid = lmtexcoord.xy-midcoord;
-		vtexcoordam.pq  = abs(texcoordminusmid)*2;
-		vtexcoordam.st  = min(lmtexcoord.xy,midcoord-texcoordminusmid);
-		vtexcoord.xy    = sign(texcoordminusmid)*0.5+0.5;
+		vtexcoordam.pq = abs(texcoordminusmid) * 2;
+		vtexcoordam.st = min(lmtexcoord.xy,midcoord-texcoordminusmid);
+		vtexcoord.xy = sign(texcoordminusmid) * 0.5 + 0.5;
 
 		tangent = vec4(normalize(gl_NormalMatrix * at_tangent.rgb), at_tangent.w);
-		
+
 		normalMat = vec4(normalize(gl_NormalMatrix * gl_Normal), 1.0);
 	#endif
 
@@ -92,7 +85,7 @@ void main() {
 	#ifdef WEATHER
 		vec3 position = mat3(gl_ModelViewMatrix) * vec3(gl_Vertex) + gl_ModelViewMatrix[3].xyz;
 
-   		vec3 worldpos = mat3(gbufferModelViewInverse) * position + gbufferModelViewInverse[3].xyz + cameraPosition;
+   		vec3 worldpos = toWorldSpaceCamera(position);
 		bool istopv = worldpos.y > cameraPosition.y + 5.0 && lmtexcoord.w > 0.99;
 
 		if(!istopv){
@@ -103,39 +96,39 @@ void main() {
 
 		position = mat3(gbufferModelView) * worldpos + gbufferModelView[3].xyz;
 
-		gl_Position = toClipSpace3(position);
+		gl_Position = toClipSpace4alt(position);
 	#else
 		gl_Position = ftransform();
 
 		#ifdef TAA_UPSCALING
-			gl_Position.xy = gl_Position.xy * RENDER_SCALE + RENDER_SCALE * gl_Position.w - gl_Position.w;
+			gl_Position.xy = (gl_Position.xy + gl_Position.w) * RENDER_SCALE-gl_Position.w;
 		#endif
 		#ifdef TAA
-			gl_Position.xy += offsets[framemod8] * gl_Position.w*texelSize;
+			gl_Position.xy += offsets[framemod8] * gl_Position.w * texelSize;
 		#endif
 	#endif
 
 	color = gl_Color;
-	
-	exposure = texelFetch2D(colortex4,ivec2(10,37),0).r;
+
+	exposure = texelFetch2D(colortex4, ivec2(10, 37), 0).r;
 	// color.rgb = worldpos;
-	
+
 	#ifdef LINES
 		SELECTION_BOX = 0;
 		if(dot(color.rgb,vec3(0.33333)) < 0.00001) SELECTION_BOX = 1;
 	#endif
-	
+
 	#ifdef OVERWORLD_SHADER
-		lightCol.rgb = texelFetch2D(colortex4,ivec2(6,37),0).rgb;
-		lightCol.a = float(sunElevation > 1e-5)*2.0 - 1.0;
-	
-		averageSkyCol_Clouds = texelFetch2D(colortex4,ivec2(0,37),0).rgb;
-	
+		lightCol.rgb = texelFetch2D(colortex4, ivec2(6, 37), 0).rgb;
+		lightCol.a = float(sunElevation > 1e-5) * 2.0-1.0;
+
+		averageSkyCol_Clouds = texelFetch2D(colortex4, ivec2(0, 37), 0).rgb;
+
 		WsunVec = lightCol.a * normalize(mat3(gbufferModelViewInverse) * sunPosition);
 
 		#ifdef Daily_Weather
-			dailyWeatherParams0 = vec4(texelFetch2D(colortex4,ivec2(1,1),0).rgb / 1500.0, 0.0);
-			dailyWeatherParams1 = vec4(texelFetch2D(colortex4,ivec2(2,1),0).rgb / 1500.0, 0.0);
+			dailyWeatherParams0 = vec4(texelFetch2D(colortex4,ivec2(1, 1), 0).rgb/1500.0, 0.0);
+			dailyWeatherParams1 = vec4(texelFetch2D(colortex4,ivec2(2, 1), 0).rgb/1500.0, 0.0);
 		#else
 			dailyWeatherParams0 = vec4(CloudLayer0_coverage, CloudLayer1_coverage, CloudLayer2_coverage, 0.0);
 			dailyWeatherParams1 = vec4(CloudLayer0_density, CloudLayer1_density, CloudLayer2_density, 0.0);

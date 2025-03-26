@@ -20,21 +20,21 @@ Read the terms of modification and sharing before changing something below pleas
 	#define MC_NORMAL_MAP
 #endif
 
-varying vec4 color;
-varying float VanillaAO;
+out vec4 color;
+out float VanillaAO;
 
-varying vec4 lmtexcoord;
-varying vec4 normalMat;
+out vec4 lmtexcoord;
+out vec4 normalMat;
 
 // #ifdef POM
-	varying vec4 vtexcoordam; // .st for add, .pq for mul
-	varying vec4 vtexcoord;
+	out vec4 vtexcoordam; // .st for add, .pq for mul
+	out vec4 vtexcoord;
 // #endif
 
 #ifdef MC_NORMAL_MAP
-	varying vec4 tangent;
+	out vec4 tangent;
 	attribute vec4 at_tangent;
-	varying vec3 FlatNormals;
+	out vec3 FlatNormals;
 #endif
 
 uniform float frameTimeCounter;
@@ -46,13 +46,13 @@ attribute vec4 mc_midTexCoord;
 
 uniform int blockEntityId;
 uniform int entityId;
-flat varying float blockID;
+flat out float blockID;
 
 uniform int heldItemId;
 uniform int heldItemId2;
-flat varying float HELD_ITEM_BRIGHTNESS;
+flat out float HELD_ITEM_BRIGHTNESS;
 
-flat varying int NameTags;
+flat out int NameTags;
 
 uniform int frameCounter;
 uniform float far;
@@ -63,11 +63,11 @@ uniform int hideGUI;
 uniform float screenBrightness;
 uniform int isEyeInWater;
 
-flat varying float SSSAMOUNT;
-flat varying float EMISSIVE;
-flat varying int LIGHTNING;
-flat varying int PORTAL;
-flat varying int SIGN;
+flat out float SSSAMOUNT;
+flat out float EMISSIVE;
+flat out int LIGHTNING;
+flat out int PORTAL;
+flat out int SIGN;
 
 uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
