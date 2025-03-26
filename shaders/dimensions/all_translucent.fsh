@@ -2,14 +2,12 @@
 #include "/lib/util.glsl"
 #include "/lib/dither.glsl"
 
-varying vec4 lmtexcoord;
+in vec4 lmtexcoord;
+float lightmap = clamp((lmtexcoord.w-0.9) * 10.0, 0.0, 1.0);
+
 #include "/lib/ripples.glsl"
 
 #undef FLASHLIGHT_BOUNCED_INDIRECT
-
-// #if defined END_SHADER || defined NETHER_SHADER
-	// #undef IS_LPV_ENABLED
-// #endif
 
 #ifdef IS_LPV_ENABLED
 	#extension GL_EXT_shader_image_load_store: enable
@@ -18,12 +16,10 @@ varying vec4 lmtexcoord;
 
 #include "/lib/res_params.glsl"
 
-varying vec4 color;
+in vec4 color;
 uniform vec4 entityColor;
 uniform float rainStrength;
-uniform float raining;
-
-float lightmap = clamp((lmtexcoord.w-0.9) * 10.0, 0.0, 1.0);
+uniform float isRaining;
 
 #ifdef OVERWORLD_SHADER
 	const bool shadowHardwareFiltering = true;
@@ -36,15 +32,15 @@ float lightmap = clamp((lmtexcoord.w-0.9) * 10.0, 0.0, 1.0);
 	#endif
 
 	uniform float lightSign;
-	flat varying vec3 WsunVec;
+	flat in vec3 WsunVec;
 
-	flat varying vec3 averageSkyCol_Clouds;
-	flat varying vec4 lightCol;
+	flat in vec3 averageSkyCol_Clouds;
+	flat in vec4 lightCol;
 #endif
 
-flat varying float HELD_ITEM_BRIGHTNESS;
+flat in float HELD_ITEM_BRIGHTNESS;
 #if defined ENTITIES && defined IS_IRIS
-	flat varying int NAMETAG;
+	flat in int NAMETAG;
 #endif
 
 uniform sampler2D depthtex1;
@@ -73,13 +69,13 @@ uniform sampler2D normals;
 	uniform sampler3D texLpv2;
 #endif
 
-varying vec4 tangent;
-varying vec4 normalMat;
-varying vec3 binormal;
-varying vec3 flatnormal;
+in vec4 tangent;
+in vec4 normalMat;
+in vec3 binormal;
+in vec3 flatnormal;
 
 #ifdef LARGE_WAVE_DISPLACEMENT
-	varying vec3 shitnormal;
+	in vec3 shitnormal;
 #endif
 
 uniform float near;
@@ -111,7 +107,7 @@ uniform float waterEnteredAltitude;
 	uniform int worldTime;
 	uniform int worldDay;
 
-	flat varying float Flashing;
+	flat in float Flashing;
 	
 	#include "/lib/lightning_stuff.glsl"
 
@@ -145,7 +141,7 @@ uniform float waterEnteredAltitude;
 
 #include "/lib/TAA_jitter.glsl"
 
-varying vec3 viewVector;
+in vec3 viewVector;
 vec3 getParallaxDisplacement(vec3 waterPos, vec3 playerPos) {
 
 	float largeWaves = texture2D(noisetex, waterPos.xy / 600.0 ).b;
@@ -165,7 +161,7 @@ vec3 getParallaxDisplacement(vec3 waterPos, vec3 playerPos) {
 vec3 applyBump(mat3 tbnMatrix, vec3 bump, float puddle_values){
 	float bumpmult = puddle_values;
 	bump = bump * vec3(bumpmult, bumpmult, bumpmult) + vec3(0.0f, 0.0f, 1.0f - bumpmult);
-	// 
+
 	return normalize(bump*tbnMatrix);
 }
 
@@ -289,6 +285,7 @@ void convertHandDepth(inout float depth) {
 	ndcDepth /= MC_HAND_DEPTH;
 	depth = ndcDepth * 0.5 + 0.5;
 }
+
 void Emission(
 	inout vec3 Lighting,
 	vec3 Albedo,
@@ -430,7 +427,7 @@ void main() {
 				vec3 bump = normalize(getWaveNormal(waterPos, playerPos, false));
 
 				#if defined OVERWORLD_SHADER && defined WATER_RIPPLES
-					vec3 rippleNormal = drawRipples(worldPos.xz * 5.0, frameTimeCounter) * 0.5 * raining * lightmap * clamp(1.0 - length(playerPos) / 128.0, 0.0, 1.0);
+					vec3 rippleNormal = drawRipples(worldPos.xz * 5.0, frameTimeCounter) * 0.5 * isRaining * lightmap * clamp(1.0 - length(playerPos) / 128.0, 0.0, 1.0);
 					bump = normalize(bump + rippleNormal);
 				#endif
 
@@ -640,7 +637,9 @@ void main() {
 				gl_FragData[0].a = gl_FragData[0].a + (1.0-gl_FragData[0].a) * reflectance;
 		
 				// invert the alpha blending darkening on the color so you can interpolate between diffuse and specular and keep buffer blending
-				float colorFactor = (isGlass || isSlime) ? 0.5 : 0.2;
+				float colorFactor = 0.2;
+				if(isWater) colorFactor = 1.0;
+				if(isGlass || isSlime) colorFactor = 0.5;
 				gl_FragData[0].rgb = clamp(specularReflections / gl_FragData[0].a * 0.1,0.0,65000.0) * colorFactor;
 			}else{
 				gl_FragData[0].rgb = clamp(FinalColor * 0.1,0.0,65000.0);

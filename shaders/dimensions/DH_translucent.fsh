@@ -27,22 +27,19 @@ uniform sampler2D colortex12;
 #include "/lib/waterBump.glsl"
 #include "/lib/Shadow_Params.glsl"
 
-varying vec4 pos;
-varying vec4 gcolor;
-
-varying vec4 normals_and_materials;
-
-varying vec2 lightmapCoords;
-
-flat varying int isWater;
+in vec4 pos;
+in vec4 gcolor;
+in vec4 normals_and_materials;
+in vec2 lightmapCoords;
+flat in int isWater;
 
 // uniform float far;
 
 // uniform sampler2D colortex4;
-flat varying vec3 averageSkyCol_Clouds;
-flat varying vec4 lightCol;
-flat varying vec3 WsunVec;
-flat varying vec3 WsunVec2;
+flat in vec3 averageSkyCol_Clouds;
+flat in vec4 lightCol;
+flat in vec3 WsunVec;
+flat in vec3 WsunVec2;
 
 #include "/lib/DistantHorizons_projections.glsl"
 
@@ -50,6 +47,7 @@ uniform float near;
 float invLinZ (float lindepth){
 	return -((2.0*near/lindepth)-far-near)/(far-near);
 }
+
 float ld(float dist) {
 	return (2.0 * near) / (far + near - dist * (far - near));
 }
@@ -93,7 +91,6 @@ float GGX(vec3 n, vec3 v, vec3 l, float r, float f0) {
 }
 
 uniform int framemod8;
-
 #include "/lib/TAA_jitter.glsl"
 
 vec3 rayTrace(vec3 dir, vec3 position,float dither, float fresnel, bool inwater){
@@ -115,7 +112,7 @@ vec3 rayTrace(vec3 dir, vec3 position,float dither, float fresnel, bool inwater)
 	vec3 spos = clipPosition*vec3(RENDER_SCALE,1.0) + stepv*dither;
 	float minZ = clipPosition.z;
 	float maxZ = spos.z+stepv.z*0.5;
-	
+
 	spos.xy += offsets[framemod8]*texelSize*0.5/RENDER_SCALE;
 
 	for (int i = 0; i <= int(quality); i++) {
@@ -154,14 +151,14 @@ void main() {
 		float material = 0.7;
 		if(iswater) material = 1.0;
 
-			vec3 normals = normalize(normals_and_materials.xyz);
+		vec3 normals = normalize(normals_and_materials.xyz);
 		if (!gl_FrontFacing) normals = -normals;
 
-			vec3 worldSpaceNormals =  mat3(gbufferModelViewInverse) * normals;
+		vec3 worldSpaceNormals =  mat3(gbufferModelViewInverse) * normals;
 
-			vec3 viewPos = pos.xyz;
-			vec3 playerPos = toWorldSpace(viewPos);
-			float transition = exp(-25* pow(clamp(1.0 - length(playerPos)/(far-8),0.0,1.0),2));
+		vec3 viewPos = pos.xyz;
+		vec3 playerPos = toWorldSpace(viewPos);
+		float transition = exp(-25* pow(clamp(1.0 - length(playerPos)/(far-8),0.0,1.0),2));
 
 		#ifdef DH_OVERDRAW_PREVENTION
 			#if OVERDRAW_MAX_DISTANCE == 0
@@ -187,156 +184,157 @@ void main() {
 			waterNormals.xz = bump.xy;
 		}
 
-	normals = worldToView(waterNormals);
+		normals = worldToView(waterNormals);
 
-	gl_FragData[0] = gcolor;
-	// float UnchangedAlpha = gl_FragData[0].a;
-
-	#ifdef WhiteWorld
-		gl_FragData[0].rgb = vec3(0.5);
-		gl_FragData[0].a = 1.0;
-	#endif
+		gl_FragData[0] = gcolor;
+		// float UnchangedAlpha = gl_FragData[0].a;
     
-	vec3 Albedo = toLinear(gl_FragData[0].rgb);
+		vec3 Albedo = toLinear(gl_FragData[0].rgb);
 
-	#ifndef WhiteWorld
-		#ifndef Vanilla_like_water
-			if (iswater){
-	    			Albedo = vec3(0.0);
-	    			gl_FragData[0].a = 1.0/255.0;
-			}
-		#endif
-	#endif
-
-	// diffuse
-	vec3 Indirect_lighting = vec3(0.0);
-	// vec3 MinimumLightColor = vec3(1.0);
-	vec3 Direct_lighting = vec3(0.0);
-
-	#ifdef OVERWORLD_SHADER
-		vec3 DirectLightColor = lightCol.rgb/2400.0;
-
-		float NdotL = clamp(dot(worldSpaceNormals, WsunVec),0.0,1.0); 
-		NdotL = clamp((-15 + NdotL*255.0) / 240.0  ,0.0,1.0);
-
-		float Shadows = 1.0;
-
-		#ifdef DISTANT_HORIZONS_SHADOWMAP
-			vec3 feetPlayerPos_shadow = toWorldSpace(pos.xyz);
-
-			vec3 projectedShadowPosition = mat3(shadowModelView) * feetPlayerPos_shadow  + shadowModelView[3].xyz;
-			projectedShadowPosition = diagonal3(shadowProjection) * projectedShadowPosition + shadowProjection[3].xyz;
-
-			//apply distortion
-			#ifdef DISTORT_SHADOWMAP
-				float distortFactor = calcDistort(projectedShadowPosition.xy);
-				projectedShadowPosition.xy *= distortFactor;
+		if(iswater){
+			#ifdef Vanilla_like_water
+				Albedo *= sqrt(luma(Albedo));
 			#else
-				float distortFactor = 1.0;
+				Albedo = vec3(0.0);
+				gl_FragData[0].a = 1.0/255.0;
 			#endif
+		}
 
-			float smallbias = -0.0035;
+		#ifdef WhiteWorld
+			gl_FragData[0].rgb = vec3(0.5);
+			gl_FragData[0].a = 1.0;
+		#endif
 
- 			bool ShadowBounds = abs(projectedShadowPosition.x) < 1.0-1.5/shadowMapResolution && abs(projectedShadowPosition.y) < 1.0-1.5/shadowMapResolution && abs(projectedShadowPosition.z) < 6.0;
+		// diffuse
+		vec3 Indirect_lighting = vec3(0.0);
+		// vec3 MinimumLightColor = vec3(1.0);
+		vec3 Direct_lighting = vec3(0.0);
 
-			if(ShadowBounds){
-				Shadows = 0.0;
-				projectedShadowPosition = projectedShadowPosition * vec3(0.5,0.5,0.5/6.0) + vec3(0.5);
+		#ifdef OVERWORLD_SHADER
+			vec3 DirectLightColor = lightCol.rgb/2400.0;
+
+			float NdotL = clamp(dot(worldSpaceNormals, WsunVec),0.0,1.0); 
+			NdotL = clamp((-15 + NdotL*255.0) / 240.0  ,0.0,1.0);
+
+			float Shadows = 1.0;
+
+			#ifdef DISTANT_HORIZONS_SHADOWMAP
+				vec3 feetPlayerPos_shadow = toWorldSpace(pos.xyz);
+
+				vec3 projectedShadowPosition = mat3(shadowModelView) * feetPlayerPos_shadow  + shadowModelView[3].xyz;
+				projectedShadowPosition = diagonal3(shadowProjection) * projectedShadowPosition + shadowProjection[3].xyz;
+
+				//apply distortion
+				#ifdef DISTORT_SHADOWMAP
+					float distortFactor = calcDistort(projectedShadowPosition.xy);
+					projectedShadowPosition.xy *= distortFactor;
+				#else
+					float distortFactor = 1.0;
+				#endif
+
+				float smallbias = -0.0035;
+
+ 				bool ShadowBounds = abs(projectedShadowPosition.x) < 1.0-1.5/shadowMapResolution && abs(projectedShadowPosition.y) < 1.0-1.5/shadowMapResolution && abs(projectedShadowPosition.z) < 6.0;
+
+				if(ShadowBounds){
+					Shadows = 0.0;
+					projectedShadowPosition = projectedShadowPosition * vec3(0.5,0.5,0.5/6.0) + vec3(0.5);
 
 					#ifdef LPV_SHADOWS
 						projectedShadowPosition.xy *= 0.8;
 					#endif
 
-				Shadows = shadow2D(shadow, projectedShadowPosition + vec3(0.0,0.0, smallbias)).x;
-			}
-		#endif
+					Shadows = shadow2D(shadow, projectedShadowPosition + vec3(0.0,0.0, smallbias)).x;
+				}
+			#endif
 
-		Shadows *= GetCloudShadow(playerPos + cameraPosition, WsunVec);
+			Shadows *= GetCloudShadow(playerPos + cameraPosition, WsunVec);
 
-    		Direct_lighting = DirectLightColor * NdotL * Shadows;
+    			Direct_lighting = DirectLightColor * NdotL * Shadows;
 
-    		vec3 AmbientLightColor = averageSkyCol_Clouds/900.0 ;
+    			vec3 AmbientLightColor = averageSkyCol_Clouds/900.0 ;
 
-    		vec3 ambientcoefs = worldSpaceNormals.xyz / dot(abs(worldSpaceNormals.xyz), vec3(1.0));
-    		float SkylightDir = ambientcoefs.y*1.5;
+    			vec3 ambientcoefs = worldSpaceNormals.xyz / dot(abs(worldSpaceNormals.xyz), vec3(1.0));
+    			float SkylightDir = ambientcoefs.y*1.5;
     
-    		float skylight = max(pow(worldSpaceNormals.y*0.5+0.5,0.1) + SkylightDir, 0.2);
-    		AmbientLightColor *= skylight;
-	#endif
-
-	#ifndef OVERWORLD_SHADER
-		vec3 AmbientLightColor = vec3(0.5);
-	#endif
-
-	Indirect_lighting = AmbientLightColor;
-
-	vec3 FinalColor = (Indirect_lighting + Direct_lighting) * Albedo;
-
-	// specular
-	#ifdef FORWARD_SPECULAR
-		vec3 Reflections_Final = vec3(0.0);
-		vec4 Reflections = vec4(0.0);
-		vec3 BackgroundReflection = FinalColor; 
-		vec3 SunReflection = vec3(0.0);
-
-		float roughness = 0.0;
-		float f0 = 0.02;
-		// f0 = 0.9;
-
-		vec3 reflectedVector = reflect(normalize(viewPos), normals);
-		float normalDotEye = dot(normals, normalize(viewPos));
-
-		float fresnel =  pow(clamp(1.0 + normalDotEye, 0.0, 1.0),5.0);
-
-		fresnel = mix(f0, 1.0, fresnel);
-
-		#ifdef SNELLS_WINDOW
-			if(isEyeInWater == 1) fresnel = pow(clamp(1.5 + normalDotEye,0.0,1.0), 25.0);
-		#endif
-		#if defined FORWARD_ENVIORNMENT_REFLECTION && defined DH_SCREENSPACE_REFLECTIONS
-			vec3 rtPos = rayTrace(reflectedVector, viewPos, interleaved_gradientNoise_temporal(), fresnel, false);
-			if (rtPos.z < 1.){
-				vec3 previousPosition = toPreviousPos(DH_toScreenSpace(rtPos));
-				previousPosition.xy = projMAD(dhPreviousProjection, previousPosition).xy / -previousPosition.z * 0.5 + 0.5;
-				previousPosition.xy = clamp(previousPosition.xy, 0.0, 1.0);
-				Reflections.a = 1.0;
-				Reflections.rgb = texture2D(colortex5, previousPosition.xy).rgb;
-			}
-        	#endif
-
-		#ifdef FORWARD_BACKGROUND_REFLECTION
-			BackgroundReflection = skyCloudsFromTex(mat3(gbufferModelViewInverse) * reflectedVector, colortex4).rgb / 1200.0; 
+    			float skylight = max(pow(worldSpaceNormals.y*0.5+0.5,0.1) + SkylightDir, 0.2);
+    			AmbientLightColor *= skylight;
 		#endif
 
-		#ifdef WATER_SUN_SPECULAR
-			SunReflection = (DirectLightColor * Shadows) * GGX(normalize(normals), -normalize(viewPos), normalize(WsunVec2), roughness, f0) * (1.0-Reflections.a);
+		#ifndef OVERWORLD_SHADER
+			vec3 AmbientLightColor = vec3(0.5);
 		#endif
 
-		Reflections_Final = mix(FinalColor, mix(BackgroundReflection, Reflections.rgb, Reflections.a), fresnel);
-		Reflections_Final += SunReflection;
+		Indirect_lighting = AmbientLightColor;
 
-		gl_FragData[0].a = gl_FragData[0].a + (1.0-gl_FragData[0].a) * fresnel;
+		vec3 FinalColor = (Indirect_lighting + Direct_lighting) * Albedo;
+
+		// specular
+		#ifdef FORWARD_SPECULAR
+			vec3 Reflections_Final = vec3(0.0);
+			vec4 Reflections = vec4(0.0);
+			vec3 BackgroundReflection = FinalColor; 
+			vec3 SunReflection = vec3(0.0);
+
+			float roughness = 0.0;
+			float f0 = 0.02;
+			// f0 = 0.9;
+
+			vec3 reflectedVector = reflect(normalize(viewPos), normals);
+			float normalDotEye = dot(normals, normalize(viewPos));
+
+			float fresnel =  pow(clamp(1.0 + normalDotEye, 0.0, 1.0),5.0);
+
+			fresnel = mix(f0, 1.0, fresnel);
+
+			#ifdef SNELLS_WINDOW
+				if(isEyeInWater == 1) fresnel = pow(clamp(1.5 + normalDotEye,0.0,1.0), 25.0);
+			#endif
+
+			#if defined FORWARD_ENVIORNMENT_REFLECTION && defined DH_SCREENSPACE_REFLECTIONS
+				vec3 rtPos = rayTrace(reflectedVector, viewPos, interleaved_gradientNoise_temporal(), fresnel, false);
+				if (rtPos.z < 1.){
+					vec3 previousPosition = toPreviousPos(DH_toScreenSpace(rtPos));
+					previousPosition.xy = projMAD(dhPreviousProjection, previousPosition).xy / -previousPosition.z * 0.5 + 0.5;
+					previousPosition.xy = clamp(previousPosition.xy, 0.0, 1.0);
+					Reflections.a = 1.0;
+					Reflections.rgb = texture2D(colortex5, previousPosition.xy).rgb;
+				}
+        		#endif
+
+			#ifdef FORWARD_BACKGROUND_REFLECTION
+				BackgroundReflection = skyCloudsFromTex(mat3(gbufferModelViewInverse) * reflectedVector, colortex4).rgb / 1200.0; 
+			#endif
+
+			#ifdef WATER_SUN_SPECULAR
+				SunReflection = (DirectLightColor * Shadows) * GGX(normalize(normals), -normalize(viewPos), normalize(WsunVec2), roughness, f0) * (1.0-Reflections.a);
+			#endif
+
+			Reflections_Final = mix(FinalColor, mix(BackgroundReflection, Reflections.rgb, Reflections.a), fresnel);
+			Reflections_Final += SunReflection;
+
+			gl_FragData[0].a = gl_FragData[0].a + (1.0-gl_FragData[0].a) * fresnel;
 	
-		gl_FragData[0].rgb = clamp(Reflections_Final / gl_FragData[0].a * 0.1,0.0,65000.0);
+			gl_FragData[0].rgb = clamp(Reflections_Final / gl_FragData[0].a * 0.1,0.0,65000.0);
 
-		if (gl_FragData[0].r > 65000.) gl_FragData[0].rgba = vec4(0.0);
-	#else
-		gl_FragData[0].rgb = FinalColor*0.1;
-	#endif
+			if (gl_FragData[0].r > 65000.) gl_FragData[0].rgba = vec4(0.0);
+		#else
+			gl_FragData[0].rgb = FinalColor * 0.1;
+		#endif
 	    
-	#ifdef DH_OVERDRAW_PREVENTION
-		float distancefade = min(max(1.0 - length(playerPos)/clamp(far-16*4, 16, maxOverdrawDistance),0.0)*5,1.0);
+		#ifdef DH_OVERDRAW_PREVENTION
+			float distancefade = min(max(1.0 - length(playerPos)/clamp(far-16*4, 16, maxOverdrawDistance),0.0)*5,1.0);
 
-		if(texture2D(depthtex0, gl_FragCoord.xy*texelSize).x < 1.0 || distancefade > 0.0){
-			gl_FragData[0].a = 0.0;
-			material = 0.0;
-		}
-	#endif
-	
-	#if DEBUG_VIEW == debug_DH_WATER_BLENDING
-		if(gl_FragCoord.x*texelSize.x > 0.53) gl_FragData[0] = vec4(0.0);
-	#endif
-   
-	gl_FragData[1] = vec4(Albedo, material);
+			if(texture2D(depthtex0, gl_FragCoord.xy*texelSize).x < 1.0 || distancefade > 0.0){
+				gl_FragData[0].a = 0.0;
+				material = 0.0;
+			}
+		#endif
+
+		#if DEBUG_VIEW == debug_DH_WATER_BLENDING
+			if(gl_FragCoord.x*texelSize.x > 0.53) gl_FragData[0] = vec4(0.0);
+		#endif
+
+		gl_FragData[1] = vec4(Albedo, material);
 	}
 }
