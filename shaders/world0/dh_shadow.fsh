@@ -3,12 +3,12 @@
 
 #include "/lib/settings.glsl"
 
-flat varying int water;
-varying vec2 texcoord;
-
-varying float overdrawCull;
+flat in int isWater;
+in vec2 texcoord;
+in float overdrawCull;
 
 uniform sampler2D tex;
+
 //////////////////////////////VOID MAIN//////////////////////////////
 //////////////////////////////VOID MAIN//////////////////////////////
 //////////////////////////////VOID MAIN//////////////////////////////
@@ -17,15 +17,15 @@ uniform sampler2D tex;
 
 void main() {
 
-    if(water > 0){   
-        discard;
-        return;
-    }
-    
-    if(overdrawCull < 1.0){   
-        discard;
-        return;
-    }
-    
+	if(isWater > 0){   
+		discard;
+		return;
+	}
+
+	if(overdrawCull < 1.0){   
+		discard;
+		return;
+	}
+
 	gl_FragData[0] = texture2D(tex, texcoord.xy);
 }

@@ -10,58 +10,45 @@ Read the terms of modification and sharing before changing something below pleas
 
 #define SHADOW_MAP_BIAS 0.5
 const float PI = 3.1415927;
-varying vec3 color;
-uniform mat4 shadowProjectionInverse;
-uniform mat4 shadowProjection;
-uniform mat4 shadowModelViewInverse;
-uniform mat4 shadowModelView;
-uniform mat4 gbufferProjection;
-uniform mat4 gbufferProjectionInverse;
+out vec3 color;
 
-flat varying int water;
+uniform mat4 shadowModelViewInverse;
+
+flat out int isWater;
 
 #include "/lib/Shadow_Params.glsl"
-
-#define diagonal3(m) vec3((m)[0].x, (m)[1].y, m[2].z)
-#define projMAD(m, v) (diagonal3(m) * (v) + (m)[3].xyz)
 
 // uniform float far;
 uniform float dhFarPlane;
 
+#include "/lib/projections.glsl"
 #include "/lib/DistantHorizons_projections.glsl"
 
-vec4 toClipSpace3(vec3 viewSpacePosition) {
-
-	// mat4 projection = DH_shadowProjectionTweak(gl_ProjectionMatrix);
-
-    return vec4(projMAD(gl_ProjectionMatrix, viewSpacePosition),1.0);
-}
-
-varying float overdrawCull;
+out float overdrawCull;
 // uniform int renderStage;
 
 void main() {
-    water = 0;
+	isWater = 0;
 
-    if(gl_Color.a < 1.0) water = 1;
+	if(gl_Color.a < 1.0) isWater = 1;
 
 	color = gl_Color.rgb;
 
 	vec3 position = mat3(gl_ModelViewMatrix) * vec3(gl_Vertex) + gl_ModelViewMatrix[3].xyz;
 	#ifdef DH_OVERDRAW_PREVENTION
-  		vec3 worldpos = mat3(shadowModelViewInverse) * position + shadowModelViewInverse[3].xyz;
+		vec3 worldpos = mat3(shadowModelViewInverse) * position + shadowModelViewInverse[3].xyz;
 		overdrawCull = 1.0 - clamp(1.0 - length(worldpos) / far,0.0,1.0);
 	#else
 		overdrawCull = 1.0;
 	#endif
 
 	#ifdef DISTORT_SHADOWMAP
-		gl_Position = BiasShadowProjection(toClipSpace3(position));
+		gl_Position = BiasShadowProjection(toClipSpace4(position));
 	#else
-		gl_Position = toClipSpace3(position);
+		gl_Position = toClipSpace4(position);
 	#endif
 
-  	gl_Position.z /= 6.0;
+	gl_Position.z /= 6.0;
 	#ifdef LPV_SHADOWS
 		gl_Position.xy = gl_Position.xy * 0.8 - 0.2 * gl_Position.w;
 	#endif

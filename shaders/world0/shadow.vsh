@@ -18,7 +18,7 @@ Read the terms of modification and sharing before changing something below pleas
 
 #define SHADOW_MAP_BIAS 0.5
 const float PI = 3.1415927;
-varying vec2 texcoord;
+out vec2 texcoord;
 uniform mat4 shadowProjectionInverse;
 uniform mat4 shadowModelViewInverse;
 uniform int hideGUI;
@@ -36,10 +36,10 @@ uniform vec3 shadowCamera;
 uniform vec3 shadowLightVec;
 uniform float shadowMaxProj;
 attribute vec4 mc_midTexCoord;
-varying vec4 color;
+out vec4 color;
 #ifdef LPV_SHADOWS
-	varying vec3 worldPos;
-	flat varying vec3 worldNormal;
+	out vec3 worldPos;
+	flat out vec3 worldNormal;
 #endif
 
 attribute vec4 mc_Entity;
@@ -122,66 +122,10 @@ void main() {
 
 	vec3 position = mat3(gl_ModelViewMatrix) * vec3(gl_Vertex) + gl_ModelViewMatrix[3].xyz;
 
-	// playerpos = vec4(0.0);
-	// playerpos = gbufferModelViewInverse * (gl_ModelViewMatrix * gl_Vertex);
-	
-	// mat4 Custom_ViewMatrix = BuildShadowViewMatrix(LightDir);
-	// mat4 Custom_ProjectionMatrix = BuildShadowProjectionMatrix();
-
-	// position = gl_Vertex.xyz;
-
-	// if((renderStage == 10 || renderStage == 12) && mc_Entity.x != 3000) {
-	// 	position = (shadowModelViewInverse * vec4(gl_Vertex.xyz,1.0)).xyz;
-	// } 
-	
-	// position = mat3(Custom_ViewMatrix) * position + Custom_ViewMatrix[3].xyz;
-
-	// HHHHHHHHH ITS THE JITTER DOF HERE TO SAY HELLO
-	// It turns out 'position' above is just viewPos lmao
-	// #ifdef DOF_JITTER_SHADOW
-	// 	// CLIP SPACE
-	// 	vec2 jitter = clamp(jitter_offsets[frameCounter % 64], -1.0, 1.0);
-	// 	jitter = rotate(radians(float(frameCounter))) * jitter;
-	// 	jitter.y *= aspectRatio;
-	// 	jitter.x *= DOF_ANAMORPHIC_RATIO;
-
-	// 	vec4 clipPos = gbufferProjection * vec4(position, 1.0);
-
-	// 	// CLIP SPACE -> VIEW SPACE
-	// 	vec3 viewPos = (gbufferProjectionInverse * clipPos).xyz;
-
-	// 	// Focus distance
-	// 	#if DOF_JITTER_FOCUS < 0
-	// 	float focusMul = clipPos.z - mix(pow(512.0, screenBrightness), 512.0 * screenBrightness, 0.25);
-	// 	#else
-	// 	float focusMul = clipPos.z - DOF_JITTER_FOCUS;
-	// 	#endif
-
-	// 	// CLIP SPACE -> SHADOW CLIP SPACE
-	// 	vec3 jitterViewPos = (gbufferProjectionInverse * vec4(jitter, 1.0, 1.0)).xyz;
-	// 	// vec3 jitterFeetPos = (gbufferModelViewInverse * vec4(jitterViewPos, 1.0)).xyz;
-	// 	// vec3 jitterShadowViewPos = (shadowModelView * vec4(jitterFeetPos, 1.0)).xyz;
-	// 	// vec4 jitterShadowClipPos = gl_ProjectionMatrix * vec4(jitterShadowViewPos, 1.0);
-		
-	// 	// vec4 totalOffset = jitterShadowClipPos * JITTER_STRENGTH * focusMul * 1e-2;
-
-	// 	position += jitterViewPos * focusMul * 1e-2;
-	// 	if(focusMul < 10.0) {
-	// 		gl_Position = vec4(-1.0);
-	// 		return;
-	// 	}
-	// #endif
-
-	// #if defined IS_LPV_ENABLED || defined WAVY_PLANTS || !defined PLANET_CURVATURE
-		vec3 playerpos = mat3(shadowModelViewInverse) * position + shadowModelViewInverse[3].xyz;
-	// #endif
+	vec3 playerpos = mat3(shadowModelViewInverse) * position + shadowModelViewInverse[3].xyz;
 
 	#ifdef LPV_SHADOWS
-		#ifdef WAVY_PLANTS
-			worldPos = playerpos;
-		#else
-			worldPos = mat3(shadowModelViewInverse) * position + shadowModelViewInverse[3].xyz;
-		#endif
+		worldPos = playerpos;
 		worldNormal = mat3(shadowModelViewInverse) * gl_NormalMatrix * gl_Normal;
 	#endif
 

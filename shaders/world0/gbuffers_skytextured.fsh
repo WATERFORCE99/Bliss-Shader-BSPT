@@ -2,8 +2,8 @@
 #include "/lib/settings.glsl"
 
 #if RESOURCEPACK_SKY != 0
-	varying vec4 color;
-	varying vec2 texcoord;
+	in vec4 color;
+	in vec2 texcoord;
 	uniform sampler2D texture;
 	uniform sampler2D depthtex0;
 

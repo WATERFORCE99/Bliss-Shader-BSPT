@@ -2,15 +2,15 @@
 
 #include "/lib/settings.glsl"
 
-varying vec4 color;
+in vec4 color;
 
 #ifdef TRANSLUCENT_COLORED_SHADOWS
-	varying vec3 Fcolor;
+	in vec3 Fcolor;
 #else
 	const vec3 Fcolor = vec3(1.0);
 #endif
 
-varying vec2 Ftexcoord;
+in vec2 Ftexcoord;
 uniform sampler2D tex;
 uniform sampler2D noisetex;
 
@@ -20,7 +20,7 @@ uniform sampler2D noisetex;
 #endif
 
 float blueNoise(){
-	return fract(texelFetch2D(noisetex, ivec2(gl_FragCoord.xy)%512, 0).a + 1.0/1.6180339887 );
+	return fract(texelFetch2D(noisetex, ivec2(gl_FragCoord.xy)%512, 0).a + 1.0/1.6180339887);
 }
 
 //////////////////////////////VOID MAIN//////////////////////////////

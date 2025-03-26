@@ -9,8 +9,8 @@
 	Read the terms of modification and sharing before changing something below please !
 	!! DO NOT REMOVE !!
 	*/
-	varying vec4 color;
-	varying vec2 texcoord;
+	out vec4 color;
+	out vec2 texcoord;
 	uniform vec2 texelSize;
 	uniform int framemod8;
 	const vec2[8] offsets = vec2[8](vec2(1./8.,-3./8.),
