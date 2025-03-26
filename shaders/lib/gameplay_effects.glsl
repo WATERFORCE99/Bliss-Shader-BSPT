@@ -13,7 +13,7 @@
 uniform float exitWater;
 // uniform float exitPowderSnow;
 uniform int isEyeInWater;
-uniform float raining;
+uniform float isRaining;
 uniform ivec2 eyeBrightness;
 
 // uniform float currentPlayerHunger;
@@ -34,7 +34,7 @@ uniform ivec2 eyeBrightness;
 // uniform bool is_on_ground;
 // uniform bool isSpectator;
 
-float rainExposed = raining * clamp((eyeBrightness.y/240.0 - 0.9) * 10.0, 0.0, 1.0);
+float rainExposed = isRaining * clamp((eyeBrightness.y/240.0 - 0.9) * 10.0, 0.0, 1.0);
 
 vec3 distortedRain(){
 	vec2 uv = texcoord;
