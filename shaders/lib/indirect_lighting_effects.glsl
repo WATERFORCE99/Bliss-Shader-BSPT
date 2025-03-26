@@ -65,9 +65,9 @@ vec4 BilateralUpscale_SSAO(sampler2D tex, sampler2D depth, vec2 coord, float ref
 
 vec3 rayTrace_GI(vec3 dir,vec3 position,float dither, float quality){
 	vec3 clipPosition = toClipSpace3(position);
-	float rayLength = ((position.z + dir.z * far * sqrt(3)) > -near)
+	float rayLength = ((position.z + dir.z * far * sqrt(3.0)) > -near)
 					? (-near - position.z)/dir.z
-					: far * sqrt(3);
+					: far * sqrt(3.0);
 	vec3 direction = normalize(toClipSpace3(position + dir * rayLength) - clipPosition); //convert to clip space
 	direction.xy = normalize(direction.xy);
 
@@ -114,9 +114,9 @@ vec3 RT_alternate(vec3 dir, vec3 position, float noise, float stepsizes, bool is
 
 	int maxSteps = STEPS;
 	vec3 clipPosition = toClipSpace3(position);
-	float rayLength = ((position.z + dir.z * far * sqrt(3)) > -sqrt(3) * near)
-					? (-sqrt(3) * near - position.z)/dir.z
-					: sqrt(3) * far;
+	float rayLength = ((position.z + dir.z * far * sqrt(3.0)) > -sqrt(3.0) * near)
+					? (-sqrt(3.0) * near - position.z)/dir.z
+					: sqrt(3.0) * far;
 	vec3 end = toClipSpace3(position + dir * rayLength) ;
 	vec3 direction = end - clipPosition ; //convert to clip space
 
