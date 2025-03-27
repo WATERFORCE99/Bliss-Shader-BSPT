@@ -5,6 +5,7 @@ uniform mat4 gbufferModelView;
 uniform mat4 gbufferModelViewInverse;
 uniform mat4 gbufferPreviousModelView;
 uniform mat4 shadowModelView;
+uniform mat4 shadowModelViewInverse;
 uniform mat4 shadowProjection;
 uniform vec3 cameraPosition;
 uniform vec3 previousCameraPosition;
@@ -14,6 +15,10 @@ uniform vec3 previousCameraPosition;
 
 vec3 toClipSpace3(vec3 viewSpacePosition) {
 	return projMAD(gbufferProjection, viewSpacePosition) / -viewSpacePosition.z * 0.5 + 0.5;
+}
+
+vec3 toClipSpace3Prev(vec3 viewSpacePosition) {
+	return projMAD(gbufferPreviousProjection, viewSpacePosition) / -viewSpacePosition.z * 0.5 + 0.5;
 }
 
 vec4 toClipSpace4(vec3 viewSpacePosition) {
@@ -55,13 +60,11 @@ vec3 toWorldSpaceCamera(vec3 p3) {
 }
 
 vec3 toShadowSpace(vec3 p3) {
-	p3 = mat3(gbufferModelViewInverse) * p3 + gbufferModelViewInverse[3].xyz;
-	p3 = mat3(shadowModelView) * p3 + shadowModelView[3].xyz;
+	p3 = mat3(shadowModelViewInverse) * p3 + shadowModelViewInverse[3].xyz;
 	return p3;
 }
 
 vec3 toShadowSpaceProjected(vec3 p3) {
-	p3 = mat3(gbufferModelViewInverse) * p3 + gbufferModelViewInverse[3].xyz;
 	p3 = mat3(shadowModelView) * p3 + shadowModelView[3].xyz;
 	p3 = diagonal3(shadowProjection) * p3 + shadowProjection[3].xyz;
 	return p3;

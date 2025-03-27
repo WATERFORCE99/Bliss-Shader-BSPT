@@ -80,7 +80,7 @@ vec3 drawAurora(vec3 rayDir, float dither) {
 }
 
 #ifdef AURORA_SNOWY
-	float applyAurora = Night * smoothSnowy;
+	float applyAurora = Night * smoothBiome_Snowy;
 #else
 	float applyAurora = Night;
 #endif

@@ -22,14 +22,14 @@ vec3 lensflare(vec2 uv, vec2 pos) {
 	float f1b = max(1.0/(1.0 + 16.0 * pow(length(uvd + 0.9 * pos),1.6)), 0.0) * 0.42;
 
 	vec2 uvx = mix(uv,uvd,-0.3);
-	float f2r = max(0.02 - pow(length(uvx + 0.4 * pos),1.2),.0) * 3.0;
-	float f2g = max(0.02 - pow(length(uvx + 0.45 * pos),1.2),.0) * 2.5;
-	float f2b = max(0.02 - pow(length(uvx + 0.5 * pos),1.2),.0) * 1.5;
+	float f2r = max(0.02 - pow(length(uvx + 0.4 * pos),1.2), 0.0) * 3.0;
+	float f2g = max(0.02 - pow(length(uvx + 0.45 * pos),1.2), 0.0) * 2.5;
+	float f2b = max(0.02 - pow(length(uvx + 0.5 * pos),1.2), 0.0) * 1.5;
 
 	uvx = mix(uv,uvd,-0.15);
-	float f3r = max(0.01 - pow(length(uvx - 0.3 * pos),1.4),.0) * 3.0;
-	float f3g = max(0.01 - pow(length(uvx - 0.325 * pos),1.4),.0) * 2.5;
-	float f3b = max(0.01 - pow(length(uvx - 0.35 * pos),1.4),.0) * 1.5;
+	float f3r = max(0.01 - pow(length(uvx - 0.3 * pos),1.2), 0.0) * 3.0;
+	float f3g = max(0.01 - pow(length(uvx - 0.325 * pos),1.2), 0.0) * 2.5;
+	float f3b = max(0.01 - pow(length(uvx - 0.35 * pos),1.2), 0.0) * 1.5;
 
 	vec3 c = vec3(0.0);
 	c.r += f1r + f2r + f3r;

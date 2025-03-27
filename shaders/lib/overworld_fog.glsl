@@ -26,7 +26,7 @@ float cloudVol(in vec3 pos, float maxDistance ){
 	
 	float fog_shape = 0.0;
 	float fog_erosion = 0.0;
-	if(sandStorm < 1.0 && snowStorm < 1.0){
+	if(sandStorm < 1.0 && sandStorm_red < 1.0 && snowStorm < 1.0){
 		fog_shape = 1.0 - densityAtPosFog(samplePos * 24.0);
 		fog_erosion = 1.0 - densityAtPosFog(samplePos2 * 200.0 - vec3(min(max(fog_shape - 0.6 ,0.0) * 2.0 ,1.0)*200.0));
 	}
@@ -34,9 +34,9 @@ float cloudVol(in vec3 pos, float maxDistance ){
 	float cloudyFog = max(min(max(fog_shape - 0.6 ,0.0) * 2.0 ,1.0) - fog_erosion * 0.4	, 0.0) * exp(-0.05 * max(pos.y - (fogYstart+20),0.0));
 	float rainyFog = (low_gradientFog * 0.5 + exp2(-0.06 * max(pos.y - fogYstart,0.0))) * isRaining;
 	
-	if(sandStorm > 0.0 || snowStorm > 0.0){
+	if(sandStorm > 0.0 || sandStorm_red > 0.0 || snowStorm > 0.0){
 		float IntenseFogs = pow(1.0 - densityAtPosFog((samplePos2  - vec3(frameTimeCounter,0,frameTimeCounter)*15.0) * 100.0),2.0) * mix(1.0, high_gradientFog, snowStorm);
-		cloudyFog = mix(cloudyFog, IntenseFogs, sandStorm+snowStorm);
+		cloudyFog = mix(cloudyFog, IntenseFogs, sandStorm+sandStorm_red+snowStorm);
 
 		medium_gradientFog = 1.0;
 	}
@@ -89,12 +89,11 @@ vec4 GetVolumetricFog(
 	int SAMPLECOUNT = VL_SAMPLES;
 
 	//project pixel position into projected shadowmap space
-	vec3 wpos = mat3(gbufferModelViewInverse) * viewPosition + gbufferModelViewInverse[3].xyz;
-	vec3 fragposition = mat3(shadowModelView) * wpos + shadowModelView[3].xyz;
-	fragposition = diagonal3(shadowProjection) * fragposition + shadowProjection[3].xyz;
+	vec3 wpos = toWorldSpace(viewPosition);
+	vec3 fragposition = toShadowSpaceProjected(wpos);
 
 	//project view origin into projected shadowmap space
-	vec3 start = toShadowSpaceProjected(vec3(0.0));
+	vec3 start = toShadowSpaceProjected(toWorldSpace(vec3(0.0)));
 
 	//rayvector into projected shadow map space
 	//we can use a projected vector because its orthographic projection

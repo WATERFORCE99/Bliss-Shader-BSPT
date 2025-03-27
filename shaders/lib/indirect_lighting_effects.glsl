@@ -78,7 +78,7 @@ vec3 rayTrace_GI(vec3 dir,vec3 position,float dither, float quality){
 	float biasdist =  1 + clamp(position.z * position.z/50.0, 0, 2); // shrink sample size as distance increases
 
 	vec3 stepv = direction * mult/quality * vec3(RENDER_SCALE, 1.0)/biasdist;
-	lowp vec3 spos = clipPosition * vec3(RENDER_SCALE,1.0) ;
+	vec3 spos = clipPosition * vec3(RENDER_SCALE,1.0) ;
 
 	spos.xy += TAA_Offset * texelSize * 0.5/RENDER_SCALE;
 
@@ -130,7 +130,7 @@ vec3 RT_alternate(vec3 dir, vec3 position, float noise, float stepsizes, bool is
 
 	int iterations = min(int(min(len, mult * len)-2), maxSteps);
 
-	lowp vec3 spos = clipPosition * vec3(RENDER_SCALE, 1.0) + stepv * (noise - 0.5);
+	vec3 spos = clipPosition * vec3(RENDER_SCALE, 1.0) + stepv * (noise - 0.5);
 	spos.xy += TAA_Offset * texelSize * 0.5 * RENDER_SCALE;
 
 	float biasamount = 0.00005;
@@ -188,7 +188,7 @@ vec3 ApplySSRT(
 	for (int i = 0; i < nrays; i++) {
 		int seed = (frameCounter%40000)*nrays+i;
 		vec2 ij = fract(R2_samples(seed) + noise.xy);
-		lowp vec3 rayDir = TangentToWorld(normal, normalize(cosineHemisphereSample(ij)));
+		vec3 rayDir = TangentToWorld(normal, normalize(cosineHemisphereSample(ij)));
 
 		#if indirect_RTGI == 0 || indirect_RTGI == 1
 			vec3 rayHit = RT_alternate(mat3(gbufferModelView) * rayDir, viewPos, noise.z, 10.0, isLOD, CURVE); // choc sspt 
@@ -211,7 +211,7 @@ vec3 ApplySSRT(
 		if (rayHit.z < 1.0){
 			#if indirect_RTGI == 1 || indirect_RTGI == 2
 				vec3 previousPosition = toPreviousPos(toScreenSpace(rayHit));
-				previousPosition.xy = projMAD(gbufferPreviousProjection, previousPosition).xy/-previousPosition.z * 0.5 + 0.5;
+				previousPosition = toClipSpace3Prev(previousPosition);
 
 				previousPosition.xy = clamp(previousPosition.xy, 0.0, 1.0);
 				bouncedLight = texture2D(colortex5, previousPosition.xy).rgb;

@@ -17,7 +17,7 @@ vec3 DH_toClipSpace3(vec3 viewSpacePosition) {
 	return projMAD(dhProjection, viewSpacePosition) / -viewSpacePosition.z * 0.5 + 0.5;
 }
 
-vec3 toScreenSpace_DH( vec2 texcoord, float depth, float DHdepth ) {
+vec3 toScreenSpace_DH(vec2 texcoord, float depth, float DHdepth) {
 	vec4 viewPos = vec4(0.0);
 	vec3 feetPlayerPos = vec3(0.0);
 	vec4 iProjDiag = vec4(0.0);
@@ -44,7 +44,36 @@ vec3 toScreenSpace_DH( vec2 texcoord, float depth, float DHdepth ) {
 	return viewPos.xyz;
 }
 
-vec3 toClipSpace3_DH( vec3 viewSpacePosition, bool depthCheck ) {
+vec3 toScreenSpace_DH_special(vec3 POS, bool depthCheck) {
+
+	vec4 viewPos = vec4(0.0);
+	vec3 feetPlayerPos = vec3(0.0);
+	vec4 iProjDiag = vec4(0.0);
+
+	#ifdef DISTANT_HORIZONS
+    		if(depthCheck) {
+			iProjDiag = vec4(dhProjectionInverse[0].x, dhProjectionInverse[1].y, dhProjectionInverse[2].zw);
+
+			feetPlayerPos = POS * 2.0 - 1.0;
+			viewPos = iProjDiag * feetPlayerPos.xyzz + dhProjectionInverse[3];
+			viewPos.xyz /= viewPos.w;
+
+		} else {
+	#endif
+		iProjDiag = vec4(gbufferProjectionInverse[0].x, gbufferProjectionInverse[1].y, gbufferProjectionInverse[2].zw);
+
+		feetPlayerPos = POS * 2.0 - 1.0;
+		viewPos = iProjDiag * feetPlayerPos.xyzz + gbufferProjectionInverse[3];
+		viewPos.xyz /= viewPos.w;
+			
+	#ifdef DISTANT_HORIZONS
+		}
+	#endif
+
+	return viewPos.xyz;
+}
+
+vec3 toClipSpace3_DH(vec3 viewSpacePosition, bool depthCheck) {
 
 	#ifdef DISTANT_HORIZONS
 		mat4 projectionMatrix = depthCheck ? dhProjection : gbufferProjection;
@@ -54,7 +83,17 @@ vec3 toClipSpace3_DH( vec3 viewSpacePosition, bool depthCheck ) {
 	#endif
 }
 
-mat4 DH_shadowProjectionTweak( in mat4 projection){
+vec3 toClipSpace3Prev_DH(vec3 viewSpacePosition, bool depthCheck) {
+
+	#ifdef DISTANT_HORIZONS
+		mat4 projectionMatrix = depthCheck ? dhPreviousProjection : gbufferPreviousProjection;
+   		return projMAD(projectionMatrix, viewSpacePosition) / -viewSpacePosition.z * 0.5 + 0.5;
+	#else
+		return projMAD(gbufferPreviousProjection, viewSpacePosition) / -viewSpacePosition.z * 0.5 + 0.5;
+	#endif
+}
+
+mat4 DH_shadowProjectionTweak(in mat4 projection) {
 
 	#ifdef DH_SHADOWPROJECTIONTWEAK
 		
@@ -78,6 +117,6 @@ float DH_ld(float dist) {
 	return (2.0 * dhNearPlane) / (dhFarPlane + dhNearPlane - dist * (dhFarPlane - dhNearPlane));
 }
 
-float DH_inv_ld (float lindepth){
+float DH_inv_ld (float lindepth) {
 	return - ((2.0 * dhNearPlane / lindepth) - dhFarPlane - dhNearPlane) / (dhFarPlane - dhNearPlane);
 }
