@@ -1,8 +1,20 @@
+2025-3-27 v1.57
+1. Arrange codes. (may cause crash in aether/twilight forest, if so, pls contact me)
+~ xxx 整理代码（可能造成aether与暮色森林维度崩溃，如果发生请联系我）
+2. Sperate color of sandstrom for bad land & desert.
+~ climate_settings 为沙漠/恶地的沙尘暴增加颜色区分
+3. Potentially fix shader crash for AMD users.
+~ indirect_lighting 可能修复AMD用户无法加载光影的问题
+
 2025-3-25 v1.56
 1. Adjust darkening and transparency of all translucents to make them prettier.
 ~ all_translucent 优化了所有透明物体的透明度与光线吸收使其更美观
-20.	Update Lang.
+2. Update Lang.
 ~ zh_cn/en_us 优化翻译文件
+3. Arrange codes.
+~ xxx 整理代码
+4. Merge sandstorm/snowstrom to dry/snowy biome environments.
+~ climate_settings 新增干旱群系特色环境，将沙暴与雪暴合并到干旱/下雪群系特色环境中
 
 2025-3-19 ~ 3-24 v1.5 ~ 1.55
 1.	Add puddle ripple, improve ripple visual & perf.
