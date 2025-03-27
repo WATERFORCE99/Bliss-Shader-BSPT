@@ -2,6 +2,7 @@
 
 uniform vec2 texelSize;
 #include "/lib/res_params.glsl"
+
 void main() {
 	gl_Position = ftransform();
 	vec2 scaleRatio = max(vec2(0.25), vec2(18.+258*2,258.)*texelSize);

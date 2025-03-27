@@ -13,7 +13,6 @@ out vec4 color;
 uniform sampler2D colortex4;
 
 out vec4 lmtexcoord;
-flat out float exposure;
 
 #ifdef LINES
 	flat out int SELECTION_BOX;
@@ -110,7 +109,6 @@ void main() {
 
 	color = gl_Color;
 
-	exposure = texelFetch2D(colortex4, ivec2(10, 37), 0).r;
 	// color.rgb = worldpos;
 
 	#ifdef LINES

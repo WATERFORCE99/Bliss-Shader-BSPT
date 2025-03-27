@@ -82,9 +82,6 @@ flat in vec3 zMults;
 
 uniform vec2 texelSize;
 uniform vec2 viewSize;
-uniform float viewWidth;
-uniform float viewHeight;
-uniform float aspectRatio;
 
 uniform float eyeAltitude;
 flat in vec2 TAA_Offset;
@@ -104,7 +101,6 @@ uniform vec3 sunVec;
 flat in vec3 WsunVec;
 flat in vec3 unsigned_WsunVec;
 flat in vec3 WmoonVec;
-flat in float exposure;
 flat in vec3 albedoSmooth;
 
 #ifdef IS_LPV_ENABLED
@@ -840,8 +836,7 @@ void main() {
 			vec3 shadowPlayerPos = toWorldSpace(viewPos);
 			if(!hand) GriAndEminShadowFix(shadowPlayerPos, FlatNormals, vanilla_AO, lightmap.y);
 
-			vec3 projectedShadowPosition = mat3(shadowModelView) * shadowPlayerPos + shadowModelView[3].xyz;
-			projectedShadowPosition = diagonal3(shadowProjection) * projectedShadowPosition + shadowProjection[3].xyz;
+			vec3 projectedShadowPosition = toShadowSpaceProjected(shadowPlayerPos);
 
 			float shadowMapFalloff = smoothstep(0.0, 1.0, min(max(1.0 - length(feetPlayerPos) / (shadowDistance+32.0),0.0)*5.0,1.0));
 			float shadowMapFalloff2 = smoothstep(0.0, 1.0, min(max(1.0 - length(feetPlayerPos) / shadowDistance,0.0)*5.0,1.0));

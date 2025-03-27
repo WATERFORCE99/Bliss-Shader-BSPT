@@ -9,7 +9,6 @@
 flat in vec4 lightCol;
 flat in vec3 averageSkyCol;
 flat in vec3 averageSkyCol_Clouds;
-flat in float exposure;
 
 // uniform int dhRenderDistance;
 uniform sampler2D depthtex0;
@@ -114,8 +113,8 @@ float fogPhase2(float lightPoint){
 vec4 waterVolumetrics( vec3 rayStart, vec3 rayEnd, float estEndDepth, float estSunDepth, float rayLength, float dither, vec3 waterCoefs, vec3 scatterCoef, vec3 ambient, vec3 lightSource, float VdotL, float lightleakFix){
 	int spCount = rayMarchSampleCount;
 
-	vec3 start = toShadowSpaceProjected(rayStart);
-	vec3 end = toShadowSpaceProjected(rayEnd);
+	vec3 start = toShadowSpaceProjected(toWorldSpace(rayStart));
+	vec3 end = toShadowSpaceProjected(toWorldSpace(rayEnd));
 	vec3 dV = (end-start);
 
 	//limit ray length at 32 blocks for performance and reducing integration error
@@ -242,19 +241,18 @@ void main() {
 
 		// vec3 lightningColor = (lightningEffect / 3) * (max(eyeBrightnessSmooth.y,0)/240.);
 
-		float dirtAmount = Dirt_Amount ;
     		// float dirtAmount = Dirt_Amount + 0.01;
 		vec3 waterEpsilon = vec3(Water_Absorb_R, Water_Absorb_G, Water_Absorb_B);
 		vec3 dirtEpsilon = vec3(Dirt_Absorb_R, Dirt_Absorb_G, Dirt_Absorb_B);
-		vec3 totEpsilon = vec3(Water_Absorb_R, Water_Absorb_G, Water_Absorb_B);//dirtEpsilon * dirtAmount + waterEpsilon;
-		vec3 scatterCoef = dirtAmount * vec3(Dirt_Scatter_R, Dirt_Scatter_G, Dirt_Scatter_B) / 3.14;
+		vec3 totEpsilon = vec3(Water_Absorb_R, Water_Absorb_G, Water_Absorb_B);//dirtEpsilon * Dirt_Amount + waterEpsilon;
+		vec3 scatterCoef = Dirt_Amount * vec3(Dirt_Scatter_R, Dirt_Scatter_G, Dirt_Scatter_B) / 3.14;
 
 		#ifdef BIOME_TINT_WATER
 			// yoink the biome tint written in this buffer for water only.
 			if(iswater){
 				vec2 data = texelFetch2D(colortex11,ivec2(tc/texelSize),0).gb;
 				vec3 wateralbedo = vec3(decodeVec2(data.x),decodeVec2(data.y).r);
-				scatterCoef = dirtAmount * (normalize(wateralbedo.rgb+1e-7) * 0.5 + 0.5) / 3.14;
+				scatterCoef = Dirt_Amount * (normalize(wateralbedo.rgb+1e-7) * 0.5 + 0.5) / 3.14;
 			}
 		#endif
 

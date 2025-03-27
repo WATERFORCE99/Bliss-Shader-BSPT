@@ -13,7 +13,10 @@ out vec2 texcoord;
 
 out vec4 tangent;
 out vec4 normalMat;
+// flat out float exposure;
 attribute vec4 at_tangent;
+
+uniform sampler2D colortex4;
 
 uniform vec2 texelSize;
 uniform int framemod8;
@@ -27,16 +30,13 @@ uniform int framemod8;
 //////////////////////////////VOID MAIN//////////////////////////////
 //////////////////////////////VOID MAIN//////////////////////////////
 
-uniform sampler2D colortex4;
-flat out float exposure;
-
 void main() {
 	color = gl_Color;
 
 	texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).st;
 
 	#if defined ENCHANT_GLINT || defined SPIDER_EYES || defined BEACON_BEAM
-		exposure = texelFetch2D(colortex4,ivec2(10,37),0).r;
+		// exposure = texelFetch2D(colortex4,ivec2(10,37),0).r;
 
 		vec3 position = mat3(gl_ModelViewMatrix) * vec3(gl_Vertex) + gl_ModelViewMatrix[3].xyz;
 		gl_Position = toClipSpace4alt(position);

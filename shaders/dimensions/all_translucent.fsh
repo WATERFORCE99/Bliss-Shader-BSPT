@@ -201,8 +201,7 @@ uniform float dhFarPlane;
 		// if(maxDistFade <= 0.0) return 1.0;
 
 		// setup shadow projection
-		vec3 projectedShadowPosition = mat3(shadowModelView) * playerPos + shadowModelView[3].xyz;
-		projectedShadowPosition = diagonal3(shadowProjection) * projectedShadowPosition + shadowProjection[3].xyz;
+		vec3 projectedShadowPosition = toShadowSpaceProjected(playerPos);
 
 		// un-distort
 		float distortFactor = 1.0;

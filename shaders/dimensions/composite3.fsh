@@ -108,17 +108,16 @@ vec3 doRefractionEffect(inout vec2 texcoord, vec2 normal, float linearDistance, 
 	#else
 		vec2 directionalSmudge = vec2(0.0);
 	#endif
-  
-  vec2 refractedUV = texcoord - (UVNormal + directionalSmudge)*refractionMult;
-  
+
+	vec2 refractedUV = texcoord - (UVNormal + directionalSmudge)*refractionMult;
 
 	#ifdef FAKE_DISPERSION_EFFECT
 		refractionMult *= min(decodeVec2(texelFetch2D(colortex11, ivec2((texcoord - ((UVNormal + abberationOffset) + directionalSmudge)*refractionMult)/texelSize),0).b).g,
-							decodeVec2(texelFetch2D(colortex11, ivec2((texcoord + ((UVNormal + abberationOffset) + directionalSmudge)*refractionMult)/texelSize),0).b).g  ) > 0.0 ? 1.0 : 0.0;
+							decodeVec2(texelFetch2D(colortex11, ivec2((texcoord + ((UVNormal + abberationOffset) + directionalSmudge)*refractionMult)/texelSize),0).b).g) > 0.0 ? 1.0 : 0.0;
 	#else
 		refractionMult *= decodeVec2(texelFetch2D(colortex11, ivec2(refractedUV/texelSize),0).b).g > 0.0 ? 1.0 : 0.0;
 	#endif
-  
+
 	// a max bound around screen edges and edges of the refracted screen
 	vec2 vignetteSides = clamp(min((1.0 - refractedUV)/0.05, refractedUV/0.05)+0.5,0.0,1.0);
 	float vignette = vignetteSides.x*vignetteSides.y;
@@ -146,10 +145,6 @@ vec3 doRefractionEffect(inout vec2 texcoord, vec2 normal, float linearDistance, 
 	return color;
 }
 
-vec3 toClipSpace3Prev(vec3 viewSpacePosition) {
-	return projMAD(gbufferPreviousProjection, viewSpacePosition) / -viewSpacePosition.z * 0.5 + 0.5;
-}
-
 vec3 closestToCamera5taps(vec2 texcoord, sampler2D depth){
 	vec2 du = vec2(texelSize.x*2., 0.0);
 	vec2 dv = vec2(0.0, texelSize.y*2.);
@@ -171,45 +166,6 @@ vec3 closestToCamera5taps(vec2 texcoord, sampler2D depth){
 	#endif
 
 	return dmin;
-}
-
-vec3 toClipSpace3Prev_DH( vec3 viewSpacePosition, bool depthCheck ) {
-
-	#ifdef DISTANT_HORIZONS
-		mat4 projectionMatrix = depthCheck ? dhPreviousProjection : gbufferPreviousProjection;
-   		return projMAD(projectionMatrix, viewSpacePosition) / -viewSpacePosition.z * 0.5 + 0.5;
-	#else
-		return projMAD(gbufferPreviousProjection, viewSpacePosition) / -viewSpacePosition.z * 0.5 + 0.5;
-	#endif
-}
-
-vec3 toScreenSpace_DH_special(vec3 POS, bool depthCheck ) {
-
-	vec4 viewPos = vec4(0.0);
-	vec3 feetPlayerPos = vec3(0.0);
-	vec4 iProjDiag = vec4(0.0);
-
-	#ifdef DISTANT_HORIZONS
-    		if(depthCheck) {
-			iProjDiag = vec4(dhProjectionInverse[0].x, dhProjectionInverse[1].y, dhProjectionInverse[2].zw);
-
-			feetPlayerPos = POS * 2.0 - 1.0;
-			viewPos = iProjDiag * feetPlayerPos.xyzz + dhProjectionInverse[3];
-			viewPos.xyz /= viewPos.w;
-
-		} else {
-	#endif
-		iProjDiag = vec4(gbufferProjectionInverse[0].x, gbufferProjectionInverse[1].y, gbufferProjectionInverse[2].zw);
-
-		feetPlayerPos = POS * 2.0 - 1.0;
-		viewPos = iProjDiag * feetPlayerPos.xyzz + gbufferProjectionInverse[3];
-		viewPos.xyz /= viewPos.w;
-			
-	#ifdef DISTANT_HORIZONS
-		}
-	#endif
-
-	return viewPos.xyz;
 }
 
 vec4 bilateralUpsample(out float outerEdgeResults, float referenceDepth, sampler2D depth){

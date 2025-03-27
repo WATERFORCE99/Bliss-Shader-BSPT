@@ -17,8 +17,6 @@ flat out vec4 lightCol;
 flat out vec3 moonCol;
 flat out vec3 albedoSmooth;
 
-flat out float exposure;
-
 flat out vec2 TAA_Offset;
 flat out vec3 zMults;
 uniform sampler2D colortex4;
@@ -30,7 +28,6 @@ uniform mat4 gbufferModelViewInverse;
 uniform vec3 sunPosition;
 uniform vec3 moonPosition;
 
-uniform float rainStrength;
 uniform float sunElevation;
 uniform float frameTimeCounter;
 
@@ -60,18 +57,15 @@ void main() {
 	averageSkyCol_Clouds = texelFetch2D(colortex4,ivec2(0,37),0).rgb;
 
 	unsigned_WsunVec = normalize(mat3(gbufferModelViewInverse) * sunPosition);
-	
+
 	vec3 moonVec = normalize(mat3(gbufferModelViewInverse) * moonPosition);
 
 	WmoonVec = moonVec;
-	
+
 	if(dot(-moonVec, unsigned_WsunVec) < 0.9999) WmoonVec = -moonVec;
 
 	WsunVec = mix(WmoonVec, unsigned_WsunVec, clamp(lightCol.a,0,1));
-	
 
-	exposure = texelFetch2D(colortex4,ivec2(10,37),0).r;
-	
 	#ifdef Daily_Weather
 		dailyWeatherParams0 = vec4(texelFetch2D(colortex4,ivec2(1,1),0).rgb / 1500.0, 0.0);
 		dailyWeatherParams1 = vec4(texelFetch2D(colortex4,ivec2(2,1),0).rgb / 1500.0, 0.0);
@@ -79,7 +73,7 @@ void main() {
 		dailyWeatherParams0 = vec4(CloudLayer0_coverage, CloudLayer1_coverage, CloudLayer2_coverage, 0.0);
 		dailyWeatherParams1 = vec4(CloudLayer0_density, CloudLayer1_density, CloudLayer2_density, 0.0);
 	#endif
-	
+
 	#ifdef TAA
 		TAA_Offset = offsets[framemod8];
 	#else

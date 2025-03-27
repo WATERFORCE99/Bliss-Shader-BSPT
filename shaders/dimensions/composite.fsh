@@ -243,7 +243,6 @@ void main() {
 	}
 
 	vec3 viewPos = toScreenSpace_DH(texcoord/RENDER_SCALE - TAA_Offset*texelSize*0.5, z, DH_depth1);
-	
 
 	#if defined DENOISE_SSS_AND_SSAO && indirect_effect == 1
 		float depth = z;
@@ -293,34 +292,32 @@ void main() {
 	// 	// gl_FragData[3].a *= VL.a; 
 	// }
 
-#ifdef OVERWORLD_SHADER
-	float SpecularTex = texture2D(colortex8,texcoord).z;
-	float LabSSS = clamp((-64.0 + SpecularTex * 255.0) / 191.0 ,0.0,1.0);
+	#ifdef OVERWORLD_SHADER
+		float SpecularTex = texture2D(colortex8,texcoord).z;
+		float LabSSS = clamp((-64.0 + SpecularTex * 255.0) / 191.0 ,0.0,1.0);
 
-	float NdotL = clamp(dot(normal,WsunVec),0.0,1.0);
-	float vanillAO = clamp(texture2D(colortex15,texcoord).a,0.0,1.0)  ;
+		float NdotL = clamp(dot(normal,WsunVec),0.0,1.0);
+		float vanillAO = clamp(texture2D(colortex15,texcoord).a,0.0,1.0)  ;
 
-	float minshadowfilt = Min_Shadow_Filter_Radius;
-	float maxshadowfilt = Max_Shadow_Filter_Radius;
+		float minshadowfilt = Min_Shadow_Filter_Radius;
+		float maxshadowfilt = Max_Shadow_Filter_Radius;
 
-	if(lightmap.y < 0.1) maxshadowfilt = min(maxshadowfilt, minshadowfilt);
+		if(lightmap.y < 0.1) maxshadowfilt = min(maxshadowfilt, minshadowfilt);
 
-	#ifdef BASIC_SHADOW_FILTER
-		if (LabSSS > 0.0 && NdotL < 0.001){  
-			minshadowfilt = 50;
-			// maxshadowfilt = 50;
-		 }
-	#endif
+		#ifdef BASIC_SHADOW_FILTER
+			if (LabSSS > 0.0 && NdotL < 0.001){  
+				minshadowfilt = 50;
+				// maxshadowfilt = 50;
+			 }
+		#endif
 
-	// if (z < 1.0){
 		gl_FragData[0] = vec4(minshadowfilt, 0.0, 0.0, 0.0);
 
 		#ifdef Variable_Penumbra_Shadows
 			if (LabSSS > -1) {
 				
 				vec3 feetPlayerPos = mat3(gbufferModelViewInverse) * viewPos + gbufferModelViewInverse[3].xyz;
-				vec3 projectedShadowPosition = mat3(shadowModelView) * feetPlayerPos  + shadowModelView[3].xyz;
-				projectedShadowPosition = diagonal3(shadowProjection) * projectedShadowPosition + shadowProjection[3].xyz;
+				vec3 projectedShadowPosition = toShadowSpaceProjected(feetPlayerPos);
 
 				float TEST = projectedShadowPosition.z * (0.5/6.0) + 0.5;
 
@@ -384,6 +381,5 @@ void main() {
 				}
 			}
 		#endif
-	// }
-#endif
+	#endif
 }

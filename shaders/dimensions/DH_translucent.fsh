@@ -221,8 +221,7 @@ void main() {
 			#ifdef DISTANT_HORIZONS_SHADOWMAP
 				vec3 feetPlayerPos_shadow = toWorldSpace(pos.xyz);
 
-				vec3 projectedShadowPosition = mat3(shadowModelView) * feetPlayerPos_shadow  + shadowModelView[3].xyz;
-				projectedShadowPosition = diagonal3(shadowProjection) * projectedShadowPosition + shadowProjection[3].xyz;
+				vec3 projectedShadowPosition = toShadowSpaceProjected(feetPlayerPos_shadow);
 
 				//apply distortion
 				#ifdef DISTORT_SHADOWMAP

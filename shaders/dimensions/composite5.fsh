@@ -93,10 +93,6 @@ vec4 fp10Dither(vec4 color ,float dither){
 	return vec4(color.rgb + dither*exp2(-mantissaBits)*exp2(exponent), color.a);
 }
 
-vec3 toClipSpace3Prev(vec3 viewSpacePosition){
-	return projMAD(gbufferPreviousProjection, viewSpacePosition) / -viewSpacePosition.z * 0.5 + 0.5;
-}
-
 void convertHandDepth(inout float depth){
 	float ndcDepth = depth * 2.0 - 1.0;
 	ndcDepth /= MC_HAND_DEPTH;
@@ -123,43 +119,6 @@ float ld(float dist) {
 
 float linearizeDepthFast(const in float depth, const in float near, const in float far) {
 	return (near * far) / (depth * (near - far) + far);
-}
-
-vec3 toClipSpace3Prev_DH( vec3 viewSpacePosition, bool depthCheck ) {
-
-	#ifdef DISTANT_HORIZONS
-		mat4 projectionMatrix = depthCheck ? dhPreviousProjection : gbufferPreviousProjection;
-		return projMAD(projectionMatrix, viewSpacePosition) / -viewSpacePosition.z * 0.5 + 0.5;
-	#else
-		return projMAD(gbufferPreviousProjection, viewSpacePosition) / -viewSpacePosition.z * 0.5 + 0.5;
-	#endif
-}
-
-vec3 toScreenSpace_DH_special(vec3 POS, bool depthCheck ) {
-	vec4 viewPos = vec4(0.0);
-	vec3 feetPlayerPos = vec3(0.0);
-	vec4 iProjDiag = vec4(0.0);
-	#ifdef DISTANT_HORIZONS
-		if (depthCheck) {
-			iProjDiag = vec4(dhProjectionInverse[0].x, dhProjectionInverse[1].y, dhProjectionInverse[2].zw);
-
-			feetPlayerPos = POS * 2.0 - 1.0;
-			viewPos = iProjDiag * feetPlayerPos.xyzz + dhProjectionInverse[3];
-			viewPos.xyz /= viewPos.w;
-
-		} else {
-	#endif
-			iProjDiag = vec4(gbufferProjectionInverse[0].x, gbufferProjectionInverse[1].y, gbufferProjectionInverse[2].zw);
-
-			feetPlayerPos = POS * 2.0 - 1.0;
-			viewPos = iProjDiag * feetPlayerPos.xyzz + gbufferProjectionInverse[3];
-			viewPos.xyz /= viewPos.w;
-			
-	#ifdef DISTANT_HORIZONS
-		}
-	#endif
-
-	return viewPos.xyz;
 }
 
 //Modified texture interpolation from inigo quilez

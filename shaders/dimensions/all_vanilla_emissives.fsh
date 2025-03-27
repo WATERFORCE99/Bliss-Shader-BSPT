@@ -7,7 +7,7 @@ uniform sampler2D texture;
 uniform sampler2D normals;
 uniform sampler2D noisetex;
 
-flat in float exposure;
+// flat in float exposure;
 
 in vec4 tangent;
 in vec4 normalMat;

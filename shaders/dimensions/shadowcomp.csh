@@ -44,15 +44,13 @@ layout (local_size_x = 8, local_size_y = 8, local_size_z = 8) in;
 	vec4 GetLpvValue(in ivec3 texCoord) {
 		if (clamp(texCoord, ivec3(0), ivec3(LpvSize) - 1) != texCoord) return vec4(0.0);
 
-	vec4 lpvSample = (frameCounter % 2) == 0
-										? imageLoad(imgLpv2, texCoord)
-										: imageLoad(imgLpv1, texCoord);
+		vec4 lpvSample = (frameCounter % 2) == 0 ? imageLoad(imgLpv2, texCoord) : imageLoad(imgLpv1, texCoord);
 
-	vec4 hsv_sky = vec4(RgbToHsv(lpvSample.rgb), lpvSample.a);
-	hsv_sky.zw = exp2(hsv_sky.zw * LpvBlockSkyRange) - 1.0;
-	lpvSample = vec4(HsvToRgb(hsv_sky.xyz), hsv_sky.w);
+		vec4 hsv_sky = vec4(RgbToHsv(lpvSample.rgb), lpvSample.a);
+		hsv_sky.zw = exp2(hsv_sky.zw * LpvBlockSkyRange) - 1.0;
+		lpvSample = vec4(HsvToRgb(hsv_sky.xyz), hsv_sky.w);
 
-	return lpvSample;
+		return lpvSample;
 	}
     
 	uint GetVoxelBlock(const in ivec3 voxelPos) {

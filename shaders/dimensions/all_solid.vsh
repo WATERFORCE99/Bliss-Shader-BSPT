@@ -69,19 +69,12 @@ flat out int LIGHTNING;
 flat out int PORTAL;
 flat out int SIGN;
 
-uniform mat4 gbufferModelView;
-uniform mat4 gbufferModelViewInverse;
-uniform vec3 cameraPosition;
 uniform vec2 texelSize;
 
 uniform int framemod8;
 #include "/lib/TAA_jitter.glsl"
-							
-#define diagonal3(m) vec3((m)[0].x, (m)[1].y, m[2].z)
-#define projMAD(m, v) (diagonal3(m) * (v) + (m)[3].xyz)
-vec4 toClipSpace3(vec3 viewSpacePosition) {
-	return vec4(projMAD(gl_ProjectionMatrix, viewSpacePosition),-viewSpacePosition.z);
-}
+
+#include "/lib/projections.glsl"
 
 vec2 calcWave(in vec3 pos) {
 	float magnitude = abs(sin(dot(vec4(frameTimeCounter, pos),vec4(1.0,0.005,0.005,0.005)))*0.5+0.72)*0.013;
@@ -122,14 +115,6 @@ float densityAtPos(in vec3 pos) {
 	vec2 xy = texture2D(noisetex, coord).yx;
 
 	return mix(xy.r,xy.g, f.y);
-}
-
-vec3 viewToWorld(vec3 viewPos) {
-	vec4 pos;
-	pos.xyz = viewPos;
-	pos.w = 0.0;
-	pos = gbufferModelViewInverse * pos;
-	return pos.xyz;
 }
 
 //////////////////////////////VOID MAIN//////////////////////////////
@@ -326,7 +311,7 @@ void main() {
 
 		position = mat3(gbufferModelView) * worldpos + gbufferModelView[3].xyz;
 
-		gl_Position = toClipSpace3(position);
+		gl_Position = toClipSpace4alt(position);
 	#endif
 
 	#if defined Seasons && defined WORLD && !defined ENTITIES && !defined BLOCKENTITIES && !defined HAND

@@ -127,8 +127,8 @@ void waterVolumetrics_notoverworld(inout vec3 inColor, vec3 rayStart, vec3 rayEn
 	inColor *= exp(-rayLength * waterCoefs);	//No need to take the integrated value
 	
 	int spCount = rayMarchSampleCount;
-	vec3 start = toShadowSpaceProjected(rayStart);
-	vec3 end = toShadowSpaceProjected(rayEnd);
+	vec3 start = toShadowSpaceProjected(toWorldSpace(rayStart));
+	vec3 end = toShadowSpaceProjected(toWorldSpace(rayEnd));
 	vec3 dV = (end-start);
 	//limit ray length at 32 blocks for performance and reducing integration error
 	//you can't see above this anyway
@@ -171,8 +171,8 @@ uniform float waterEnteredAltitude;
 vec4 waterVolumetrics(vec3 rayStart, vec3 rayEnd, float rayLength, vec2 dither, vec3 waterCoefs, vec3 scatterCoef, vec3 ambient, vec3 lightSource, float VdotL){
 	int spCount = 8;
 
-	vec3 start = toShadowSpaceProjected(rayStart);
-	vec3 end = toShadowSpaceProjected(rayEnd);
+	vec3 start = toShadowSpaceProjected(toWorldSpace(rayStart));
+	vec3 end = toShadowSpaceProjected(toWorldSpace(rayEnd));
 	vec3 dV = (end-start);
 
 	//limit ray length at 32 blocks for performance and reducing integration error
@@ -408,11 +408,10 @@ void main() {
 	vec3 playerPos = toWorldSpace(viewPos0);
 	vec3 playerPos_normalized = normalize(playerPos);
 
-	float dirtAmount = Dirt_Amount;
 	vec3 waterEpsilon = vec3(Water_Absorb_R, Water_Absorb_G, Water_Absorb_B);
 	vec3 dirtEpsilon = vec3(Dirt_Absorb_R, Dirt_Absorb_G, Dirt_Absorb_B);
 	vec3 totEpsilon = vec3(Water_Absorb_R, Water_Absorb_G, Water_Absorb_B);
-	vec3 scatterCoef = dirtAmount * vec3(Dirt_Scatter_R, Dirt_Scatter_G, Dirt_Scatter_B) / 3.14;
+	vec3 scatterCoef = Dirt_Amount * vec3(Dirt_Scatter_R, Dirt_Scatter_G, Dirt_Scatter_B) / 3.14;
 
 	vec3 directLightColor = lightCol.rgb / 2400.0;
 	vec3 indirectLightColor = averageSkyCol / 1200.0;
