@@ -29,15 +29,13 @@ Read the terms of modification and sharing before changing something below pleas
 		uniform usampler1D texBlockData;
 	#endif
 
-	uniform mat4 shadowModelViewInverse;
-	
 	uniform int renderStage;
 	uniform vec3 chunkOffset;
-	uniform vec3 cameraPosition;
 	uniform int currentRenderedItemId;
 	uniform int blockEntityId;
 	uniform int entityId;
 
+	#include "/lib/projections.glsl"
 	#include "/lib/blocks.glsl"
 	#include "/lib/entities.glsl"
 	#include "/lib/voxel_common.glsl"
@@ -51,7 +49,7 @@ void main() {
 			vec3 playerpos = gl_Vertex.xyz;
 		#else
 			vec3 position = mat3(gl_ModelViewMatrix) * vec3(gl_Vertex) + gl_ModelViewMatrix[3].xyz;
-			vec3 playerpos = mat3(shadowModelViewInverse) * position + shadowModelViewInverse[3].xyz;
+			vec3 playerpos = toShadowSpace(position);
 		#endif
 
 		PopulateShadowVoxel(playerpos);
