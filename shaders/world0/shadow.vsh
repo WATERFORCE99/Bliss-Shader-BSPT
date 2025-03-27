@@ -19,8 +19,6 @@ Read the terms of modification and sharing before changing something below pleas
 #define SHADOW_MAP_BIAS 0.5
 const float PI = 3.1415927;
 out vec2 texcoord;
-uniform mat4 shadowProjectionInverse;
-uniform mat4 shadowModelViewInverse;
 uniform int hideGUI;
 uniform float frameTimeCounter;
 uniform int frameCounter;
@@ -122,7 +120,7 @@ void main() {
 
 	vec3 position = mat3(gl_ModelViewMatrix) * vec3(gl_Vertex) + gl_ModelViewMatrix[3].xyz;
 
-	vec3 playerpos = mat3(shadowModelViewInverse) * position + shadowModelViewInverse[3].xyz;
+	vec3 playerpos = toShadowSpace(position);
 
 	#ifdef LPV_SHADOWS
 		worldPos = playerpos;

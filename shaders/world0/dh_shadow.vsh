@@ -12,8 +12,6 @@ Read the terms of modification and sharing before changing something below pleas
 const float PI = 3.1415927;
 out vec3 color;
 
-uniform mat4 shadowModelViewInverse;
-
 flat out int isWater;
 
 #include "/lib/Shadow_Params.glsl"
@@ -36,7 +34,7 @@ void main() {
 
 	vec3 position = mat3(gl_ModelViewMatrix) * vec3(gl_Vertex) + gl_ModelViewMatrix[3].xyz;
 	#ifdef DH_OVERDRAW_PREVENTION
-		vec3 worldpos = mat3(shadowModelViewInverse) * position + shadowModelViewInverse[3].xyz;
+		vec3 worldpos = toShadowSpace(position);
 		overdrawCull = 1.0 - clamp(1.0 - length(worldpos) / far,0.0,1.0);
 	#else
 		overdrawCull = 1.0;
