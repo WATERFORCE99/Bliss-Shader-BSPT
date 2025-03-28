@@ -13,8 +13,7 @@ flat out vec3 averageSkyCol_Clouds;
 flat out vec4 lightCol;
 
 #ifdef OVERWORLD_SHADER
-	flat out vec4 dailyWeatherParams0;
-	flat out vec4 dailyWeatherParams1;
+	#include "/lib/scene_controller.glsl"
 #endif
 
 out mat4 normalmatrix;
@@ -87,13 +86,7 @@ void main() {
 	averageSkyCol_Clouds = texelFetch2D(colortex4,ivec2(0,37),0).rgb;
 
 	#ifdef OVERWORLD_SHADER
-		#ifdef Daily_Weather
-			dailyWeatherParams0 = vec4((texelFetch2D(colortex4,ivec2(1,1),0).rgb/150.0)/2.0, 0.0);
-			dailyWeatherParams1 = vec4((texelFetch2D(colortex4,ivec2(2,1),0).rgb/150.0)/2.0, 0.0);
-		#else
-			dailyWeatherParams0 = vec4(CloudLayer0_coverage, CloudLayer1_coverage, CloudLayer2_coverage, 0.0);
-			dailyWeatherParams1 = vec4(CloudLayer0_density, CloudLayer1_density, CloudLayer2_density, 0.0);
-		#endif
+		readSceneControllerParameters(colortex4, parameters.smallCumulus, parameters.largeCumulus, parameters.altostratus, parameters.fog);
 	#endif
 
 	WsunVec = lightCol.a * normalize(mat3(gbufferModelViewInverse) * sunPosition);

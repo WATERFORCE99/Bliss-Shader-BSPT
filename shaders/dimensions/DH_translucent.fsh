@@ -63,9 +63,7 @@ uniform float rainStrength;
 	uniform int worldTime;
 	uniform int worldDay;
 
-	flat in vec4 dailyWeatherParams0;
-	flat in vec4 dailyWeatherParams1;
-
+	#include "/lib/scene_controller.glsl"
 	#define CLOUDSHADOWSONLY
 	#include "/lib/volumetricClouds.glsl"
 #endif
@@ -138,7 +136,7 @@ vec3 applyBump(mat3 tbnMatrix, vec3 bump, float puddle_values){
 }
 
 #define FORWARD_SPECULAR
-#define FORWARD_ENVIORNMENT_REFLECTION
+#define FORWARD_ENVIRONMENT_REFLECTION
 #define FORWARD_BACKGROUND_REFLECTION
 #define FORWARD_ROUGH_REFLECTION
 
@@ -290,7 +288,7 @@ void main() {
 				if(isEyeInWater == 1) fresnel = pow(clamp(1.5 + normalDotEye,0.0,1.0), 25.0);
 			#endif
 
-			#if defined FORWARD_ENVIORNMENT_REFLECTION && defined DH_SCREENSPACE_REFLECTIONS
+			#if defined FORWARD_ENVIRONMENT_REFLECTION && defined DH_SCREENSPACE_REFLECTIONS
 				vec3 rtPos = rayTrace(reflectedVector, viewPos, interleaved_gradientNoise_temporal(), fresnel, false);
 				if (rtPos.z < 1.){
 					vec3 previousPosition = toPreviousPos(DH_toScreenSpace(rtPos));

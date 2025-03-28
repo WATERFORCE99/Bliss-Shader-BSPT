@@ -74,8 +74,7 @@ float linearizeDepthFast(const in float depth, const in float near, const in flo
 
 	flat in vec3 refractedSunVec;
 	
-	flat in vec4 dailyWeatherParams0;
-	flat in vec4 dailyWeatherParams1;
+	#include "/lib/scene_controller.glsl"
 
 	#include "/lib/diffuse_lighting.glsl"
 	#define TIMEOFDAYFOG

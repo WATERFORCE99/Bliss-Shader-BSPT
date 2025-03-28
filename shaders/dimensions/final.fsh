@@ -21,8 +21,8 @@ uniform sampler2D depthtex2;
 	uniform int worldDay;
 
 	flat in vec3 WsunVec;
-	flat in vec4 dailyWeatherParams0;
-	flat in vec4 dailyWeatherParams1;
+
+	#include "/lib/scene_controller.glsl"
 
 	uniform sampler2D colortex4;
 	uniform float rainStrength;
@@ -60,6 +60,14 @@ uniform float far;
 
 float ld(float dist){
 	return (2.0 * near) / (far + near - dist * (far - near));
+}
+
+float convertHandDepth_2(in float depth, bool hand) {
+	if(!hand) return depth;
+
+	float ndcDepth = depth * 2.0 - 1.0;
+	ndcDepth /= MC_HAND_DEPTH;
+	return ndcDepth * 0.5 + 0.5;
 }
 
 void doCameraGridLines(inout vec3 color, vec2 UV){
@@ -108,14 +116,6 @@ vec3 doMotionBlur(vec2 texcoord, float depth, float noise, bool hand){
 	return color / samples;
 }
 
-float convertHandDepth_2(in float depth, bool hand) {
-	if(!hand) return depth;
-
-	float ndcDepth = depth * 2.0 - 1.0;
-	ndcDepth /= MC_HAND_DEPTH;
-	return ndcDepth * 0.5 + 0.5;
-}
-
 uniform sampler2D shadowcolor1;
 
 float doVignette(in vec2 texcoord, in float noise){
@@ -130,23 +130,6 @@ float doVignette(in vec2 texcoord, in float noise){
 	vignette = vignette + vignette*(noise-0.5)*0.01;
   
 	return mix(1.0, vignette, VIGNETTE_STRENGTH);
-}
-
-float cloudSunVis(vec3 playerPos, vec3 sunDir){
-	float density = 0.0;
-	#ifdef CloudLayer0
-		vec3 pos0 = playerPos + sunDir / abs(sunDir.y) * max((CloudLayer0_height + 50.0) - playerPos.y, 0.0);
-		density += getCloudShape(SMALLCUMULUS_LAYER, 0, pos0, CloudLayer0_height, CloudLayer0_height + 100.0) * dailyWeatherParams1.x;
-	#endif
-	#ifdef CloudLayer1
-		vec3 pos1 = playerPos + sunDir / abs(sunDir.y) * max((CloudLayer1_height + 100.0) - playerPos.y, 0.0);
-		density += getCloudShape(LARGECUMULUS_LAYER, 0, pos1, CloudLayer1_height, CloudLayer1_height + 200.0) * dailyWeatherParams1.y;
-	#endif
-	#ifdef CloudLayer2
-		vec3 pos2 = playerPos + sunDir / abs(sunDir.y) * max((CloudLayer2_height + 2.5) - playerPos.y, 0.0);
-		density += getCloudShape(ALTOSTRATUS_LAYER, 0, pos2, CloudLayer2_height, CloudLayer2_height + 5.0) * dailyWeatherParams1.z;
-	#endif
-	return clamp(1.0 - density * 32.0, 0.0, 1.0);
 }
 
 void main() {
@@ -168,7 +151,8 @@ void main() {
 
 				float cloudVis = 1.0;
 				#if defined VOLUMETRIC_CLOUDS && (defined CloudLayer0 || defined CloudLayer1 || defined CloudLayer2)
-					cloudVis = cloudSunVis(cameraPosition, WsunVec);
+					cloudVis = sunOcculsion(cameraPosition, WsunVec);
+					cloudVis = clamp(1.0 - cloudVis * 32.0, 0.0, 1.0);
 				#endif
 
 				float sunVis = screenVis * depthVis * cloudVis;

@@ -111,9 +111,7 @@ uniform float waterEnteredAltitude;
 	
 	#include "/lib/lightning_stuff.glsl"
 
-	flat in vec4 dailyWeatherParams0;
-	flat in vec4 dailyWeatherParams1;
-
+	#include "/lib/scene_controller.glsl"
 	#define CLOUDSHADOWSONLY
 	#include "/lib/volumetricClouds.glsl"
 #endif
@@ -132,7 +130,7 @@ uniform float waterEnteredAltitude;
 #endif
 
 #define FORWARD_SPECULAR
-#define FORWARD_ENVIORNMENT_REFLECTION
+#define FORWARD_ENVIRONMENT_REFLECTION
 #define FORWARD_BACKGROUND_REFLECTION
 #define FORWARD_ROUGH_REFLECTION
 

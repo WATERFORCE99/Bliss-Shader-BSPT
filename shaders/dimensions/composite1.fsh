@@ -91,6 +91,7 @@ uniform float frameTimeCounter;
 uniform float rainStrength;
 uniform float wetnessAmount;
 uniform float wetness;
+uniform int biome_precipitation;
 
 uniform int isEyeInWater;
 uniform float waterEnteredAltitude;
@@ -137,12 +138,10 @@ float convertHandDepth_2(in float depth, bool hand) {
 #include "/lib/rainbow.glsl"
 
 #ifdef OVERWORLD_SHADER
-	flat in vec4 dailyWeatherParams0;
-	flat in vec4 dailyWeatherParams1;
-
+	#include "/lib/scene_controller.glsl"
 	#define CLOUDSHADOWSONLY
-	#include "/lib/volumetricClouds.glsl"
 	#define CLOUDS_INTERSECT_TERRAIN
+	#include "/lib/volumetricClouds.glsl"
 #endif
 
 #ifdef IS_LPV_ENABLED
@@ -152,7 +151,7 @@ float convertHandDepth_2(in float depth, bool hand) {
 #endif
 
 #define DEFERRED_SPECULAR
-#define DEFERRED_ENVIORNMENT_REFLECTION
+#define DEFERRED_ENVIRONMENT_REFLECTION
 #define DEFERRED_BACKGROUND_REFLECTION
 #define DEFERRED_ROUGH_REFLECTION
 
@@ -1163,7 +1162,7 @@ void main() {
 		gl_FragData[0].rgb = clamp(fp10Dither(Background, triangularize(noise_2)), 0.0, 65000.);
 	}
 
-	if(translucentMasks > 0.0 && isEyeInWater != 1){
+	if(translucentMasks > 0.0){
 		// water absorbtion will impact ALL light coming up from terrain underwater.
 		gl_FragData[0].rgb *= Absorbtion;
 

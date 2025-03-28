@@ -101,8 +101,7 @@ float invLinZ (float lindepth){
 
 	flat in vec3 refractedSunVec;
 
-	flat in vec4 dailyWeatherParams0;
-	flat in vec4 dailyWeatherParams1;
+	#include "/lib/scene_controller.glsl"
 
 	// uniform int dhRenderDistance;
 	#define TIMEOFDAYFOG

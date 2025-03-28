@@ -316,7 +316,7 @@ void main() {
 		#ifdef Variable_Penumbra_Shadows
 			if (LabSSS > -1) {
 				
-				vec3 feetPlayerPos = mat3(gbufferModelViewInverse) * viewPos + gbufferModelViewInverse[3].xyz;
+				vec3 feetPlayerPos = toWorldSpace(viewPos);
 				vec3 projectedShadowPosition = toShadowSpaceProjected(feetPlayerPos);
 
 				float TEST = projectedShadowPosition.z * (0.5/6.0) + 0.5;

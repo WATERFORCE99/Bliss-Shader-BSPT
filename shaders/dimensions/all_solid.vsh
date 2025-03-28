@@ -273,7 +273,7 @@ void main() {
 
 		#endif
 
-   		vec3 worldpos = mat3(gbufferModelViewInverse) * position + gbufferModelViewInverse[3].xyz;
+   		vec3 worldpos = toWorldSpace(position);
 
 		#ifdef WAVY_PLANTS
 			// also use normal, so up/down facing geometry does not get detatched from its model parts.
