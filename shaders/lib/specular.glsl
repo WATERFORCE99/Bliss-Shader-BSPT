@@ -98,9 +98,9 @@ vec3 rayTraceSpeculars(vec3 dir, vec3 position, float dither, float quality, boo
 	float biasAmount = mix(0.0001, 0.00002, fresnel);
 
 	vec3 clipPosition = toClipSpace3(position);
-	float rayLength = ((position.z + dir.z * far * sqrt(3)) > -near)
+	float rayLength = ((position.z + dir.z * far * sqrt(3.0)) > -near)
 					? (-near - position.z) / dir.z
-					: far * sqrt(3);
+					: far * sqrt(3.0);
 	vec3 direction = normalize(toClipSpace3(position+dir*rayLength)-clipPosition);  //convert to clip space
 	direction.xy = normalize(direction.xy);
 
@@ -329,7 +329,7 @@ vec3 specularReflections(
 
 	float reflectionVisibilty = getReflectionVisibility(f0, roughness);
 
-	#if defined DEFERRED_BACKGROUND_REFLECTION || defined FORWARD_BACKGROUND_REFLECTION || defined DEFERRED_ENVIORNMENT_REFLECTION || defined FORWARD_ENVIORNMENT_REFLECTION
+	#if defined DEFERRED_BACKGROUND_REFLECTION || defined FORWARD_BACKGROUND_REFLECTION || defined DEFERRED_ENVIRONMENT_REFLECTION || defined FORWARD_ENVIRONMENT_REFLECTION
 		if(reflectionVisibilty < 1.0){
 			
 			#if defined DEFERRED_BACKGROUND_REFLECTION || defined FORWARD_BACKGROUND_REFLECTION
@@ -342,10 +342,10 @@ vec3 specularReflections(
 				#endif
 			#endif
 
-			#if defined DEFERRED_ENVIORNMENT_REFLECTION || defined FORWARD_ENVIORNMENT_REFLECTION
-				vec4 enviornmentReflection = screenSpaceReflections(mat3(gbufferModelView) * reflectedVector_L, viewPos, noise.y, isHand, roughness, shlickFresnel);
+			#if defined DEFERRED_ENVIRONMENT_REFLECTION || defined FORWARD_ENVIRONMENT_REFLECTION
+				vec4 environmentReflection = screenSpaceReflections(mat3(gbufferModelView) * reflectedVector_L, viewPos, noise.y, isHand, roughness, shlickFresnel);
 				// darkening for metals.
-				vec3 DarkenedDiffuseLighting = isMetal ? diffuseLighting * (1.0-enviornmentReflection.a) * (1.0-lightmap) : diffuseLighting;
+				vec3 DarkenedDiffuseLighting = isMetal ? diffuseLighting * (1.0-environmentReflection.a) * (1.0-lightmap) : diffuseLighting;
 			#else
 				// darkening for metals.
 				vec3 DarkenedDiffuseLighting = isMetal ? diffuseLighting * (1.0-lightmap) : diffuseLighting;
@@ -356,8 +356,8 @@ vec3 specularReflections(
 				specularReflections = mix(DarkenedDiffuseLighting, backgroundReflection, lightmap);
 			#endif
 
-			#if defined DEFERRED_ENVIORNMENT_REFLECTION || defined FORWARD_ENVIORNMENT_REFLECTION
-				specularReflections = mix(specularReflections, enviornmentReflection.rgb, enviornmentReflection.a);
+			#if defined DEFERRED_ENVIRONMENT_REFLECTION || defined FORWARD_ENVIRONMENT_REFLECTION
+				specularReflections = mix(specularReflections, environmentReflection.rgb, environmentReflection.a);
 			#endif
 
 			specularReflections = mix(DarkenedDiffuseLighting, specularReflections, F0);

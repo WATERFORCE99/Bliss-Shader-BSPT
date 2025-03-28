@@ -1,4 +1,4 @@
-#define SHADER_VERSION_LABEL 1.56 // [1.56]
+#define SHADER_VERSION_LABEL 1.58 // [1.58]
 
 ////////////////////////////////////////
 // ----- WATER RELATED SETTINGS ----- //
@@ -198,7 +198,7 @@ const float shadowDistance = 128; // [16 32 48 64 80 96 128 160 192 256 512 1024
 #define SEA_LEVEL 62 // [-200 -195 -190 -185 -180 -175 -170 -165 -160 -155 -150 -145 -140 -135 -130 -125 -120 -115 -110 -105 -100 -95 -90 -85 -80 -75 -70 -65 -60 -55 -50 -45 -40 -35 -30 -25 -20 -15 -10 -5 0 5 10 15 20 25 30 35 40 45 50 55 60 65 70 75 80 85 90 95 100 105 110 115 120 125 130 135 140 145 150 155 160 165 170 175 180 185 190 195 200]
 
 //////////////////////////////////////////////////////
-// ----- BIOME SPECIFIC ENVIORNMENTS SETTINGS ----- //
+// ----- BIOME SPECIFIC ENVIRONMENTS SETTINGS ----- //
 //////////////////////////////////////////////////////
 
 #define PER_BIOME_ENVIRONMENT
@@ -573,7 +573,7 @@ const vec3 aerochrome_color = mix(vec3(1.0, 0.0, 0.0), vec3(0.715, 0.303, 0.631)
 
 #define WATER_ON_CAMERA_EFFECT
 // #define RAIN_ON_CAMERA_EFFECT
-#define POWDERSNOW_FROST_CAMERA_EFFECT
+#define ON_FIRE_DISTORT_EFFECT
 
 // #define FLASHLIGHT
 #define FLASHLIGHT_SPECULAR
@@ -858,7 +858,7 @@ const vec3 aerochrome_color = mix(vec3(1.0, 0.0, 0.0), vec3(0.715, 0.303, 0.631)
 #endif
 #ifdef DEFERRED_SPECULAR
 #endif
-#ifdef DEFERRED_ENVIORNMENT_REFLECTION
+#ifdef DEFERRED_ENVIRONMENT_REFLECTION
 #endif
 #ifdef DEFERRED_BACKGROUND_REFLECTION
 #endif
@@ -866,7 +866,7 @@ const vec3 aerochrome_color = mix(vec3(1.0, 0.0, 0.0), vec3(0.715, 0.303, 0.631)
 #endif
 #ifdef FORWARD_SPECULAR
 #endif
-#ifdef FORWARD_ENVIORNMENT_REFLECTION
+#ifdef FORWARD_ENVIRONMENT_REFLECTION
 #endif
 #ifdef FORWARD_BACKGROUND_REFLECTION
 #endif
@@ -885,4 +885,6 @@ const vec3 aerochrome_color = mix(vec3(1.0, 0.0, 0.0), vec3(0.715, 0.303, 0.631)
 #ifdef USE_CUSTOM_CLOUD_LIGHTING_COLORS
 #endif
 #ifdef USE_CUSTOM_FOG_LIGHTING_COLORS
+#endif
+#ifdef WATER_RIPPLES
 #endif
