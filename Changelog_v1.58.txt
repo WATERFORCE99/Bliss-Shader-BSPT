@@ -1,3 +1,13 @@
+2025-3-28 v1.58
+1. Mitigated the issue of puddle & wetness specular appear in dry biomes. (not able to solve completely)
+~ shader/ composite1 缓解了在干旱群系出现潮湿高光与水坑的问题（无法彻底解决）
+2. Fix stupid snowstorm issue
+~ climate_settings 修复了愚蠢的暴风雪问题
+3. Merge X0nk's latest commit. (daily weather && water entering animation)
+~xxx 整合了X0nk最新的更新 (日常天气 && 入水效果)
+4. Improve lensflare perf.
+~ volumetric_cloud 优化了镜头炫光的性能
+
 2025-3-27 v1.57
 1. Arrange codes. (may cause crash in aether/twilight forest, if so, pls contact me)
 ~ xxx 整理代码（可能造成aether与暮色森林维度崩溃，如果发生请联系我）
