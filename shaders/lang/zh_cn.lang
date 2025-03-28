@@ -205,8 +205,13 @@ screen.SNOWY=寒冷群系
 	option.SNOWY_G=绿色比重
 	option.SNOWY_B=蓝色比重
 
-	option.SNOW_STORMS=雪暴
-	option.SAND_STORMS=沙暴
+screen.DRY=干旱群系
+	option.DRY_ENV=干旱群系环境
+	option.DRY_UNIFORM_DENSITY=均匀雾气密度
+	option.DRY_CLOUDY_DENSITY=均匀雾气密度
+	option.DRY_R=红色比重
+	option.DRY_G=绿色比重
+	option.DRY_B=蓝色比重
 
 screen.Waving_Stuff=摇晃相关
 	option.WAVY_PLANTS=植物摇晃
@@ -525,8 +530,8 @@ screen.Resource_Pack_Support = 资源包配置
 screen.Reflections = 高光反射
 	option.DEFERRED_SPECULAR = 延迟高光反射
 	option.FORWARD_SPECULAR = 前向高光反射
-	option.DEFERRED_ENVIORNMENT_REFLECTION = 延迟环境反射
-	option.FORWARD_ENVIORNMENT_REFLECTION = 前向环境反射
+	option.DEFERRED_ENVIRONMENT_REFLECTION = 延迟环境反射
+	option.FORWARD_ENVIRONMENT_REFLECTION = 前向环境反射
 	option.DEFERRED_BACKGROUND_REFLECTION = 延迟背景反射
 	option.FORWARD_BACKGROUND_REFLECTION = 前向背景反射
 	option.DEFERRED_ROUGH_REFLECTION = 延迟粗糙度反射
@@ -629,6 +634,7 @@ screen.GAMEPLAY_EFFECTS=游玩效果配置
 	option.CRITICALLY_LOW_HEALTH_EFFECT_START=配置危险生命值的剩余 HP
 	option.WATER_ON_CAMERA_EFFECT=相机覆水效果
 	option.RAIN_ON_CAMERA_EFFECT=相机覆雨效果
+	option.ON_FIRE_DISTORT_EFFECT=灼烧扭曲效果
 
 screen.Aerochrome_Mode=Aerochrome 模式
 	option.AEROCHROME_MODE=Aerochrome 模式
@@ -819,10 +825,8 @@ option.PER_BIOME_ENVIRONMENT.comment=开启此选项将在特定群系应用特�
 option.SWAMP_ENV.comment=开启此选项以应用沼泽/红树林沼泽的雾气与色彩滤镜.
 option.JUNGLE_ENV.comment=开启此选项以应用丛林/稀树丛林/竹林的雾气与色彩滤镜.
 option.DARKFOREST_ENV.comment=开启此选项以应用黑森林/苍白之圆的雾气与色彩滤镜.
-option.SNOWY_ENV.comment=开启此选项以应用寒冷群系的雾气与色彩滤镜.
-
-option.SNOW_STORMS.comment=开启此选项使寒冷群系在降雪时应用暴风雪特效.
-option.SAND_STORMS.comment=开启此选项使干旱群系在雷雨时应用沙尘暴特效.
+option.SNOWY_ENV.comment=开启此选项以应用寒冷群系的雾气与色彩滤镜, 同时包含暴风雪特效.
+option.DRY_ENV.comment=开启此选项以应用干旱群系的雾气与色彩滤镜 同时包含沙尘暴特效.
 
 option.WAVY_PLANTS.comment=开启此选项以启用植物摇晃的所有功能. §a性能开销很低.
 option.RP_MODEL_FIX.comment=开启此选项以禁用一些可能含有 3D 模型的植物摇晃. 用以避免一些图像问题.
@@ -972,8 +976,8 @@ option.LENS_FLARE_STRENGTH.comment=配置镜头光晕效果的强度.
 
 option.DEFERRED_SPECULAR.comment=WIP选项
 option.FORWARD_SPECULAR.comment=WIP选项
-option.DEFERRED_ENVIORNMENT_REFLECTION.comment=WIP选项
-option.FORWARD_ENVIORNMENT_REFLECTION.comment=WIP选项
+option.DEFERRED_ENVIRONMENT_REFLECTION.comment=WIP选项
+option.FORWARD_ENVIRONMENT_REFLECTION.comment=WIP选项
 option.DEFERRED_BACKGROUND_REFLECTION.comment=WIP选项
 option.FORWARD_BACKGROUND_REFLECTION.comment=WIP选项
 option.DEFERRED_ROUGH_REFLECTION.comment=WIP选项
@@ -1034,8 +1038,9 @@ option.DAMAGE_TAKEN_EFFECT.comment=开启此选项以启用受击效果. §aIRIS
 option.LOW_HEALTH_EFFECT.comment=开启此选项以启用低生命值效果. §aIRIS限定功能.
 option.LOW_HEALTH_EFFECT_START.comment=配置低生命值的阈值. §aIRIS限定功能.
 option.CRITICALLY_LOW_HEALTH_EFFECT_START.comment=配置危险生命值的阈值. §aIRIS限定功能.
-option.WATER_ON_CAMERA_EFFECT.comment=开启此选项以启用相机覆水效果. §aIRIS限定功能.
-option.RAIN_ON_CAMERA_EFFECT.comment=开启此选项以启用相机覆雨效果. §aIRIS限定功能.
+option.WATER_ON_CAMERA_EFFECT.comment=开启此选项以在进出水体时启用相机覆水效果. §aIRIS限定功能.
+option.RAIN_ON_CAMERA_EFFECT.comment=开启此选项以在下雨时启用相机覆雨效果. §aIRIS限定功能.
+option.ON_FIRE_DISTORT_EFFECT.comment=开启此选项以在着火时启用扭曲效果. §aIRIS限定功能.
 
 option.AEROCHROME_MODE.comment=开启此选项以启用受Chrome浏览器启发而开发的 Aerochrome 红外胶片效果.
 option.AEROCHROME_PINKNESS.comment=配置 Aerochrome 模式的颜色. 数值越高越接近粉色, 反之越接近红色.

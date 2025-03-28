@@ -197,16 +197,21 @@ screen.DARKFOREST=Black Forest and Its Variants
 	option.DARKFOREST_G=Green Amount
 	option.DARKFOREST_B=Blue Amount
 
-screen.SNOWY=Snowys Biomes
-	option.SNOWY_ENV=Snowys Biomes Environment
+screen.SNOWY=Snowy Biomes
+	option.SNOWY_ENV=Snowy Biomes Environment
 	option.SNOWY_UNIFORM_DENSITY=Uniform Fog Density
 	option.SNOWY_CLOUDY_DENSITY=Cloudy Fog Density
 	option.SNOWY_R=Red Amount
 	option.SNOWY_G=Green Amount
 	option.SNOWY_B=Blue Amount
 
-	option.SNOW_STORMS=Blizzard
-	option.SAND_STORMS=Sand Storm
+screen.DRY=Dry Biomes
+	option.DRY_ENV=Dry Biomes Environment
+	option.DRY_UNIFORM_DENSITY=Uniform Fog Density
+	option.DRY_CLOUDY_DENSITY=Cloudy Fog Density
+	option.DRY_R=Red Amount
+	option.DRY_G=Green Amount
+	option.DRY_B=Blue Amount
 
 screen.Waving_Stuff=Waving Stuff
 	option.WAVY_PLANTS=Waving Plants
@@ -526,8 +531,8 @@ screen.Resource_Pack_Support=Resource Pack Support
 screen.Reflections=Specular Reflections
 	option.DEFERRED_SPECULAR=Deferred Specular
 	option.FORWARD_SPECULAR=Forward Specular
-	option.DEFERRED_ENVIORNMENT_REFLECTION=Deferred Environment Reflection
-	option.FORWARD_ENVIORNMENT_REFLECTION=Forward Environment Reflection
+	option.DEFERRED_ENVIRONMENT_REFLECTION=Deferred Environment Reflection
+	option.FORWARD_ENVIRONMENT_REFLECTION=Forward Environment Reflection
 	option.DEFERRED_BACKGROUND_REFLECTION=Deferred Background Reflection
 	option.FORWARD_BACKGROUND_REFLECTION=Forward Background Reflection
 	option.DEFERRED_ROUGH_REFLECTION=Deferred Roughness Reflection
@@ -630,6 +635,7 @@ screen.GAMEPLAY_EFFECTS=Gameplay Effect Settings
 	option.CRITICALLY_LOW_HEALTH_EFFECT_START=HP for Critical Health
 	option.WATER_ON_CAMERA_EFFECT=Water on Camera Effect
 	option.RAIN_ON_CAMERA_EFFECT=Rain on Camera Effect
+	option.ON_FIRE_DISTORT_EFFECT=Fire Distortion Effect
 
 screen.Aerochrome_Mode=Aerochrome Mode Settings
 	option.AEROCHROME_MODE=Aerochrome Mode
@@ -820,10 +826,8 @@ option.PER_BIOME_ENVIRONMENT.comment=Toggle biome-specific environmental effects
 option.SWAMP_ENV.comment=Toggle the special environment in Swamp biome and its variants.
 option.JUNGLE_ENV.comment=Toggle the special environment in Jungle biome and its variants.
 option.DARKFOREST_ENV.comment=Toggle the special environment in Dark Forest biome and its variants.
-option.SNOWY_ENV.comment=Toggle the special environment in all snowy biome.
-
-option.SNOW_STORMS.comment=Toggle the snow storm effect in all snowy biome.
-option.SAND_STORMS.comment=Toggle the sand storm effect in all dry biome.
+option.SNOWY_ENV.comment=Toggle the special environment include blizzard effect in all snowy biomes.
+option.DRY_ENV.comment=Toggle the special environment include sandstorm effect in all dry biomes.
 
 option.WAVY_PLANTS.comment=Toggle the plant waving animation.
 option.RP_MODEL_FIX.comment=Toggle to disable specific groups of plant waving animation. Some RPs may contain 3D models for vanilla plants, disable them from waving will avoid some graphic flaws.
@@ -973,8 +977,8 @@ option.LENS_FLARE_STRENGTH.comment = Configure the lens flare strength.
 
 option.DEFERRED_SPECULAR.comment=[WIP]
 option.FORWARD_SPECULAR.comment=[WIP]
-option.DEFERRED_ENVIORNMENT_REFLECTION.comment=[WIP]
-option.FORWARD_ENVIORNMENT_REFLECTION.comment=[WIP]
+option.DEFERRED_ENVIRONMENT_REFLECTION.comment=[WIP]
+option.FORWARD_ENVIRONMENT_REFLECTION.comment=[WIP]
 option.DEFERRED_BACKGROUND_REFLECTION.comment=[WIP]
 option.FORWARD_BACKGROUND_REFLECTION.comment=[WIP]
 option.DEFERRED_ROUGH_REFLECTION.comment=[WIP]
@@ -1035,8 +1039,9 @@ option.DAMAGE_TAKEN_EFFECT.comment=Toggle the damage taken effect filter. §aFor
 option.LOW_HEALTH_EFFECT.comment=Toggle the low health effect filter. §aFor Iris users ONLY.
 option.LOW_HEALTH_EFFECT_START.comment=Configure how much HP left is considered low health. §aFor Iris users ONLY.
 option.CRITICALLY_LOW_HEALTH_EFFECT_START.comment=Configure how much HP left is considered critical health.
-option.WATER_ON_CAMERA_EFFECT.comment=Toggle the effect of water drops slicing over the camera while leaving the water. §aFor Iris users ONLY.
+option.WATER_ON_CAMERA_EFFECT.comment=Toggle the effect of water drops slicing over the camera while entering and leaving the water. §aFor Iris users ONLY.
 option.RAIN_ON_CAMERA_EFFECT.comment=Toggle the effect of rain drops slicing over the camera while raining. §aFor Iris users ONLY.
+option.ON_FIRE_DISTORT_EFFECT.comment=Toggle the heat distortion effect while on fire. §aFor Iris users ONLY.
 
 option.AEROCHROME_MODE.comment=Toggle the infrared film mode. Google "Aerochrome" to get an idea of what it does.
 option.AEROCHROME_PINKNESS.comment=Configure the Aerochrome mode color. Higher = Pink. Lower = Red.
