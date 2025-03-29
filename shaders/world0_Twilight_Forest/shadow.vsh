@@ -19,7 +19,6 @@ const float PI = 3.1415927;
 varying vec2 texcoord;
 
 uniform int hideGUI;
-uniform vec3 cameraPosition;
 uniform float frameTimeCounter;
 uniform int frameCounter;
 uniform float screenBrightness;
@@ -110,7 +109,6 @@ bool intersectCone(float coneHalfAngle, vec3 coneTip , vec3 coneAxis, vec3 rayOr
 #include "/lib/projections.glsl"
 
 // uniform float far;
-uniform float dhFarPlane;
 
 #include "/lib/DistantHorizons_projections.glsl"
 
