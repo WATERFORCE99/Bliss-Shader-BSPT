@@ -93,11 +93,11 @@ uniform int framemod8;
 
 vec3 rayTrace(vec3 dir, vec3 position,float dither, float fresnel, bool inwater){
 
-	float quality = mix(5,SSR_STEPS,fresnel);
+	float quality = mix(5.0, SSR_STEPS, fresnel);
 	vec3 clipPosition = DH_toClipSpace3(position);
-	float rayLength = ((position.z + dir.z * dhFarPlane*sqrt(3.)) > -dhNearPlane)
+	float rayLength = ((position.z + dir.z * dhFarPlane*sqrt(3.0)) > -dhNearPlane)
 					?(-dhNearPlane - position.z) / dir.z
-					:dhFarPlane*sqrt(3.);
+					:dhFarPlane*sqrt(3.0);
 	vec3 direction = normalize(DH_toClipSpace3(position+dir*rayLength)-clipPosition);  //convert to clip space
 	direction.xy = normalize(direction.xy);
 
