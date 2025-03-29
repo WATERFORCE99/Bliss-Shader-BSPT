@@ -19,7 +19,6 @@ flat varying int water;
 #include "/lib/Shadow_Params.glsl"
 
 // uniform float far;
-uniform float dhFarPlane;
 
 #include "/lib/DistantHorizons_projections.glsl"
 
@@ -27,9 +26,9 @@ varying float overdrawCull;
 // uniform int renderStage;
 
 void main() {
-    water = 0;
+	water = 0;
 
-    if(gl_Color.a < 1.0) water = 1;
+	if(gl_Color.a < 1.0) water = 1;
 
 	texcoord.xy = gl_MultiTexCoord0.xy;
 
