@@ -50,7 +50,6 @@ vec3 SampleVNDFGGX(
 	sinTheta = clamp(sinTheta,0.0,1.0);
 	cosTheta = clamp(cosTheta,sinTheta*0.5,1.0);
 
-	
 	vec3 reflected = vec3(vec2(cos(phi), sin(phi)) * sinTheta, cosTheta);
 
 	// Evaluate halfway direction
@@ -69,7 +68,7 @@ vec3 GGX(vec3 n, vec3 v, vec3 l, float r, vec3 f0, vec3 metalAlbedoTint) {
 	float dotLH = clamp(dot(h, l), 0.0, 1.0);
 	float dotNH = clamp(dot(n, h), 0.0, 1.0);
 	float dotNL = clamp(dot(n, l), 0.0, 1.0);
-    
+
 	float denom = dotNH * (r - 1.0) + 1.0;
 	denom = 3.141592653589793 * denom * denom;
 	float D = r / denom;
@@ -85,11 +84,11 @@ float shlickFresnelRoughness(float XdotN, float roughness){
 	float shlickFresnel = clamp(1.0 + XdotN,0.0,1.0);
 
 	float curves = exp(-4.0*pow(1-(roughness),2.5));
-	float brightness = exp(-3.0*pow(1-sqrt(roughness),3.50));
+	float brightness = exp(-3.0*pow(1-sqrt(roughness),3.5));
 
 	shlickFresnel = pow(1.0-pow(1.0-shlickFresnel, mix(1.0, 1.9, curves)),mix(5.0, 2.6, curves));
 	shlickFresnel = mix(0.0, mix(1.0,0.065,  brightness) , clamp(shlickFresnel,0.0,1.0));
-	
+
 	return shlickFresnel;
 }
 
@@ -111,18 +110,18 @@ vec3 rayTraceSpeculars(vec3 dir, vec3 position, float dither, float quality, boo
 	vec3 stepv = direction * mult / quality*vec3(RENDER_SCALE,1.0);
 
 	vec3 spos = clipPosition*vec3(RENDER_SCALE,1.0) + stepv*(dither-0.5);
-	
+
 	#ifdef DEFERRED_SPECULAR
 		spos.xy += TAA_Offset*texelSize*0.5/RENDER_SCALE;
 	#endif
 
 	float minZ = spos.z;
 	float maxZ = spos.z;
-	
+
   	for (int i = 0; i <= int(quality); i++) {
 
 		float sp = invLinZ(sqrt(texelFetch2D(colortex4,ivec2(spos.xy/texelSize/4.0),0).a/65000.0));
-				
+	
 		float currZ = linZ(spos.z);
 		float nextZ = linZ(sp);
 
@@ -155,7 +154,7 @@ vec4 screenSpaceReflections(
 	vec3 raytracePos = rayTraceSpeculars(reflectedVector, viewPos, noise, quality, isHand, reflectionLength, fresnel);
 
 	if (raytracePos.z >= 1.0) return reflection;
-	
+
 	// use higher LOD as the reflection goes on, to blur it. this helps denoise a little.
 
 	float value = 0.1;
@@ -173,7 +172,7 @@ vec4 screenSpaceReflections(
 
 	previousPosition.xy = clamp(previousPosition.xy, 0.0, 1.0);
 	reflection.a = 1.0;
-		
+
 	#ifdef FORWARD_SPECULAR
 		// vec2 clampedRes = max(vec2(viewWidth,viewHeight),vec2(1920.0,1080.));
 		// vec2 resScale = vec2(1920.,1080.)/clampedRes;
@@ -222,11 +221,11 @@ float getReflectionVisibility(float f0, float roughness){
 	float smoothness = 1.0-sqrt(roughness);
 	value = thresholdValue; // this one is typically want you want to scale.
 	float thresholdB = min(max(smoothness - value, 0.0)/value, 1.0);
-	
+
 	// preserve super smooth reflections. if thresholdB's value is really high, then fully smooth, low f0 materials would be removed (like water).
 	value = 0.1; // super low so only the smoothest of materials are includes.
 	float thresholdC = 1.0-min(max(value - (1.0-smoothness), 0.0)/value, 1.0);
-	
+
 	float visibilityGradient = max(thresholdA*thresholdC - thresholdB,0.0);
 
 	// a curve to make the gradient look smooth/nonlinear. just preference
@@ -331,7 +330,7 @@ vec3 specularReflections(
 
 	#if defined DEFERRED_BACKGROUND_REFLECTION || defined FORWARD_BACKGROUND_REFLECTION || defined DEFERRED_ENVIRONMENT_REFLECTION || defined FORWARD_ENVIRONMENT_REFLECTION
 		if(reflectionVisibilty < 1.0){
-			
+	
 			#if defined DEFERRED_BACKGROUND_REFLECTION || defined FORWARD_BACKGROUND_REFLECTION
 				#if !defined OVERWORLD_SHADER && !defined FORWARD_SPECULAR
 					vec3 backgroundReflection = volumetricsFromTex(reflectedVector_L, colortex4, roughness).rgb / 1200.0;
