@@ -118,7 +118,7 @@ void main() {
 
 			displacedPos.y -= (1.0-getWave(displacedPos, range)) * 0.5 - 0.2;
 			shitnormal = getWaveNormal(displacedPos, range);
-    		position = mat3(gbufferModelView) * (displacedPos - cameraPosition) + gbufferModelView[3].xyz;
+    			position = mat3(gbufferModelView) * (displacedPos - cameraPosition) + gbufferModelView[3].xyz;
 		}
 	#endif
 
@@ -199,18 +199,18 @@ void main() {
 	#ifdef OVERWORLD_SHADER
 		lightCol.rgb = texelFetch2D(colortex4,ivec2(6,37),0).rgb;
 		lightCol.a = float(sunElevation > 1e-5)*2.0 - 1.0;
-	
+
 		averageSkyCol_Clouds = texelFetch2D(colortex4,ivec2(0,37),0).rgb;
-	
+
 		// WsunVec = lightCol.a * normalize(mat3(gbufferModelViewInverse) * sunPosition);
-		
+
 		WsunVec = normalize(mat3(gbufferModelViewInverse) * sunPosition);
 		vec3 moonVec = normalize(mat3(gbufferModelViewInverse) * moonPosition);
 		vec3 WmoonVec = moonVec;
 		if(dot(-moonVec, WsunVec) < 0.9999) WmoonVec = -moonVec;
 
 		WsunVec = mix(WmoonVec, WsunVec, clamp(lightCol.a,0,1));
-	
+
 		readSceneControllerParameters(colortex4, parameters.smallCumulus, parameters.largeCumulus, parameters.altostratus, parameters.fog);
 	#endif
 

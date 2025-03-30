@@ -421,14 +421,16 @@ void main() {
 		
 				waterPos.xyz = getParallaxDisplacement(waterPos, playerPos);
 			
-				vec3 bump = normalize(getWaveNormal(waterPos, playerPos, false));
+				vec3 bump = getWaveNormal(waterPos, playerPos, false);
 
 				#if defined OVERWORLD_SHADER && defined WATER_RIPPLES
 					vec3 rippleNormal = drawRipples(worldPos.xz * 5.0, frameTimeCounter) * 0.5 * isRaining * lightmap * clamp(1.0 - length(playerPos) / 128.0, 0.0, 1.0);
-					bump = normalize(bump + rippleNormal);
+					bump += rippleNormal;
 				#endif
 
+				bump = normalize(bump);
 				float bumpmult = WATER_WAVE_STRENGTH + 0.5 * rainStrength;
+
 				bump = bump * bumpmult + vec3(0.0, 0.0, 1.0 - bumpmult);
 
 				NormalTex.xyz = bump;

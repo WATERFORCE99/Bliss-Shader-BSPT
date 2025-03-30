@@ -212,13 +212,13 @@ vec3 closestToCamera5taps_DH(vec2 texcoord, sampler2D depth, sampler2D dhDepth, 
 	dmc += vec3( 0.0, 0.0, 				   		depthCheck ? texture2D(dhDepth, texcoord).x				:	texture2D(depth, texcoord).x);
 	dbl += vec3(-texelSize.x, texelSize.y, 		depthCheck ? texture2D(dhDepth, texcoord + dv - du).x	:	texture2D(depth, texcoord + dv - du).x);
 	dbr += vec3( texelSize.x, texelSize.y, 		depthCheck ? texture2D(dhDepth, texcoord + dv + du).x	:	texture2D(depth, texcoord + dv + du).x);
-	
+
 	vec3 dmin = dmc;
 	dmin = dmin.z > dtr.z ? dtr : dmin;
 	dmin = dmin.z > dtl.z ? dtl : dmin;
 	dmin = dmin.z > dbl.z ? dbl : dmin;
 	dmin = dmin.z > dbr.z ? dbr : dmin;
-	
+
 	#ifdef TAA_UPSCALING
 		dmin.xy = dmin.xy/RENDER_SCALE;
 	#endif
@@ -294,7 +294,7 @@ vec4 computeTAA(vec2 texcoord, bool hand){
 
 	float blendingFactor = BLEND_FACTOR;
 
-	if(hand) blendingFactor = clamp(length(velocity/texelSize),blendingFactor,1.0);
+	if(hand) float blendingFactor = clamp(length(velocity/texelSize),blendingFactor,1.0);
 
 	////// Increases blending factor when far from AABB, reduces ghosting
 	blendingFactor = clamp(blendingFactor + luma(abs(clampedframeHistory - frameHistory)/clampedframeHistory),0.0,1.0);

@@ -110,7 +110,7 @@ float densityAtPos(in vec3 pos) {
 	vec3 f = fract(pos);
 	vec2 uv =  p.xz + f.xz + p.y * vec2(0.0,193.0);
 	vec2 coord =  uv / 512.0;
-	
+
 	//The y channel has an offset to avoid using two textures fetches
 	vec2 xy = texture2D(noisetex, coord).yx;
 
@@ -145,11 +145,11 @@ void main() {
 	lmtexcoord.xy = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
 
 	// #ifdef POM
-	vec2 midcoord = (gl_TextureMatrix[0] *  mc_midTexCoord).st;
+	vec2 midcoord = (gl_TextureMatrix[0] * mc_midTexCoord).st;
 	vec2 texcoordminusmid = lmtexcoord.xy-midcoord;
-	vtexcoordam.pq  = abs(texcoordminusmid)*2;
-	vtexcoordam.st  = min(lmtexcoord.xy,midcoord-texcoordminusmid);
-	vtexcoord.xy    = sign(texcoordminusmid)*0.5+0.5;
+	vtexcoordam.pq = abs(texcoordminusmid)*2;
+	vtexcoordam.st = min(lmtexcoord.xy,midcoord-texcoordminusmid);
+	vtexcoord.xy = sign(texcoordminusmid)*0.5+0.5;
 	// #endif
 
 	vec2 lmcoord = gl_MultiTexCoord1.xy / 240.0; 
@@ -197,8 +197,8 @@ void main() {
 
     /////// ----- EMISSIVE STUFF ----- ///////
 
-		EMISSIVE = 0.0;
-		LIGHTNING = 0;
+	EMISSIVE = 0.0;
+	LIGHTNING = 0;
 	// if(NameTags > 0) EMISSIVE = 0.9;
 
 	HELD_ITEM_BRIGHTNESS = 0.0;
@@ -215,6 +215,7 @@ void main() {
 			LIGHTNING = 1;
 			normalMat.a = 0.50;
 		}
+		if (entityId == ENTITY_SPECTRAL_ARROW) EMISSIVE = 0.5;
 	#endif
 
     /////// ----- SSS STUFF ----- ///////
@@ -246,7 +247,7 @@ void main() {
 
 		// low
 		#ifdef MISC_BLOCK_SSS
-			if(mc_Entity.x == BLOCK_SSS_WEIRD || mc_Entity.x == BLOCK_GRASS) SSSAMOUNT = 0.25;
+			if(mc_Entity.x == BLOCK_SSS_WEIRD || mc_Entity.x == BLOCK_GRASS) SSSAMOUNT = 0.1;
 		#endif
 
 		#ifdef ENTITIES
@@ -254,9 +255,9 @@ void main() {
 	/////// ----- SSS ON MOBS----- ///////
 				// strong
 				if(entityId == ENTITY_SSS_MEDIUM) SSSAMOUNT = 0.75;
-	
+
 				// medium
-	
+
 				// low
 				if(entityId == ENTITY_SSS_WEAK || entityId == ENTITY_PLAYER) SSSAMOUNT = 0.4;
 			#endif

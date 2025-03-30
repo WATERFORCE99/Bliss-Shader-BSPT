@@ -137,6 +137,14 @@ void main() {
 
 	vec3 COLOR = texture2D(colortex7,texcoord).rgb;
 
+	#ifdef MOTION_BLUR
+		float depth = texture2D(depthtex0, texcoord*RENDER_SCALE).r;
+		bool hand = depth < 0.56;
+		float depth2 = convertHandDepth_2(depth, hand);
+
+		COLOR = doMotionBlur(texcoord, depth2, noise, hand);
+	#endif
+
 	#ifdef OVERWORLD_SHADER
 		#ifdef LENS_FLARE
 			if(isEyeInWater == 0 && WsunVec.y > 0.0){
@@ -166,14 +174,6 @@ void main() {
 	#if defined LOW_HEALTH_EFFECT || defined DAMAGE_TAKEN_EFFECT || defined WATER_ON_CAMERA_EFFECT  
 		// for making the fun, more fun
 		applyGameplayEffects(COLOR, texcoord, noise);
-	#endif
-
-	#ifdef MOTION_BLUR
-		float depth = texture2D(depthtex0, texcoord*RENDER_SCALE).r;
-		bool hand = depth < 0.56;
-		float depth2 = convertHandDepth_2(depth, hand);
-
-		COLOR = doMotionBlur(texcoord, depth2, noise, hand);
 	#endif
 
 	#ifdef VIGNETTE

@@ -371,18 +371,18 @@ void main() {
 			Albedo.rgb = mix(vec3(gray), aerochrome_color, 0.7);
 		}
 		else if(blockID == BLOCK_GRASS) {
-		// Special handling for grass block
+			// Special handling for grass block
 			float strength = 1.0 - color.b;
 			Albedo.rgb = mix(Albedo.rgb, aerochrome_color, strength);
 		}
 		#ifdef AEROCHROME_WOOL_ENABLED
 			else if(blockID == BLOCK_SSS_WEAK_2 || blockID == BLOCK_CARPET) {
-			// Wool
+				// Wool
 				Albedo.rgb = mix(Albedo.rgb, aerochrome_color, 0.3);
 			}
 		#endif
 		else if(blockID == BLOCK_WATER || (blockID >= 300 && blockID < 400)) {
-		// IR Absorbsive? Dark.
+			// IR Absorbsive? Dark.
 			Albedo.rgb = mix(Albedo.rgb, vec3(0.01, 0.08, 0.15), 0.5);
 		}
 	#endif

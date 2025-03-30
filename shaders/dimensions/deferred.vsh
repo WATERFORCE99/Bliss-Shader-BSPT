@@ -55,10 +55,6 @@ vec3 rodSample(vec2 Xi) {
 	return normalize(vec3(cos(phi) * r, sin(phi) * r, Xi.x)).xzy;
 }
 
-float tanh(float x) {
-	return (exp(x) - exp(-x))/(exp(x) + exp(-x));
-}
-
 float ld(float depth) {
 	return (2.0 * near) / (far + near - depth * (far - near)); // (-depth * (far - near)) = (2.0 * near)/ld - far - near
 }
@@ -99,30 +95,18 @@ void main() {
 		averageSkyCol_Clouds = vec3(0.0);
 		averageSkyCol = vec3(0.0);
 
-		vec2 sample3x3[9] = vec2[](
-			vec2(-1.0, -0.3),
-			vec2( 0.0,  0.0),
-			vec2( 1.0, -0.3),
+		vec2 sample2x2[4] = vec2[](
+			vec2(-0.8, -0.2), vec2(0.8, -0.2),
+			vec2(-0.8, -1.0), vec2(0.8, -1.0)
+		);
 
-			vec2(-1.0, -0.5),
-			vec2( 0.0, -0.5),
-			vec2( 1.0, -0.5),
-
-			vec2(-1.0, -1.0),
-			vec2( 0.0, -1.0),
-			vec2( 1.0, -1.0)
-   		);
-
-		// sample in a 3x3 pattern to get a good area for average color
-	
-		int maxIT = 9;
-		// int maxIT = 20;
-		for (int i = 0; i < maxIT; i++) {
+		// sample in a 2x2 pattern is good enough with interpolation, may squeeze out little performance
+		for (int i = 0; i < 4; i++) {
 			vec3 pos = vec3(0.0,1.0,0.0);
-			pos.xy += normalize(sample3x3[i]) * vec2(0.3183,0.9000);
+			pos.xy += normalize(sample2x2[i]) * 0.5;
 
-			averageSkyCol_Clouds += 1.5 * (skyCloudsFromTex(pos,colortex4).rgb/maxIT/150.0);
-			averageSkyCol += 1.5 * (skyFromTex(pos,colortex4).rgb/maxIT/150.0);
+			averageSkyCol_Clouds += 3.0 * (skyCloudsFromTex(pos,colortex4).rgb/4/150.0);
+			averageSkyCol += 3.0 * (skyFromTex(pos,colortex4).rgb/4/150.0);
    		}
 	
 		// maximum control of color and luminance

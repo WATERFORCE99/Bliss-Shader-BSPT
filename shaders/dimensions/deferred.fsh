@@ -13,8 +13,6 @@ flat in vec3 moonColor;
 // flat in vec3 zenithColor;
 // flat in vec3 rayleighAborbance; 
 
-// flat in vec3 WsunVec;
-
 flat in vec2 tempOffsets;
 
 flat in float exposure;
@@ -53,7 +51,6 @@ vec4 lightCol = vec4(lightSourceColor, float(sunElevation > 1e-5)*2-1.);
 #include "/lib/DistantHorizons_projections.glsl"
 
 vec3 WsunVec = mat3(gbufferModelViewInverse)*sunVec;
-// vec3 WsunVec = normalize(LightDir);
 
 #define DHVLFOG
 
@@ -234,7 +231,7 @@ void main() {
 
 			WsunVec = mix(WmoonVec, WsunVec, clamp(float(sunElevation > 1e-5)*2.0-1.0 ,0,1));
 
-			vec3 sky = texelFetch2D(colortex4,ivec2(gl_FragCoord.xy)-ivec2(257,0),0).rgb/150.0;	
+			vec3 sky = texelFetch2D(colortex4,ivec2(gl_FragCoord.xy)-ivec2(257,0),0).rgb/150.0;
 			sky = mix(averageSkyCol_Clouds * AmbientLightTint * 0.25, sky,  pow(clamp(viewVector.y+1.0,0.0,1.0),5.0));
 	
 			vec3 suncol = lightSourceColor;
