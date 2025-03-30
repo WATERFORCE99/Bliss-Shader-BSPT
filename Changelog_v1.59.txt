@@ -1,3 +1,16 @@
+2025-3-30 v1.59
+1. Fix screen effect disfunctional when motion blur is enabled.
+~ final 修复了启用运动模糊时镜头特效失效的问题
+2. Slightly improve perf.
+~ deferred 微微提升性能
+3. Adjust the cloud density.
+~ volumetric_cloud 调整云层密度
+4. Slightly adjust perset.
+~ shader 微调预设
+
+Known issue:
+1. Rainfog disfunctional.
+
 2025-3-28 v1.58
 1. Mitigated the issue of puddle & wetness specular appear in dry biomes. (not able to solve completely)
 ~ shader/ composite1 缓解了在干旱群系出现潮湿高光与水坑的问题（无法彻底解决）
