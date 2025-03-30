@@ -294,7 +294,7 @@ vec4 computeTAA(vec2 texcoord, bool hand){
 
 	float blendingFactor = BLEND_FACTOR;
 
-	if(hand) float blendingFactor = clamp(length(velocity/texelSize),blendingFactor,1.0);
+	if(hand) blendingFactor = clamp(length(velocity/texelSize),blendingFactor,1.0);
 
 	////// Increases blending factor when far from AABB, reduces ghosting
 	blendingFactor = clamp(blendingFactor + luma(abs(clampedframeHistory - frameHistory)/clampedframeHistory),0.0,1.0);
