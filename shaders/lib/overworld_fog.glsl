@@ -215,7 +215,7 @@ vec4 GetVolumetricFog(
 		sh *= GetCloudShadow(progressW, sunVector);
 
 		#ifdef PER_BIOME_ENVIRONMENT
-			float maxDistance = inBiome * min(max(1.0 -  length(d*dVWorld.xz)/(32*8),0.0)*2.0,1.0);
+			float maxDistance = inBiome * min(max(1.0 - length(d*dVWorld.xz)/(32*8),0.0)*2.0,1.0);
 			float densityVol = cloudVol(progressW, maxDistance) * inACave;
 		#else
 			float densityVol = cloudVol(progressW, 0.0) * inACave;

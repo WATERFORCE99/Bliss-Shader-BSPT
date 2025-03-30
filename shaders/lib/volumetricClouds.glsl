@@ -11,18 +11,15 @@ float densityAtPos(in vec3 pos){
 	vec3 f = fract(pos);
 	vec2 uv =  p.xz + f.xz + p.y * vec2(0.0,193.0);
 	vec2 coord =  uv / 512.0;
-	
+
+	vec2 xy = vec2(0.0);
+	float density = 0.0;
 	//The y channel has an offset to avoid using two textures fetches
-	vec2 xy1 = texture2D(noisetex, coord).yx;
-	vec2 xy2 = texture2D(noisetex, coord * 2.5).yx;
+	for (int i = 1; i < 3; i++) {
+		vec2 xy = texture2D(noisetex, coord * i).yx;
 
-	//Strengthen the vertical detail
-	float vn = texture2D(noisetex, vec2(coord.x, pos.y / 100.0)).r;
-	vn = vn * vn;
-
-	float density = mix(xy1.r, xy1.g, f.y) + mix(xy2.r, xy2.g, f.y) * 0.5;
-	density *= 1.0 + vn * 0.5;
-
+		density += mix(xy.r, xy.g, f.y)/i;
+	}
 	return density;
 }
 
@@ -50,7 +47,7 @@ float getCloudShape(int LayerIndex, int LOD, in vec3 position, float minHeight, 
 	if(LayerIndex == LARGECUMULUS_LAYER){
 		coverage = mix(parameters.largeCumulus.x, Rain_coverage, rainStrength);
 		
-		largeCloud = texture2D(noisetex, (samplePos.zx + cloud_movement*2.5)/15000.0 * CloudLayer1_scale).b;
+		largeCloud = texture2D(noisetex, (samplePos.zx + cloud_movement*2.5)/25000.0 * CloudLayer1_scale).b;
 		smallCloud = texture2D(noisetex, (samplePos.zx - cloud_movement*2.5)/3000.0 * CloudLayer1_scale).b;	
 		smallCloud += abs(largeCloud* -0.7);
 
