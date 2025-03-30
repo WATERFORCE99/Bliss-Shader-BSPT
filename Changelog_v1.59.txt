@@ -7,6 +7,8 @@
 ~ volumetric_cloud 调整云层密度
 4. Slightly adjust perset.
 ~ shader 微调预设
+5. Make special arrow emit.
+~ all_solid 使特殊箭矢发光
 
 Known issue:
 1. Rainfog disfunctional.
