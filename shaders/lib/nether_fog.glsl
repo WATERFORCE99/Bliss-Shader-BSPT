@@ -1,13 +1,13 @@
 float densityAtPosFog(in vec3 pos){
-	pos /= 18.;
+	pos /= 16.0;
 	pos.xz *= 0.5;
 
 	vec3 p = floor(pos);
 	vec3 f = fract(pos);
 
 	f = (f*f) * (3.-2.*f);
-	vec2 uv =  p.xz + f.xz + p.y * vec2(0.0,193.0);
-	vec2 coord =  uv / 512.0;
+	vec2 uv =  p.xz + f.xz + p.y * vec2(0.0,192.0);
+	vec2 coord =  uv * 0.002;
 	vec2 xy = texture2D(noisetex, coord).yx;
 	return mix(xy.r,xy.g, f.y);
 }
@@ -23,12 +23,12 @@ float cloudVol(in vec3 pos){
 
 	float Erosion = densityAtPosFog(samplePos * 400	- frameTimeCounter*10 - Wind*10) *0.7+0.3 ;
 
-    float RoofToFloorDensityFalloff = exp(max(100-pos.y,0.0) / -15);
+	float RoofToFloorDensityFalloff = exp(max(100-pos.y,0.0) / -15);
 	float FloorDensityFalloff = pow(exp(max(pos.y-31,0.0) / -3.0),2);
 	float RoofDensityFalloff = exp(max(120-pos.y,0.0) / -10);
 
-	float Output = max((RoofToFloorDensityFalloff - Plumes * (1.0-Erosion)) * 2.0,	clamp((FloorDensityFalloff - floorPlumes*0.5) * Erosion ,0.0,1.0) );
-    
+	float Output = max((RoofToFloorDensityFalloff - Plumes * (1.0-Erosion)) * 2.0,	clamp((FloorDensityFalloff - floorPlumes*0.5) * Erosion ,0.0,1.0));
+
 	return Output;
 }
 
@@ -71,16 +71,16 @@ vec4 GetVolumetricFog(
 	for (int i = 0; i < SAMPLECOUNT; i++) {
 		float d = (pow(expFactor, float(i+dither2)/float(SAMPLECOUNT))/expFactor - 1.0/expFactor)/(1-1.0/expFactor);
 		float dd = pow(expFactor, float(i+dither)/float(SAMPLECOUNT)) * log(expFactor) / float(SAMPLECOUNT)/(expFactor-1.0);
-		
+
 		progressW = gbufferModelViewInverse[3].xyz + cameraPosition + d*dVWorld;
 
 		float densityVol = cloudVol(progressW);
 
 		//------ PLUME EFFECT
-			float plumeDensity = min(densityVol * pow(min(max(100.0-progressW.y,0.0)/30.0,1.0),4.0), pow(clamp(1.0 - length(progressW-cameraPosition)/far,0.0,1.0),4.0) * NETHER_PLUME_DENSITY);
+			float plumeDensity = min(densityVol * pow(min(max(100.0-progressW.y,0.0)/30.0,1.0),4.0), pow(clamp(1.0 - length(progressW-cameraPosition)/far,0.0,1.0),2.5) * NETHER_PLUME_DENSITY);
 			float plumeVolumeCoeff = exp(-plumeDensity*dd*dL);
 
-			vec3 lighting = vec3(NETHER_PLUME_R, NETHER_PLUME_G, NETHER_PLUME_B)*0.25 * exp(-15.0*densityVol);
+			vec3 lighting = vec3(NETHER_PLUME_R, NETHER_PLUME_G, NETHER_PLUME_B) * exp(-15.0*densityVol);
 
 			color += (lighting - lighting * plumeVolumeCoeff) * absorbance;
 			absorbance *= plumeVolumeCoeff;

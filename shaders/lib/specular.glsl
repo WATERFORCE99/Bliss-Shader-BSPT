@@ -38,14 +38,13 @@ vec3 SampleVNDFGGX(
 	vec2 xy // Pair of uniformly distributed numbers in [0, 1]
 ){
 	// Transform viewer direction to the hemisphere configuration
-	viewerDirection = normalize(vec3( alpha * 0.5 * viewerDirection.xy, viewerDirection.z));
+	viewerDirection = normalize(vec3(alpha * 0.5 * viewerDirection.xy, viewerDirection.z));
 
 	// Sample a reflection direction off the hemisphere
-	const float tau = 6.2831853; // 2 * pi
-	float phi = tau * xy.x;
+	float phi = TAU * xy.x;
 
 	float cosTheta = fma(1.0 - xy.y, 1.0 + viewerDirection.z, -viewerDirection.z);
-	float sinTheta = sqrt(clamp(1.0 - cosTheta * cosTheta, 0.0, 1.0));
+	float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
 
 	sinTheta = clamp(sinTheta,0.0,1.0);
 	cosTheta = clamp(cosTheta,sinTheta*0.5,1.0);
@@ -61,22 +60,30 @@ vec3 SampleVNDFGGX(
 	return normalize(vec3(alpha * halfway.xy, halfway.z));
 }
 
+float SmithG2(float ndotv, float ndotl, float alpha) {
+	float k = alpha * 0.5;
+	float GV = ndotv / (ndotv * (1.0 - k) + k);
+	float GL = ndotl / (ndotl * (1.0 - k) + k);
+	return GV * GL;
+}
+
 vec3 GGX(vec3 n, vec3 v, vec3 l, float r, vec3 f0, vec3 metalAlbedoTint) {
-	r = max(r * r, 0.0001);
+	float r2 = max(r * r, 0.0001);
 
 	vec3 h = normalize(l + v);
-	float dotLH = clamp(dot(h, l), 0.0, 1.0);
-	float dotNH = clamp(dot(n, h), 0.0, 1.0);
-	float dotNL = clamp(dot(n, l), 0.0, 1.0);
+	float ndotv = max(dot(n, v), 1e-5);
+	float ndotl = max(dot(n, l), 1e-5);
+	float ndoth = max(dot(n, h), 1e-5);
+	float hdotv = max(dot(h, v), 0.0);
 
-	float denom = dotNH * (r - 1.0) + 1.0;
-	denom = 3.141592653589793 * denom * denom;
-	float D = r / denom;
+	float denom = ndoth * ndoth * (r2 - 1.0) + 1.0;
+	float D = r2 / (3.1415926535 * denom * denom);
 
-	vec3 F = (f0 + (1. - f0) * exp2((-5.55473*dotLH-6.98316)*dotLH)) * metalAlbedoTint;
-	float k2 = .25 * r;
+	float G = SmithG2(ndotv, ndotl, r);
 
-	return dotNL * D * F / (dotLH*dotLH*(1.0-k2)+k2);
+	vec3 F = f0 + (1.0 - f0) * exp2((-5.55473 * hdotv - 6.98316) * hdotv) * metalAlbedoTint;
+
+	return (D * G * F) / (4.0 * ndotv * ndotl);
 }
 
 float shlickFresnelRoughness(float XdotN, float roughness){
@@ -111,7 +118,7 @@ vec3 rayTraceSpeculars(vec3 dir, vec3 position, float dither, float quality, boo
 
 	vec3 spos = clipPosition*vec3(RENDER_SCALE,1.0) + stepv*(dither-0.5);
 
-	#ifdef DEFERRED_SPECULAR
+	#if defined DEFERRED_SPECULAR && defined TAA
 		spos.xy += TAA_Offset*texelSize*0.5/RENDER_SCALE;
 	#endif
 

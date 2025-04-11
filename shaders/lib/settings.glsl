@@ -1,4 +1,4 @@
-#define SHADER_VERSION_LABEL 1.58 // [1.58]
+#define SHADER_VERSION_LABEL 1.6 // [1.6]
 
 ////////////////////////////////////////
 // ----- WATER RELATED SETTINGS ----- //
@@ -340,7 +340,7 @@ const float shadowDistance = 128; // [16 32 48 64 80 96 128 160 192 256 512 1024
 #define CLOUDS_QUALITY 0.5 // [0.1 0.125 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.9 1.0]
 #define Cloud_Speed 1.0 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0 3.0 4.0 5.0 6.0 7.0 8.0 9.0 10.0]
 #define CLOUD_SHADOW_STRENGTH 0.5 // [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
-#define ERODE_AMOUNT 0.4 // [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
+#define ERODE_AMOUNT 0.2 // [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 #define HQ_CLOUDS
 
 #define CloudLayer0
@@ -571,9 +571,10 @@ const vec3 aerochrome_color = mix(vec3(1.0, 0.0, 0.0), vec3(0.715, 0.303, 0.631)
 
 #define MOTION_AMOUNT 0.2 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
 
+#define DISTORT_EFFECT_AMOUNT 0.7 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
 #define WATER_ON_CAMERA_EFFECT
-// #define RAIN_ON_CAMERA_EFFECT
 #define ON_FIRE_DISTORT_EFFECT
+// #define RAIN_ON_CAMERA_EFFECT
 
 // #define FLASHLIGHT
 #define FLASHLIGHT_SPECULAR
@@ -885,6 +886,4 @@ const vec3 aerochrome_color = mix(vec3(1.0, 0.0, 0.0), vec3(0.715, 0.303, 0.631)
 #ifdef USE_CUSTOM_CLOUD_LIGHTING_COLORS
 #endif
 #ifdef USE_CUSTOM_FOG_LIGHTING_COLORS
-#endif
-#ifdef WATER_RIPPLES
 #endif

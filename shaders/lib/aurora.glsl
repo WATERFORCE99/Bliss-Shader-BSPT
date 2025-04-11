@@ -85,7 +85,11 @@ vec3 drawAurora(vec3 rayDir, float dither) {
 	float applyAurora = Night;
 #endif
 
+float aurEnv = AUR_ENV_OFFSET * applyAurora;
+float fakeLighting1 = max(sin(frameTimeCounter * AURORA_SPEED/1.6), 0.6);
+float fakeLighting2 = max(cos(frameTimeCounter * AURORA_SPEED/2.4), 0.8);
+
 // Aurora emission
-vec3 aurDirect = lowerColor * AUR_ENV_OFFSET * applyAurora * 0.2 * max(sin(frameTimeCounter * AURORA_SPEED/1.6), 0.6);
-vec3 aurIndirect = upperColor * AUR_ENV_OFFSET * applyAurora * 0.02 * max(cos(frameTimeCounter * AURORA_SPEED/2.4), 0.8);
-vec3 aurAvg = mix(upperColor, lowerColor, 0.4) * AUR_ENV_OFFSET * applyAurora * 0.5;
+vec3 aurDirect = lowerColor * aurEnv * fakeLighting1;
+vec3 aurIndirect = upperColor * aurEnv * fakeLighting2;
+vec3 aurAvg = (aurDirect + aurIndirect) * 0.5;

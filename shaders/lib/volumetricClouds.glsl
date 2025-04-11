@@ -5,21 +5,25 @@
 float cloud_movement = (worldTime + mod(worldDay,100)*24000.0) / 24.0 * Cloud_Speed;
 
 float densityAtPos(in vec3 pos){
-	pos /= 18.;
-	pos.xz *= 0.5;
-	vec3 p = floor(pos);
+	pos /= 32.0;
+	pos.y *= 4.0;
+	vec3 w = floor(pos);
 	vec3 f = fract(pos);
-	vec2 uv =  p.xz + f.xz + p.y * vec2(0.0,193.0);
-	vec2 coord =  uv / 512.0;
+	
+	vec2 uv1 =  w.xz + f.xz + w.y * vec2(0.0,192.0);
+	vec2 coord1 =  uv1 * 0.002;
 
-	vec2 xy = vec2(0.0);
-	float density = 0.0;
-	//The y channel has an offset to avoid using two textures fetches
-	for (int i = 1; i < 3; i++) {
-		vec2 xy = texture2D(noisetex, coord * i).yx;
+	vec3 p = pos - w;
+	p *= p * (vec3(vec2(3.0/64.0), 3.0) - vec3(vec2(2.0/64.0), 2.0) * p);
+	vec2 uv2 = (16.0 * w.z + w.xy)/64.0 + p.xy;
+	vec2 coord2 = uv2 * 0.0001;
 
-		density += mix(xy.r, xy.g, f.y)/i;
-	}
+	// The y channel has an offset to avoid using two textures fetches
+	vec2 hn = texture2D(noisetex, coord1).yx;
+	vec2 vn = texture2D(noisetex, coord2).yx;
+
+	float density = mix(hn.r, hn.g, f.y) + mix(vn.x, vn.y, p.z);
+
 	return density;
 }
 
@@ -47,8 +51,8 @@ float getCloudShape(int LayerIndex, int LOD, in vec3 position, float minHeight, 
 	if(LayerIndex == LARGECUMULUS_LAYER){
 		coverage = mix(parameters.largeCumulus.x, Rain_coverage, rainStrength);
 		
-		largeCloud = texture2D(noisetex, (samplePos.zx + cloud_movement*2.5)/25000.0 * CloudLayer1_scale).b;
-		smallCloud = texture2D(noisetex, (samplePos.zx - cloud_movement*2.5)/3000.0 * CloudLayer1_scale).b;	
+		largeCloud = texture2D(noisetex, (samplePos.zx + cloud_movement*2.5)/20000.0 * CloudLayer1_scale).b;
+		smallCloud = texture2D(noisetex, (samplePos.zx - cloud_movement*2.5)/2000.0 * CloudLayer1_scale).b;	
 		smallCloud += abs(largeCloud* -0.7);
 
 		shape = min(max((coverage - smallCloud) * 1.2,0.0)/sqrt(coverage),1.0);
@@ -75,7 +79,7 @@ float getCloudShape(int LayerIndex, int LOD, in vec3 position, float minHeight, 
 	topShape = min(exp(-0.5 * (1.0-topShape)), 1.0-pow(1.0-topShape,5.0));
 
 	// round out the bottom part slightly
-	float bottomShape = smoothstep(0.0, 0.25, toBottom / tallness);
+	float bottomShape = smoothstep(0.0, 0.4, toBottom / tallness);
 
 	shape = max((shape - 1.0) + topShape * bottomShape, 0.0);
 
@@ -93,7 +97,7 @@ float getCloudShape(int LayerIndex, int LOD, in vec3 position, float minHeight, 
 		// initial erosion
 		float erosion = 0.0;
 		#ifdef HQ_CLOUDS
-			erosion = texture2D(noisetex, samplePos.xz * 0.01).r * erosionBase;
+			erosion = texture2D(noisetex, samplePos.xz * 0.015).r * erosionBase;
 		#endif
 
 		if(LayerIndex == LARGECUMULUS_LAYER){
@@ -125,7 +129,7 @@ float getPlanetShadow(vec3 playerPos, vec3 WsunVec){
 	return planetShadow;
 }
 
-float sunOcculsion(vec3 playerPos, vec3 sunVector){
+float getSunOcculsion(vec3 playerPos, vec3 sunVector){
 	float density = 0.0;
 	#ifdef CloudLayer0
 		vec3 pos0 = playerPos + sunVector / abs(sunVector.y) * max((CloudLayer0_height + 50.0) - playerPos.y, 0.0);
@@ -142,11 +146,11 @@ float sunOcculsion(vec3 playerPos, vec3 sunVector){
 	return density;
 }
 
-float GetCloudShadow(vec3 playerPos, vec3 sunVector){
+float getCloudShadow(vec3 playerPos, vec3 sunVector){
 	float totalShadow = getPlanetShadow(playerPos, sunVector);
 
 	#ifdef CLOUDS_SHADOWS
- 		float cloudShadows = sunOcculsion(playerPos, sunVector);
+ 		float cloudShadows = getSunOcculsion(playerPos, sunVector);
 		cloudShadows *= CLOUD_SHADOW_STRENGTH;
 
 		#if defined CloudLayer0 || defined CloudLayer1 || defined CloudLayer2

@@ -15,7 +15,8 @@ uniform float enterWater;
 uniform float onFire;
 // uniform float exitPowderSnow;
 uniform int isEyeInWater;
-uniform float isRaining;
+uniform float rainyAreas;
+
 uniform ivec2 eyeBrightness;
 
 // uniform float currentPlayerHunger;
@@ -36,7 +37,7 @@ uniform ivec2 eyeBrightness;
 // uniform bool is_on_ground;
 // uniform bool isSpectator;
 
-float rainExposed = isRaining * clamp((eyeBrightness.y/240.0 - 0.9) * 10.0, 0.0, 1.0);
+float rainExposed = rainStrength * rainyAreas * clamp((eyeBrightness.y/240.0 - 0.9) * 10.0, 0.0, 1.0);
 
 vec3 distortedRain(){
 	vec2 uv = texcoord;
@@ -101,7 +102,7 @@ void applyGameplayEffects(inout vec3 color, in vec2 texcoord, float noise){
 			distortedTexCoord *= scale.xy;
 
 			float waterDrops = texture2D(noisetex, distortedTexCoord).r;
-			waterDrops = isEyeInWater == 1 ? waterDrops * waterDrops * WATER_DISTORTION_AMOUNT : sqrt(min(max(waterDrops - (1.0 - sqrt(exitWater)) * 0.7, 0.0) * (1.0 + exitWater), 1.0)) * 0.3;
+			waterDrops = isEyeInWater == 1 ? waterDrops * waterDrops * WATER_DISTORTION_AMOUNT : sqrt(min(max(waterDrops - (1.0 - sqrt(exitWater)) * 0.7, 0.0) * (1.0 + exitWater), 1.0)) * DISTORT_EFFECT_AMOUNT;
 
 			// apply distortion effects for exiting water and under water
 			distortmask = max(distortmask, waterDrops);
@@ -109,7 +110,7 @@ void applyGameplayEffects(inout vec3 color, in vec2 texcoord, float noise){
 
 		if(enterWater > 0.0){
 			vec2 zoomTC = 0.5 + (texcoord - 0.5) * (1.0 - (1.0-sqrt(1.0-enterWater)));
-			float waterSplash = texture2D(noisetex, zoomTC * vec2(aspectRatio,1.0)).r * (1.0-enterWater);
+			float waterSplash = texture2D(noisetex, zoomTC * vec2(aspectRatio,1.0)).r * DISTORT_EFFECT_AMOUNT * (1.0-enterWater);
  
 			distortmask = max(distortmask, waterSplash);
 		}
@@ -122,10 +123,10 @@ void applyGameplayEffects(inout vec3 color, in vec2 texcoord, float noise){
 
 			vec2 UV = zoomin;
 
-			float flameDistort = texture2D(noisetex,  UV * vec2(aspectRatio,1.0) - vec2(0.0,frameTimeCounter*0.3)).b * clamp(-texcoord.y*0.3+0.3,0.0,1.0) * 0.75 * onFire;
+			float flameDistort = texture2D(noisetex,  UV * vec2(aspectRatio,1.0) - vec2(0.0,frameTimeCounter*0.3)).b * clamp(-texcoord.y*0.3+0.3,0.0,1.0) * DISTORT_EFFECT_AMOUNT * onFire;
  
 			distortmask = max(distortmask, flameDistort);
-		} 
+		}
 	#endif
 
 //////////////////////// APPLY DISTORTION /////////////////////
