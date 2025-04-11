@@ -451,7 +451,7 @@ void main() {
 
 				#ifdef WATER_RIPPLES
 					vec3 rippleNormal = vec3(0.0);
-					if (rainStrength > 0.01) rippleNormal = drawRipples(worldPos.xz * 5.0, frameTimeCounter) * 0.5 * rainStrength * rainyAreas * lightmap * clamp(1.0 - length(playerPos) / 128.0, 0.0, 1.0);
+					if (rainStrength > 0.1) rippleNormal = drawRipples(worldPos.xz * 5.0, frameTimeCounter) * 0.5 * rainStrength * rainyAreas * lightmap * clamp(1.0 - length(playerPos) / 128.0, 0.0, 1.0);
 
 					bump += rippleNormal;
 				#endif
