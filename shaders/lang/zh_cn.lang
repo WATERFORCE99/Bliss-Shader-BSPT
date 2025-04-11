@@ -789,6 +789,8 @@ screen.DISTANT_HORIZONS_SETTINGS = §2Distant Horizons §f配置
 	option.DISTANT_HORIZONS_SHADOWMAP = §c(如果不知道本选项作用, 请不要开启)§r DH 阴影图支持
 	option.TOGGLE_VL_FOG = 体积雾
 
+screen.PHYSICS_MOD_OCEAN_SETTINGS = §2物理模组 §c配置
+
 ////////////////////////////////// COMMENT //////////////////////////////////
 
 option.sunPathRotation.comment=配置太阳和月亮的角度, 用以投射出更长的阴影.
