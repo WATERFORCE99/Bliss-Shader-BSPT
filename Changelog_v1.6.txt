@@ -1,3 +1,15 @@
+2025-4-8 v1.6
+1. Merge X0nk's latest commit. (physics oceans support)
+~ xxx 整合了X0nk最新的更新 (物理海洋支持)
+2. Improve cloud density & perf.
+~ volumetric_clouds 优化了体积云密度计算并提升了性能
+3. Slightly improve GGX specualr.
+~ specular 微微优化GGX高光效果
+4. Add rainstrength threshold to avoid visual issue of ripple.
+~ all_translucent 为涟漪添加雨水强度阈值以避免一些视觉问题
+5. Improve aurora environment lighting.
+~ aurora 优化极光环境光照
+
 2025-3-30 v1.59
 1. Fix screen effect disfunctional when motion blur is enabled.
 ~ final 修复了启用运动模糊时镜头特效失效的问题
@@ -9,9 +21,6 @@
 ~ shader 微调预设
 5. Make special arrow emit.
 ~ all_solid 使特殊箭矢发光
-
-Known issue:
-1. Rainfog disfunctional.
 
 2025-3-28 v1.58
 1. Mitigated the issue of puddle & wetness specular appear in dry biomes. (not able to solve completely)
