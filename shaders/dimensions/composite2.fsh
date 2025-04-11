@@ -242,7 +242,7 @@ vec4 waterVolumetrics(vec3 rayStart, vec3 rayEnd, float rayLength, vec2 dither, 
 				#endif
 			}
 
-			sh *= GetCloudShadow(progressW, WsunVec * lightCol.a);
+			sh *= getCloudShadow(progressW, WsunVec * lightCol.a);
 
 		#endif
 
@@ -418,7 +418,7 @@ void main() {
 	float cloudPlaneDistance = 0.0;
 
 	#ifdef OVERWORLD_SHADER
-		vec4 VolumetricClouds = GetVolumetricClouds(viewPos0, BN, WsunVec, directLightColor + aurDirect, indirectLightColor + aurIndirect, cloudPlaneDistance);
+		vec4 VolumetricClouds = GetVolumetricClouds(viewPos0, BN, WsunVec, directLightColor + aurDirect * 0.2, indirectLightColor + aurIndirect * 0.02, cloudPlaneDistance);
 
 		#ifdef CAVE_FOG
   	  		float skyhole = pow(clamp(1.0-pow(max(playerPos_normalized.y - 0.6,0.0)*5.0,2.0),0.0,1.0),2)* caveDetection;

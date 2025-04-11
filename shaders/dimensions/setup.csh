@@ -555,11 +555,11 @@ void main() {
         }
 
         if (blockId == BLOCK_LAVA) {
-            lightColor = vec3(0.439, 0.201, 0.071);
+            lightColor = vec3(0.537, 0.150, 0.053);
             lightRange = 15.0;
         }
         else if (blockId == ITEM_LAVA_BUCKET) {
-            lightColor = vec3(0.439, 0.201, 0.071);
+            lightColor = vec3(0.537, 0.150, 0.053);
             lightRange = 8.0;
         }
 

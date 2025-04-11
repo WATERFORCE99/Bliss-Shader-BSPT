@@ -903,7 +903,7 @@ void main() {
 
 				if(isEyeInWater != 1) SSSColor *= lightLeakFix;
 
-				float cloudShadows = GetCloudShadow(feetPlayerPos.xyz + cameraPosition, WsunVec);
+				float cloudShadows = getCloudShadow(feetPlayerPos.xyz + cameraPosition, WsunVec);
 				shadowColor *= cloudShadows;
 				SSSColor *= cloudShadow*cloudShadows;
 			#endif

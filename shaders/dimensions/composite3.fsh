@@ -91,7 +91,7 @@ vec3 doRefractionEffect(inout vec2 texcoord, vec2 normal, float linearDistance, 
 	// make the tangent space normals match the directions of the texcoord UV, this greatly improves the refraction effect.
 	vec2 UVNormal = vec2(normal.x,-normal.y);
   
-	float refractionMult = 0.3 / (1.0 + linearDistance);
+	float refractionMult = 0.3 / (1.0 + pow(linearDistance,0.8));
 	float diffractionMult = 0.035;
 	float smudgeMult = 1.0;
 
@@ -174,30 +174,34 @@ vec4 bilateralUpsample(out float outerEdgeResults, float referenceDepth, sampler
 	float edgeSum = 0.0;
 	float threshold = 0.005;
 
-	vec2 UV = gl_FragCoord.xy + 2 + (ivec2(gl_FragCoord.xy + frameCounter)%2)*2;
+	vec2 coord = gl_FragCoord.xy - 1.5;
+
+	vec2 UV = coord;
 	const ivec2 SCALE = ivec2(1.0/VL_RENDER_RESOLUTION);
 	ivec2 UV_DEPTH = ivec2(UV*VL_RENDER_RESOLUTION)*SCALE;
 	ivec2 UV_COLOR = ivec2(UV*VL_RENDER_RESOLUTION);
+	ivec2 UV_NOISE = ivec2(gl_FragCoord.xy*texelSize + 1);
 
-	ivec2[4] OFFSET = ivec2[4] (
-		ivec2(-2, -2),
-		ivec2(-2,  0),
-		ivec2( 0,  0),
-		ivec2( 0, -2)
+	ivec2 OFFSET[5] = ivec2[](
+		ivec2(-1,-1),
+		ivec2( 1, 1),
+		ivec2(-1, 1),
+		ivec2( 1,-1),
+		ivec2( 0, 0)
 	);
 
-	for(int i = 0; i < 4; i++) {
+	for(int i = 0; i < 5; i++) {
  
 		#ifdef DISTANT_HORIZONS
-			float offsetDepth = sqrt(texelFetch2D(depth, UV_DEPTH + OFFSET[i] * SCALE,0).a/65000.0);
+			float offsetDepth = sqrt(texelFetch2D(depth, UV_DEPTH + (OFFSET[i] + UV_NOISE) * SCALE,0).a/65000.0);
 		#else
-			float offsetDepth = ld(texelFetch2D(depth, UV_DEPTH + OFFSET[i] * SCALE, 0).r);
+			float offsetDepth = ld(texelFetch2D(depth, UV_DEPTH + (OFFSET[i] + UV_NOISE) * SCALE, 0).r);
 		#endif
  
 		float edgeDiff = abs(offsetDepth - referenceDepth) < threshold ? 1.0 : 1e-7;
 		outerEdgeResults = max(outerEdgeResults, clamp(referenceDepth - offsetDepth,0.0,1.0));
 
-		vec4 offsetColor = texelFetch2D(colortex0, UV_COLOR + OFFSET[i], 0).rgba;
+		vec4 offsetColor = texelFetch2D(colortex0, UV_COLOR + OFFSET[i] + UV_NOISE, 0).rgba;
 		colorSum += offsetColor*edgeDiff;
 		edgeSum += edgeDiff;
 	}
@@ -467,7 +471,7 @@ void main() {
   
 ////// --------------- lava.
 	if (isEyeInWater == 2){
-		color.rgb = mix(color.rgb, vec3(0.1,0.0,0.0), 1.0-exp(-10.0*clamp(linearDistance*0.5,0.,1.))*0.5  );
+		color.rgb = mix(color.rgb, vec3(0.1,0.0,0.0), 1.0-exp(-10.0*clamp(linearDistance*0.5,0.,1.))*0.5);
 		bloomyFogMult = 0.0;
 	}
 

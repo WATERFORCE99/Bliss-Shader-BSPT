@@ -139,7 +139,7 @@ vec4 waterVolumetrics( vec3 rayStart, vec3 rayEnd, float estEndDepth, float estS
 		phase *= fogPhase(VdotL) * 5.0;
 
 		// do this outside raymarch loop, masking the water surface is good enough
-		sh *= GetCloudShadow(wpos+cameraPosition, WsunVec);
+		sh *= getCloudShadow(wpos+cameraPosition, WsunVec);
 	#endif
 
 	float thing = -normalize(dVWorld).y;

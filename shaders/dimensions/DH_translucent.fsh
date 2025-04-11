@@ -245,7 +245,7 @@ void main() {
 				}
 			#endif
 
-			Shadows *= GetCloudShadow(playerPos + cameraPosition, WsunVec);
+			Shadows *= getCloudShadow(playerPos + cameraPosition, WsunVec);
 
     			Direct_lighting = DirectLightColor * NdotL * Shadows;
 

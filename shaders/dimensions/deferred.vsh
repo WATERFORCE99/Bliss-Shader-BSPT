@@ -61,24 +61,6 @@ float ld(float depth) {
 
 uniform float nightVision;
 
-void getWeatherParams(
-	inout vec4 weatherParams0,
-	inout vec4 weatherParams1,
-
-	float layer0_coverage,
-	float layer1_coverage,
-	float layer2_coverage,
-	float uniformFog_density,
-
-	float layer0_density,
-	float layer1_density,
-	float layer2_density,
-	float cloudyFog_density
-){
-	weatherParams0 = vec4(layer0_coverage, layer1_coverage, layer2_coverage, uniformFog_density);
-	weatherParams1 = vec4(layer0_density, layer1_density, layer2_density, cloudyFog_density);
-}
-
 void main() {
 
 	gl_Position = ftransform()*0.5+0.5;

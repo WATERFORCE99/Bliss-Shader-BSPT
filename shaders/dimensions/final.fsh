@@ -16,6 +16,8 @@ uniform sampler2D depthtex2;
 	uniform sampler2D dhDepthTex0;
 #endif
 
+uniform float rainStrength;
+
 #ifdef OVERWORLD_SHADER
 	uniform int worldTime;
 	uniform int worldDay;
@@ -25,7 +27,6 @@ uniform sampler2D depthtex2;
 	#include "/lib/scene_controller.glsl"
 
 	uniform sampler2D colortex4;
-	uniform float rainStrength;
 	#define CLOUDSHADOWSONLY
 	#include "/lib/volumetricClouds.glsl"
 #endif
@@ -159,7 +160,7 @@ void main() {
 
 				float cloudVis = 1.0;
 				#if defined VOLUMETRIC_CLOUDS && (defined CloudLayer0 || defined CloudLayer1 || defined CloudLayer2)
-					cloudVis = sunOcculsion(cameraPosition, WsunVec);
+					cloudVis = getSunOcculsion(cameraPosition, WsunVec);
 					cloudVis = clamp(1.0 - cloudVis * 32.0, 0.0, 1.0);
 				#endif
 
