@@ -551,7 +551,8 @@ void applyPuddles(
 	if(isWater) wetnessStages = 0.0;
 
 	#ifdef GROUND_RIPPLES
-		vec3 rippleNormal = drawRipples(worldPos.xz * 10.0, frameTimeCounter * 1.5) * 0.25 * clamp(1.0 - length(worldPos - cameraPosition) / 32.0, 0.0, 1.0) * rainStrength;
+		vec3 rippleNormal = vec3(0.0);
+		if (rainStrength > 0.01) rippleNormal = drawRipples(worldPos.xz * 10.0, frameTimeCounter * 1.5) * 0.25 * clamp(1.0 - length(worldPos - cameraPosition) / 32.0, 0.0, 1.0) * rainStrength;
 		flatNormals = normalize(flatNormals + rippleNormal);
 	#endif
 

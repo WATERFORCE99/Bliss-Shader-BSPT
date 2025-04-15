@@ -9,7 +9,6 @@
 #include "/lib/dither.glsl"
 
 in vec4 lmtexcoord;
-#include "/lib/ripples.glsl"
 
 flat in int NameTags;
 
