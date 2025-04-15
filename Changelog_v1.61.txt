@@ -1,54 +1,44 @@
-2025-4-8 v1.6
-1. Merge X0nk's latest commit. (physics oceans support)
-~ xxx 整合了X0nk最新的更新 (物理海洋支持)
-2. Improve cloud density & perf.
-~ volumetric_clouds 优化了体积云密度计算并提升了性能
-3. Slightly improve GGX specualr.
-~ specular 微微优化GGX高光效果
-4. Add rainstrength threshold to avoid visual issue of ripple.
-~ all_translucent 为涟漪添加雨水强度阈值以避免一些视觉问题
-5. Improve aurora environment lighting.
-~ aurora 优化极光环境光照
+2025-4-15 v1.61
+1. Revert specular change.
+~ specular 回退高光优化
+2. Add rainstrength threshold to avoid visual issue of ripple.
+~ composite1 为涟漪添加雨水强度阈值以避免一些视觉问题
+3. Increase cloud coverage/density while rain.
+~ volumetric_clouds 增加了下雨时云层的覆盖率与密度以避免太阳雨的问题
+4. Avoid rainbow appear at night.
+~ rainbow 避免彩虹在夜间出现
 
-2025-3-30 v1.59
-1. Fix screen effect disfunctional when motion blur is enabled.
-~ final 修复了启用运动模糊时镜头特效失效的问题
-2. Slightly improve perf.
-~ deferred 微微提升性能
-3. Adjust the cloud density.
-~ volumetric_cloud 调整云层密度
-4. Slightly adjust perset.
-~ shader 微调预设
-5. Make special arrow emit.
-~ all_solid 使特殊箭矢发光
-
-2025-3-28 v1.58
-1. Mitigated the issue of puddle & wetness specular appear in dry biomes. (not able to solve completely)
-~ shader/ composite1 缓解了在干旱群系出现潮湿高光与水坑的问题（无法彻底解决）
-2. Fix stupid snowstorm issue
-~ climate_settings 修复了愚蠢的暴风雪问题
-3. Merge X0nk's latest commit. (daily weather && water entering animation)
-~xxx 整合了X0nk最新的更新 (日常天气 && 入水效果)
-4. Improve lensflare perf.
-~ volumetric_cloud 优化了镜头炫光的性能
-
-2025-3-27 v1.57
-1. Arrange codes. (may cause crash in aether/twilight forest, if so, pls contact me)
-~ xxx 整理代码（可能造成aether与暮色森林维度崩溃，如果发生请联系我）
-2. Sperate color of sandstrom for bad land & desert.
-~ climate_settings 为沙漠/恶地的沙尘暴增加颜色区分
-3. Potentially fix shader crash for AMD users.
-~ indirect_lighting 可能修复AMD用户无法加载光影的问题
-
-2025-3-25 v1.56
-1. Adjust darkening and transparency of all translucents to make them prettier.
-~ all_translucent 优化了所有透明物体的透明度与光线吸收使其更美观
-2. Update Lang.
-~ zh_cn/en_us 优化翻译文件
-3. Arrange codes.
-~ xxx 整理代码
-4. Merge sandstorm/snowstrom to dry/snowy biome environments.
-~ climate_settings 新增干旱群系特色环境，将沙暴与雪暴合并到干旱/下雪群系特色环境中
+2025-3-25 ~ 4-8 v1.56 ~ 1.6
+1.	Adjust darkening and transparency of all translucents to make them prettier.
+	优化了所有透明物体的透明度与光线吸收使其更美观
+2.	Update Lang.
+	优化翻译文件
+3.	Merge sandstorm/snowstrom to dry/snowy biome environments.
+	新增干旱群系特色环境，将沙暴与雪暴合并到干旱/下雪群系特色环境中
+4.	Arrange codes. (may cause crash in aether/twilight forest, if so, pls contact me)
+	整理代码（可能造成天境与暮色森林维度崩溃，如果发生请联系我）
+5.	Sperate color of sandstrom for bad land & desert.
+	为沙漠/恶地的沙尘暴增加颜色区分
+6.	Potentially fix shader crash for AMD users.
+	可能修复AMD用户无法加载光影的问题
+7.	Mitigated the issue of puddle & wetness specular appear in dry biomes. (not able to solve completely)
+	缓解了在干旱群系出现潮湿高光与水坑的问题（无法彻底解决）
+8.	Fix stupid snowstorm issue
+	修复了愚蠢的暴风雪问题
+9.	Merge X0nk's latest commit. (daily weather && water entering animation)
+	整合了X0nk最新的更新 (日常天气 && 入水效果)
+10.	Improve lensflare perf.
+	优化了镜头炫光的性能
+11.	Merge X0nk's latest commit. (physics oceans support)
+	整合了X0nk最新的更新 (物理海洋支持)
+12.	Improve cloud density & perf.
+	优化了体积云密度计算并提升了性能
+13.	Slightly improve GGX specualr.
+	微微优化GGX高光效果
+14.	Add rainstrength threshold to avoid visual issue of ripple.
+	为涟漪添加雨水强度阈值以避免一些视觉问题
+15.	Improve aurora environment lighting.
+	优化极光环境光照
 
 2025-3-19 ~ 3-24 v1.5 ~ 1.55
 1.	Add puddle ripple, improve ripple visual & perf.
