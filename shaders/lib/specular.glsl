@@ -60,30 +60,22 @@ vec3 SampleVNDFGGX(
 	return normalize(vec3(alpha * halfway.xy, halfway.z));
 }
 
-float SmithG2(float ndotv, float ndotl, float alpha) {
-	float k = alpha * 0.5;
-	float GV = ndotv / (ndotv * (1.0 - k) + k);
-	float GL = ndotl / (ndotl * (1.0 - k) + k);
-	return GV * GL;
-}
-
 vec3 GGX(vec3 n, vec3 v, vec3 l, float r, vec3 f0, vec3 metalAlbedoTint) {
 	float r2 = max(r * r, 0.0001);
 
 	vec3 h = normalize(l + v);
-	float ndotv = max(dot(n, v), 1e-5);
-	float ndotl = max(dot(n, l), 1e-5);
-	float ndoth = max(dot(n, h), 1e-5);
-	float hdotv = max(dot(h, v), 0.0);
+	float HdotL = clamp(dot(h, l), 0.0, 1.0);
+	float NdotH = clamp(dot(n, h), 0.0, 1.0);
+	float NdotL = clamp(dot(n, l), 0.0, 1.0);
 
-	float denom = ndoth * ndoth * (r2 - 1.0) + 1.0;
-	float D = r2 / (3.1415926535 * denom * denom);
+	float denom = NdotH * (r2 - 1.0) + 1.0;
+	denom *= PI * denom;
+	float D = r2 / denom;
 
-	float G = SmithG2(ndotv, ndotl, r);
+	vec3 F = (f0 + (1.0 - f0) * exp2((-5.55473 * HdotL-6.98316) * HdotL)) * metalAlbedoTint;
+	float k2 = 0.25 * r2;
 
-	vec3 F = f0 + (1.0 - f0) * exp2((-5.55473 * hdotv - 6.98316) * hdotv) * metalAlbedoTint;
-
-	return (D * G * F) / (4.0 * ndotv * ndotl);
+	return NdotL * D * F / (HdotL * HdotL * (1.0-k2) + k2);
 }
 
 float shlickFresnelRoughness(float XdotN, float roughness){
