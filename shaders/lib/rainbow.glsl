@@ -17,7 +17,7 @@ vec3 drawRainbow(vec3 viewPos, vec3 playerPos, float dither) {
 
 	vec3 rainbow = vec3(0.0);
 	if (rainbowCoord > 0.0) {
-		float rainbowFactor = pow(rainbowCoord * (1.0 - rainbowCoord) * 12.0, 2.0);
+		float rainbowFactor = pow(rainbowCoord * (1.0 - rainbowCoord) * 12.0, 2.0) * (1-Night);
 
 		float rainbowDist = smoothstep(0.0, 1.0, length(viewPos) / max(farPlane, 128.0));
 		float horizonFade = clamp(sunDir.y * 5.0, 0.0, 1.0);
@@ -29,7 +29,7 @@ vec3 drawRainbow(vec3 viewPos, vec3 playerPos, float dither) {
 
 		vec3 colorBand = smoothHue(rainbowCoord * 0.95 + 0.05);
         
-		colorBand *= vec3(1.5, 0.8, 1.2);
+		colorBand *= vec3(1.2, 0.8, 1.0);
 		rainbow = colorBand * rainbowFactor * 0.02;
 	}
 	return rainbow;
