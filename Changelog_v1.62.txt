@@ -1,3 +1,9 @@
+2025-4-16 v1.62
+1. Merge rainy scene configurations into scene_controller
+~ deferred/scene_controller 将雨天控制整合进场景控制器中
+2. Split few functions
+~ xxx 拆分一些功能
+
 2025-4-15 v1.61
 1. Revert specular change.
 ~ specular 回退高光优化
