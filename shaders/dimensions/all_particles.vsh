@@ -23,6 +23,7 @@ out vec4 lmtexcoord;
 	flat out vec4 lightCol;
 	flat out vec3 WsunVec;
 
+	uniform int worldDay;
 	#include "/lib/scene_controller.glsl"
 #endif
 

@@ -13,6 +13,7 @@ flat out vec3 averageSkyCol_Clouds;
 flat out vec4 lightCol;
 
 #ifdef OVERWORLD_SHADER
+	uniform int worldDay;
 	#include "/lib/scene_controller.glsl"
 #endif
 

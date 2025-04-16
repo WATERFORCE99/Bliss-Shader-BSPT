@@ -87,6 +87,7 @@ uniform float eyeAltitude;
 flat in vec2 TAA_Offset;
 
 uniform float frameTimeCounter;
+uniform int worldTime;
 
 uniform float rainStrength;
 uniform float wetnessAmount;

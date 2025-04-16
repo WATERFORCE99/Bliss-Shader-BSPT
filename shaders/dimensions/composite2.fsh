@@ -40,6 +40,7 @@ uniform float near;
  #endif
 
 uniform float frameTimeCounter;
+uniform int worldTime;
 
 // in vec2 texcoord;
 uniform vec2 texelSize;
@@ -101,14 +102,13 @@ float invLinZ (float lindepth){
 
 	flat in vec3 refractedSunVec;
 
-	#include "/lib/scene_controller.glsl"
-
 	// uniform int dhRenderDistance;
 	#define TIMEOFDAYFOG
 	// #define CLOUDS_INTERSECT_TERRAIN
 
 	#include "/lib/lightning_stuff.glsl"
 	#include "/lib/climate_settings.glsl"
+	#include "/lib/scene_controller.glsl"
 	#include "/lib/volumetricClouds.glsl"
 	#include "/lib/overworld_fog.glsl"
 	#include "/lib/aurora.glsl"

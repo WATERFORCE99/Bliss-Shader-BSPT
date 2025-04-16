@@ -10,6 +10,7 @@ out vec2 texcoord;
 
 	flat out vec3 WsunVec;
 
+	uniform int worldDay;
 	#include "/lib/scene_controller.glsl"
 #endif
 

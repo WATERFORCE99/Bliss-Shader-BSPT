@@ -26,6 +26,7 @@ uniform sampler2D colortex4;
 
 uniform float frameTime;
 uniform float frameTimeCounter;
+uniform int worldTime;
 uniform float rainStrength;
 uniform float eyeAltitude;
 uniform vec3 sunVec;
@@ -80,11 +81,10 @@ float invLinZ (float lindepth){
 	#define TIMEOFDAYFOG
 	#include "/lib/lightning_stuff.glsl"
 
-	#include "/lib/scene_controller.glsl"
-
 	#define VL_CLOUDS_DEFERRED
 
 	#include "/lib/climate_settings.glsl"
+	#include "/lib/scene_controller.glsl"
 	#include "/lib/volumetricClouds.glsl"
 	#include "/lib/overworld_fog.glsl"
 	#include "/lib/aurora.glsl"

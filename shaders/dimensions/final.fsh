@@ -19,8 +19,8 @@ uniform sampler2D depthtex2;
 uniform float rainStrength;
 
 #ifdef OVERWORLD_SHADER
-	uniform int worldTime;
 	uniform int worldDay;
+	uniform int worldTime;
 
 	flat in vec3 WsunVec;
 

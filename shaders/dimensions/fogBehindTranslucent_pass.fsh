@@ -34,6 +34,7 @@ uniform float sunElevation;
 uniform float near;
 
 uniform float frameTimeCounter;
+uniform int worldTime;
 
 // in vec2 texcoord;
 uniform vec2 texelSize;
@@ -73,7 +74,7 @@ float linearizeDepthFast(const in float depth, const in float near, const in flo
 	#endif
 
 	flat in vec3 refractedSunVec;
-	
+
 	#include "/lib/scene_controller.glsl"
 
 	#include "/lib/diffuse_lighting.glsl"

@@ -104,8 +104,8 @@ uniform float waterEnteredAltitude;
 #include "/lib/waterBump.glsl"
 
 #ifdef OVERWORLD_SHADER
-	uniform int worldTime;
 	uniform int worldDay;
+	uniform int worldTime;
 
 	flat in float Flashing;
 	

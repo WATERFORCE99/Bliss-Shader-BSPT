@@ -10,6 +10,7 @@ flat out vec3 averageSkyCol_Clouds;
 	flat out float exposure;
 #endif
 
+uniform int worldDay;
 #include "/lib/scene_controller.glsl"
 
 flat out vec3 WsunVec;
