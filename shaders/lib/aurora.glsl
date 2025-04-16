@@ -22,7 +22,7 @@ float triNoise2d(vec2 pos, float speed) {
 	float rz = 0.0;
 	pos *= mm2(pos.x * 0.06);
 	vec2 bp = pos;
-	float sp = Time * speed / 60.0;
+	float sp = worldTime * speed / 60.0;
 	mat2 rot = mm2(sp);
 	for (float i = 0.0; i < 5.0; i++ ) {
 		vec2 dg = tri2(bp * 1.85) * 0.75;

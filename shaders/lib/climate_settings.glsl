@@ -1,13 +1,11 @@
 // this file contains all things for seasons, weather, and biome specific settings.
 
-uniform int worldTime;
 uniform int worldDay;
 
-float Time = worldTime%24000;
-float Morning = clamp((Time-23000.0)/2000.0,0.0,1.0) + clamp((2000.0-Time)/2000.0,0.0,1.0);
-float Noon = clamp((Time-2000)/2000.0,0.0,1.0) * clamp((12000.0-Time)/2000.0,0.0,1.0);
-float Evening = clamp((Time-11000.0)/2000.0,0.0,1.0) * clamp((15000.0-Time)/2000.0,0.0,1.0);
-float Night = clamp((Time-14000.0)/2000.0,0.0,1.0) * clamp((23000.0-Time)/2000.0,0.0,1.0);
+uniform float Morning;
+uniform float Noon;
+uniform float Evening;
+uniform float Night;
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////// SEASONS //////////////////////////////////
@@ -89,7 +87,7 @@ vec3 getSeasonColor(int worldDay) {
 	// loop the year. multiply the season length by the 4 seasons to create a years time.
 	float YearLoop = mod(worldDay + SeasonLength, SeasonLength * 4);
 
-    // the time schedule for each season
+	// the time schedule for each season
 	float SummerTime = clamp(YearLoop, 0, SeasonLength) / SeasonLength;
 	float AutumnTime = clamp(YearLoop - SeasonLength, 0, SeasonLength) / SeasonLength;
 	float WinterTime = clamp(YearLoop - SeasonLength*2, 0, SeasonLength) / SeasonLength;

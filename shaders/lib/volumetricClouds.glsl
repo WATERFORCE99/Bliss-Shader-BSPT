@@ -37,7 +37,7 @@ float getCloudShape(int LayerIndex, int LOD, in vec3 position, float minHeight, 
 	float smallCloud = 0.0;
 
 	if(LayerIndex == ALTOSTRATUS_LAYER){
-		coverage = mix(parameters.altostratus.x, 1.5 * Rain_coverage, rainStrength);
+		coverage = parameters.altostratus.x;
 
 		largeCloud = texture2D(noisetex, (position.xz + cloud_movement)/100000. * CloudLayer2_scale).b;
 		smallCloud = 1.0 - texture2D(noisetex, ((position.xz - cloud_movement)/7500. - vec2(1.0-largeCloud, -largeCloud)/5.0) * CloudLayer2_scale).b;
@@ -49,7 +49,7 @@ float getCloudShape(int LayerIndex, int LOD, in vec3 position, float minHeight, 
 		return shape;
 	}
 	if(LayerIndex == LARGECUMULUS_LAYER){
-		coverage = mix(parameters.largeCumulus.x, 1.2 * Rain_coverage, rainStrength);
+		coverage = parameters.largeCumulus.x;
 		
 		largeCloud = texture2D(noisetex, (samplePos.zx + cloud_movement*2.5)/20000.0 * CloudLayer1_scale).b;
 		smallCloud = texture2D(noisetex, (samplePos.zx - cloud_movement*2.5)/2000.0 * CloudLayer1_scale).b;	
@@ -58,7 +58,7 @@ float getCloudShape(int LayerIndex, int LOD, in vec3 position, float minHeight, 
 		shape = min(max((coverage - smallCloud) * 1.2,0.0)/sqrt(coverage),1.0);
 	}
 	if(LayerIndex == SMALLCUMULUS_LAYER){
-		coverage = mix(parameters.smallCumulus.x, 1.2 * Rain_coverage, rainStrength);
+		coverage = parameters.smallCumulus.x;
 
 		largeCloud = texture2D(noisetex, (samplePos.xz + cloud_movement)/5000.0 * CloudLayer0_scale).b;
 		smallCloud = 1.0-texture2D(noisetex, (samplePos.xz - cloud_movement)/1000.0 * CloudLayer0_scale).r;
@@ -260,7 +260,7 @@ vec4 raymarchCloud(
 	densityTresholdCheck = mix(1e-5, densityTresholdCheck, dither);
 
 	if(LayerIndex == ALTOSTRATUS_LAYER){
-		float density = mix(parameters.altostratus.y, 1.0, rainStrength);
+		float density = parameters.altostratus.y;
 
 		bool ifAboveOrBelowPlane = max(mix(-1.0, 1.0, clamp(cameraPosition.y - minHeight,0.0,1.0)) * normalize(rayDirection).y,0.0) > 0.0;
 
@@ -306,9 +306,7 @@ vec4 raymarchCloud(
 	}
 
 	if(LayerIndex < ALTOSTRATUS_LAYER){
-		float density = mix(parameters.smallCumulus.y, 1.0, rainStrength);
-
-		if(LayerIndex == LARGECUMULUS_LAYER) density = mix(parameters.largeCumulus.y, 1.0, rainStrength);
+		float density = (LayerIndex == SMALLCUMULUS_LAYER) ? parameters.smallCumulus.y : parameters.largeCumulus.y;
 		
 		float skylightOcclusion = 1.0;
 		#if defined CloudLayer1 && defined CloudLayer0
