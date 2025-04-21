@@ -227,16 +227,15 @@ void main() {
 
 		// strong
 		if (
-			mc_Entity.x == BLOCK_GROUND_WAVING || mc_Entity.x == BLOCK_GROUND_WAVING_VERTICAL ||
-			mc_Entity.x == BLOCK_GRASS_SHORT || mc_Entity.x == BLOCK_GRASS_TALL_UPPER || mc_Entity.x == BLOCK_GRASS_TALL_LOWER ||
-			mc_Entity.x == BLOCK_SSS_STRONG || mc_Entity.x == BLOCK_SAPLING
-			/*|| (mc_Entity.x >= 410 && mc_Entity.x <= 415) || (mc_Entity.x >= 402 && mc_Entity.x <= 405) THIS IS FOR MCME NEW TREES.*/
+			mc_Entity.x == BLOCK_SSS_STRONG || mc_Entity.x == BLOCK_SAPLING || mc_Entity.x == BLOCK_AIR_WAVING
 		){
 			SSSAMOUNT = 1.0;
 		}
 
 		// medium
 		if (
+			mc_Entity.x == BLOCK_GROUND_WAVING || mc_Entity.x == BLOCK_GROUND_WAVING_VERTICAL ||
+			mc_Entity.x == BLOCK_GRASS_SHORT || mc_Entity.x == BLOCK_GRASS_TALL_UPPER || mc_Entity.x == BLOCK_GRASS_TALL_LOWER ||
 			mc_Entity.x == BLOCK_SSS_WEAK || mc_Entity.x == BLOCK_SSS_WEAK_2 || mc_Entity.x == BLOCK_AIR_WAVING ||
 			mc_Entity.x == BLOCK_GLOW_LICHEN || mc_Entity.x == BLOCK_SNOW_LAYERS || mc_Entity.x == BLOCK_CARPET ||
 			mc_Entity.x == BLOCK_AMETHYST_BUD_MEDIUM || mc_Entity.x == BLOCK_AMETHYST_BUD_LARGE || mc_Entity.x == BLOCK_AMETHYST_CLUSTER ||
@@ -247,7 +246,7 @@ void main() {
 
 		// low
 		#ifdef MISC_BLOCK_SSS
-			if(mc_Entity.x == BLOCK_SSS_WEIRD || mc_Entity.x == BLOCK_GRASS) SSSAMOUNT = 0.1;
+			if(mc_Entity.x == BLOCK_SSS_WEIRD || mc_Entity.x == BLOCK_GRASS) SSSAMOUNT = 0.25;
 		#endif
 
 		#ifdef ENTITIES
