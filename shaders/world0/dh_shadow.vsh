@@ -16,9 +16,6 @@ flat out int isWater;
 
 #include "/lib/Shadow_Params.glsl"
 
-// uniform float far;
-uniform float dhFarPlane;
-
 #include "/lib/projections.glsl"
 #include "/lib/DistantHorizons_projections.glsl"
 
