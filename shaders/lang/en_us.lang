@@ -790,7 +790,7 @@ screen.DISTANT_HORIZONS_SETTINGS = §2Distant Horizons §fSettings
 	option.DISTANT_HORIZONS_SHADOWMAP=DH Shadowmap Support
 	option.TOGGLE_VL_FOG=Toggle Volumetric Fog
 
-screen.PHYSICS_MOD_OCEAN_SETTINGS = §2Physics Mod §cSettings
+screen.PHYSICS_MOD_OCEAN_SETTINGS = §2Physics Mod §fSettings
 
 ////////////////////////////////// COMMENT //////////////////////////////////
 

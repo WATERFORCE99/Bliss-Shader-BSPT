@@ -786,10 +786,10 @@ screen.DISTANT_HORIZONS_SETTINGS = §2Distant Horizons §f配置
 		value.DH_KNOWN_ISSUES.0 = §c 点击此处文本循环查看已知问题列表
 		value.DH_KNOWN_ISSUES.1 = §a LOD 区域的 GTAO, RTAO 和 SSGI 不生效 - 未能实现对 DH 的支持
 
-	option.DISTANT_HORIZONS_SHADOWMAP = §c(如果不知道本选项作用, 请不要开启)§r DH 阴影图支持
+	option.DISTANT_HORIZONS_SHADOWMAP = DH 阴影图支持
 	option.TOGGLE_VL_FOG = 体积雾
 
-screen.PHYSICS_MOD_OCEAN_SETTINGS = §2物理模组 §c配置
+screen.PHYSICS_MOD_OCEAN_SETTINGS = §2物理模组 §f配置
 
 ////////////////////////////////// COMMENT //////////////////////////////////
 
@@ -1108,4 +1108,5 @@ option.NOISE_DROPOFF=配置 DH 区块内的噪声衰减速度/容易程度.
 
 option.DH_KNOWN_ISSUES.comment=点击以循环已知问题.
 
+option.DISTANT_HORIZONS_SHADOWMAP.comment=§c 如果不知道本选项作用，请勿使用本选项.
 option.TOGGLE_VL_FOG.comment=配置 DH 区块的体积雾密度.
