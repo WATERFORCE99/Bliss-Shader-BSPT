@@ -40,6 +40,7 @@ uniform float near;
 uniform float frameTime;
 uniform int frameCounter;
 uniform int worldTime;
+uniform int worldDay;
 uniform float rainStrength;
 uniform float nightVision;
 
