@@ -60,8 +60,8 @@ uniform int isEyeInWater;
 uniform float rainStrength;
 
 #ifdef OVERWORLD_SHADER
-	uniform int worldDay;
 	uniform int worldTime;
+	uniform int worldDay;
 
 	#include "/lib/scene_controller.glsl"
 	#define CLOUDSHADOWSONLY

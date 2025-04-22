@@ -60,8 +60,8 @@ flat in float HELD_ITEM_BRIGHTNESS;
 #include "/lib/projections.glsl"
 
 #ifdef OVERWORLD_SHADER
-	uniform int worldDay;
 	uniform int worldTime;
+	uniform int worldDay;
 
 	#include "/lib/scene_controller.glsl"
 	#define CLOUDSHADOWSONLY

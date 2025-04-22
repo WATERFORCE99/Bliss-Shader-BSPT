@@ -35,6 +35,7 @@ uniform float near;
 
 uniform float frameTimeCounter;
 uniform int worldTime;
+uniform int worldDay;
 
 // in vec2 texcoord;
 uniform vec2 texelSize;

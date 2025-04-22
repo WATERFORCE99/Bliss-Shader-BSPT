@@ -27,6 +27,7 @@ uniform sampler2D colortex4;
 uniform float frameTime;
 uniform float frameTimeCounter;
 uniform int worldTime;
+uniform int worldDay;
 uniform float rainStrength;
 uniform float eyeAltitude;
 uniform vec3 sunVec;
