@@ -135,13 +135,6 @@ vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 s
 
 	transmittance = vec3(1.0);
 
-	float high_sun = clamp(pow(sunVector.y+0.6,5),0.0,1.0) * 3.0; // make sunrise less blue, and allow sunset to be bluer
-	float low_sun = clamp(((1.0-abs(sunVector.y))*3.) - high_sun,1.0,2.0);
-
-	#if defined OVERWORLD_SHADER && defined TWILIGHT_FOREST_FLAG
-		low_sun = 1.5;
-	#endif
-
 	for (int i = 0; i < iSteps; ++i, position += increment) {
 		vec3 density = sky_density(length(position));
 		if (density.y > 1e35) break;
@@ -152,22 +145,15 @@ vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 s
 		vec3 stepTransmittedFraction = clamp01((stepTransmittance - 1.0) / -stepOpticalDepth) ;
 		vec3 stepScatteringVisible = transmittance * stepTransmittedFraction * GroundDarkening ;
 
-		#ifdef ORIGINAL_CHOCAPIC_SKY
-			scatteringSun += sky_coefficientsScattering  * (stepAirmass.xy * phaseSun) * stepScatteringVisible * sky_transmittance(position, sunVector,  jSteps) * planetGround;
+		scatteringSun += sky_coefficientsScattering * (stepAirmass.xy * phaseSun) * stepScatteringVisible * sky_transmittance(position, sunVector, jSteps);
+		scatteringMoon += sky_coefficientsScattering * (stepAirmass.xy * phaseMoon) * stepScatteringVisible * sky_transmittance(position, moonVector, jSteps);
 
-			scatteringAmbient += sky_coefficientsScattering * stepAirmass.xy * stepScatteringVisible;
-		#else
-			scatteringSun += sky_coefficientsScattering  * (stepAirmass.xy * phaseSun) * stepScatteringVisible * sky_transmittance(position, sunVector * 0.5 + 0.1,  jSteps) * planetGround;
-
-			scatteringAmbient += sky_coefficientsScattering * stepAirmass.xy * stepScatteringVisible * low_sun;
-		#endif
-
-		scatteringMoon += sky_coefficientsScattering * (stepAirmass.xy * phaseMoon) * stepScatteringVisible * sky_transmittance(position, moonVector, jSteps) * planetGround;
+		scatteringAmbient += sky_coefficientsScattering * stepAirmass.xy * stepScatteringVisible;
 
 		transmittance *= stepTransmittance;
 	}
 
-	vec3 scattering = scatteringAmbient * background + scatteringSun * sunColorBase + scatteringMoon * moonColorBase * 0.5;
+	vec3 scattering = scatteringAmbient * background + scatteringSun * sunColorBase * planetGround + scatteringMoon * moonColorBase * planetGround * 0.5;
 
 	return scattering;
 }
