@@ -141,7 +141,6 @@ float convertHandDepth_2(in float depth, bool hand) {
 #ifdef OVERWORLD_SHADER
 	#include "/lib/scene_controller.glsl"
 	#define CLOUDSHADOWSONLY
-	#define CLOUDS_INTERSECT_TERRAIN
 	#include "/lib/volumetricClouds.glsl"
 #endif
 

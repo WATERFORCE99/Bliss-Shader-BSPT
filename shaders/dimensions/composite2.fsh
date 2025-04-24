@@ -105,7 +105,6 @@ float invLinZ (float lindepth){
 
 	// uniform int dhRenderDistance;
 	#define TIMEOFDAYFOG
-	// #define CLOUDS_INTERSECT_TERRAIN
 
 	#include "/lib/lightning_stuff.glsl"
 	#include "/lib/climate_settings.glsl"

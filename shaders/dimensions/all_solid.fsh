@@ -342,7 +342,7 @@ void main() {
 
 				float volumeCoeff = exp(-density*(i+1));
 
-				vec3 lighting =  vec3(0.5,0.75,1.0) * 0.1 * exp(-10*density) + vec3(END_FOG_R, END_FOG_G, END_FOG_B) * verticalGradient2 * 2.0;
+				vec3 lighting =  vec3(0.5,0.75,1.0) * 0.1 * exp(-10*density) + vec3(0.2, 0.7, 1.0) * verticalGradient2 * 2.0;
 				color += (lighting - lighting * volumeCoeff) * absorbance;;
 				absorbance *= volumeCoeff;
 				endPortalEmission += verticalGradient*verticalGradient ;

@@ -82,7 +82,6 @@ float linearizeDepthFast(const in float depth, const in float near, const in flo
 	#define TIMEOFDAYFOG
 	#include "/lib/lightning_stuff.glsl"
 
-	#define CLOUDS_INTERSECT_TERRAIN
 	// #define CLOUDSHADOWSONLY
 	#include "/lib/climate_settings.glsl"
 	#include "/lib/volumetricClouds.glsl"

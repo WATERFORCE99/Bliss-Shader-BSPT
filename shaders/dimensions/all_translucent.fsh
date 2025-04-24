@@ -500,8 +500,6 @@ void main() {
 
 		vec2 lightmap = lmtexcoord.zw;
 
-		// lightmap.y = 1.0;
-
 		#ifndef OVERWORLD_SHADER
 			lightmap.y = 1.0;
 		#endif
@@ -672,9 +670,10 @@ void main() {
 				gl_FragData[0].a = gl_FragData[0].a + (1.0-gl_FragData[0].a) * reflectance;
 		
 				// invert the alpha blending darkening on the color so you can interpolate between diffuse and specular and keep buffer blending
-				float colorFactor = 0.2;
-				if(isWater) colorFactor = 1.0;
+				float colorFactor = 0.25;
+				if(isWater || isNetherPortal) colorFactor = 1.0;
 				if(isGlass || isSlime) colorFactor = 0.5;
+
 				gl_FragData[0].rgb = clamp(specularReflections / gl_FragData[0].a * 0.1,0.0,65000.0) * colorFactor;
 			}else{
 				gl_FragData[0].rgb = clamp(FinalColor * 0.1,0.0,65000.0);

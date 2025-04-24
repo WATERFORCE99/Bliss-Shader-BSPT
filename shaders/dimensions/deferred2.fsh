@@ -40,7 +40,8 @@ void main() {
  		// doing this for precision reasons, DH does NOT like depth => 1.0
 	}else{
 		vec3 skyColor = texelFetch2D(colortex2, ivec2(gl_FragCoord.xy),0).rgb;
-		skyColor.rgb = max(skyColor.rgb - skyColor.rgb * interleaved_gradientNoise()*0.05, 0.0); 						gl_FragData[0].rgb = skyColor/50.0;
+		skyColor.rgb = max(skyColor.rgb - skyColor.rgb * interleaved_gradientNoise()*0.05, 0.0);
+		gl_FragData[0].rgb = skyColor/50.0;
 		gl_FragData[0].a = 0.0;
 	}
 	gl_FragData[1] = vec4(0,0,0,0);
