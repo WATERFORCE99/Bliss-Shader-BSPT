@@ -253,7 +253,7 @@ screen.AO=环境光遮蔽配置
 screen.GI=全局光照配置
 	option.GI_Strength=全局照明倍率
 	option.RAY_COUNT=光照数量
-	option.STEPS=光照步进
+	option.RT_ITERATION=光照迭代次数
 	option.UseQuarterResDepth=使用1/4分辨率深度
 
 screen.HAND_HELD_LIGHT=手持光源/手电筒配置
@@ -667,7 +667,6 @@ screen.Misc_Settings = 杂项
 screen.EXPERIMENTAL_STUFF=实验性选项
 	option.CLOUDS_INTERSECT_TERRAIN=地平线云层
 	option.BLOOMY_PARTICLES=泛光粒子
-	option.ORIGINAL_CHOCAPIC_SKY=原始 Chocapic 天空
 	option.BIOME_TINT_WATER=群系色调水体
 	option.HYPER_DETAILED_WAVES=超细节水波
 	option.OLD_BLOOM=旧版泛光
@@ -722,6 +721,7 @@ screen.selection_box_outline=选择框框线
 	option.SELECT_BOX_COL_G=选择框颜色 - 绿色比重
 	option.SELECT_BOX_COL_B=选择框颜色 - 蓝色比重
 
+screen.SCENE_CONTROLLER=环境配置器
 	option.USE_CUSTOM_DIFFUSE_LIGHTING_COLORS = 自定义散射光
 screen.DIFFUSE_LIGHTING_COLORS=散射光颜色配置
 	option.DIRECTLIGHT_DIFFUSE_R = 来自直接照明 - 红色比重
@@ -731,7 +731,7 @@ screen.DIFFUSE_LIGHTING_COLORS=散射光颜色配置
 	option.INDIRECTLIGHT_DIFFUSE_G = 来自间接照明 - 绿色比重
 	option.INDIRECTLIGHT_DIFFUSE_B = 来自间接照明 - 蓝色比重
 	option.USE_CUSTOM_CLOUD_LIGHTING_COLORS = 自定义云层
-screen.CLOUD_LIGHTING_COLORS_LIGHTING_COLORS=云层颜色配置
+screen.CLOUD_LIGHTING_COLORS=云层颜色配置
 	option.DIRECTLIGHT_CLOUDS_R = 来自直接照明 - 红色比重
 	option.DIRECTLIGHT_CLOUDS_G = 来自直接照明 - 绿色比重
 	option.DIRECTLIGHT_CLOUDS_B = 来自直接照明 - 蓝色比重
@@ -746,11 +746,11 @@ screen.FOG_LIGHTING_COLORS=雾气颜色配置
 	option.INDIRECTLIGHT_FOG_R = 来自间接照明 - 红色比重
 	option.INDIRECTLIGHT_FOG_G = 来自间接照明 - 绿色比重
 	option.INDIRECTLIGHT_FOG_B = 来自间接照明 - 蓝色比重
-	option.USE_CUSTOM_SKY_GROUND_LIGHTING_COLORS = 自定义地表光
+	option.USE_CUSTOM_SKY_GROUND_LIGHTING_COLORS = 自定义地表大气
 screen.SKY_GROUND_LIGHTING_COLORS=地表光颜色配置
-	option.SKY_GROUND_R = 地表光 - 红色比重
-	option.SKY_GROUND_G = 地表光 - 绿色比重
-	option.SKY_GROUND_B = 地表光 - 蓝色比重
+	option.SKY_GROUND_R = 地表大气 - 红色比重
+	option.SKY_GROUND_G = 地表大气 - 绿色比重
+	option.SKY_GROUND_B = 地表大气 - 蓝色比重
 
 screen.Mod_support = 支持的模组配置
 screen.DISTANT_HORIZONS_SETTINGS = §2Distant Horizons §f配置
@@ -835,6 +835,8 @@ option.RP_MODEL_FIX.comment=开启此选项以禁用一些可能含有 3D 模型
 option.WAVY_STRENGTH.comment=配置植物摇晃的强度.
 option.WAVY_SPEED.comment=配置植物摇晃的速度.
 
+option.SKY_GROUND.comment=配置天空光对地表的作用程度.
+
 option.TORCH_AMOUNT.comment=配置照明的亮度.
 
 option.ambient_brightness.comment=配置环境光的亮度.
@@ -845,7 +847,7 @@ option.indirect_RTGI.comment=配置全局光照模式以使用光线追踪计算
 option.AO_Strength.comment=配置由 SSAO, GTAO, RTAO 渲染的环境光遮蔽强度.
 option.GI_Strength.comment=配置由 (高质量) SSGI 渲染的全局光照强度.
 option.RAY_COUNT.comment=配置光线追踪使用的光线数量, 更高的光线数量有助于提升光照准确度, 降低暗部噪点水平.
-option.STEPS.comment=配置计算每次光照间的间隔, 更高的步进将以视觉效果为代价提高运行性能.
+option.RT_ITERATION.comment=配置光线追踪使用的光线迭代次数.
 option.AO_in_sunlight.comment=配置由太阳产生的环境光遮蔽效果.
 option.UseQuarterResDepth.comment=开启此选项以使用1/4的分辨率深度作为光线追踪的采样, 有助于提高性能. §a性能开销很低.
 option.Hand_Held_lights.comment=开启此选项以使用手持光源. §a性能开销较低.
@@ -1068,7 +1070,6 @@ option.Purkinje_Multiplier.comment=配置在暗处时淡化色彩并强化明暗
 
 option.CLOUDS_INTERSECT_TERRAIN.comment=WIP选项. 用以使云层能自然过渡到地平线而非维持在固定高度.
 option.BLOOMY_PARTICLES.comment=WIP选项. 用以控制雨雪等粒子的泛光效果.
-option.ORIGINAL_CHOCAPIC_SKY.comment=开启此选项以使用原版 Chocapic 天空.
 option.BIOME_TINT_WATER.comment=开启此选项将在特定群系应用特殊颜色的水体.
 option.HYPER_DETAILED_WAVES.comment=开启此选项以启用超细节水波.
 option.OLD_BLOOM.comment=开启此选项以替换为旧版的泛光系统.
@@ -1092,7 +1093,7 @@ option.SELECT_BOX.comment=开启此选项以启用可自定义色彩的选择框
 option.USE_CUSTOM_DIFFUSE_LIGHTING_COLORS.comment = 开启此选项以启用自定义色彩的散射光.
 option.USE_CUSTOM_CLOUD_LIGHTING_COLORS.comment = 开启此选项以启用自定义色彩的云层.
 option.USE_CUSTOM_FOG_LIGHTING_COLORS.comment = 开启此选项以启用自定义色彩的雾气.
-option.USE_CUSTOM_SKY_GROUND_LIGHTING_COLORS.comment = 开启此选项以启用自定义色彩的地表光.
+option.USE_CUSTOM_SKY_GROUND_LIGHTING_COLORS.comment = 开启此选项以启用自定义色彩的地表大气.
 
 option.DH_OVERDRAW_PREVENTION.comment=开启此选项以防止着色器的一些元素过度绘制导致视觉问题.
 option.OVERDRAW_MAX_DISTANCE.comment=配置防止过度绘制的最大距离. 建议保持默认.
