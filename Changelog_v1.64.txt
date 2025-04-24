@@ -1,8 +1,32 @@
-2025-4-16 v1.62
+2025-4-24 v1.64
+1. Remove unnecessary codes.
+~ ROBOBO_sky 移除无意义代码
+2. Improve SSGI perf.
+~ indirect_lighting_effects 优化SSGI性能
+3. Improve setting layout & LANG.
+~ shaders/en_us/zh_cn 优化设置布局与翻译文件
+4. Revert portal / end portal effect / color.
+~ all_solid/all_translucent 回退下界/末地传送门特效/颜色
+5. Revert lava colored lighting
+~ setup 回退岩浆照明
+6. Arrange codes.
+~ xxx 整理代码
+
+2025-4-21 v1.63
+1. Fix DH shadowmap compile issue.
+~ world0/dh_shadow 修复了DH阴影贴图的编译错误
+2. Merge X0nk's latest commit. (SSS & cloud tweaks)
+~ xxx 整合了X0nk最新的更新 (SSS与云层的调整)
+3. Fix daily weather mistakes.
+~ deferred 修复每日天气错误
+
+2025-4-17 v1.62
 1. Merge rainy scene configurations into scene_controller
 ~ deferred/scene_controller 将雨天控制整合进场景控制器中
 2. Split few functions
 ~ xxx 拆分一些功能
+3. Adjust clouds look.
+~ volumetric_clouds 调整了云层外观
 
 2025-4-15 v1.61
 1. Revert specular change.
