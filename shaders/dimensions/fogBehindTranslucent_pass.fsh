@@ -30,8 +30,9 @@ flat in vec3 WsunVec;
 uniform vec3 sunVec;
 uniform float sunElevation;
 
-// uniform float far;
 uniform float near;
+// uniform float far;
+// uniform float dhFarPlane;
 
 uniform float frameTimeCounter;
 uniform int worldTime;

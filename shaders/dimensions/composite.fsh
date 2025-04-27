@@ -47,7 +47,6 @@ uniform float viewWidth;
 uniform float aspectRatio;
 uniform float viewHeight;
 
-// uniform float far;
 uniform float near;
 
 #include "/lib/projections.glsl"

@@ -72,9 +72,9 @@ float linearizeDepthFast(const in float depth, const in float near, const in flo
 }
 
 float bloomWeight(){
-	
-	float weights[7] = float[](     1.0,    1.0/2.0,    1.0/3.0,    1.0/5.5,    1.0/8.0,    1.0/10.0,   1.0/12.0    );
-	// float weights[7] = float[](     0.7,    pow(0.5,2), pow(0.5,3),  pow(0.5,4),   pow(0.5,5),    pow(0.5,6), pow(0.5,7)	);
+
+	float weights[7] = float[](1.0, 1.0/2.0, 1.0/3.0, 1.0/5.5, 1.0/8.0, 1.0/10.0, 1.0/12.0);
+	// float weights[7] = float[](0.7, pow(0.5,2), pow(0.5,3), pow(0.5,4), pow(0.5,5), pow(0.5,6), pow(0.5,7));
 
 	float result = 0.0;
 

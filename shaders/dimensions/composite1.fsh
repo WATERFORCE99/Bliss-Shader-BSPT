@@ -74,7 +74,6 @@ uniform sampler2D colortex15; // flat normals(rgb), vanillaAO(alpha)
 uniform float updateFadeTime;
 // uniform float centerDepthSmooth;
 
-// uniform float far;
 uniform float near;
 uniform float farPlane;
 
@@ -158,8 +157,8 @@ float convertHandDepth_2(in float depth, bool hand) {
 #include "/lib/specular.glsl"
 #include "/lib/diffuse_lighting.glsl"
 
-#include "/lib/end_fog.glsl"
 #include "/lib/DistantHorizons_projections.glsl"
+#include "/lib/end_fog.glsl"
 
 float ld(float dist) {
 	return (2.0 * near) / (far + near - dist * (far - near));

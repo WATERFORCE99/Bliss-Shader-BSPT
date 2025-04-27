@@ -28,8 +28,9 @@ flat in vec3 WsunVec;
 uniform vec3 sunVec;
 uniform float sunElevation;
 
-// uniform float far;
 uniform float near;
+// uniform float far;
+// uniform float dhFarPlane;
 
 #ifdef VIVECRAFT
  	uniform bool vivecraftIsVR;
@@ -418,7 +419,7 @@ void main() {
 	float cloudPlaneDistance = 0.0;
 
 	#ifdef OVERWORLD_SHADER
-		vec4 VolumetricClouds = GetVolumetricClouds(viewPos0, BN, WsunVec, directLightColor + aurDirect * 0.2, indirectLightColor + aurIndirect * 0.02, cloudPlaneDistance);
+		vec4 VolumetricClouds = GetVolumetricClouds(viewPos0, BN, WsunVec, directLightColor + aurEmit * 0.2, indirectLightColor + aurEmit * 0.01, cloudPlaneDistance);
 
 		#ifdef CAVE_FOG
   	  		float skyhole = pow(clamp(1.0-pow(max(playerPos_normalized.y - 0.6,0.0)*5.0,2.0),0.0,1.0),2)* caveDetection;

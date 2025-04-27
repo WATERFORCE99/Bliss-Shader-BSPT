@@ -21,7 +21,6 @@ flat out vec2 TAA_Offset;
 flat out vec3 zMults;
 uniform sampler2D colortex4;
 
-// uniform float far;
 uniform float near;
 
 uniform mat4 gbufferModelViewInverse;

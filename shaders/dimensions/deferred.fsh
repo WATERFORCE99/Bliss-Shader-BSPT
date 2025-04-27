@@ -56,7 +56,6 @@ vec3 WsunVec = mat3(gbufferModelViewInverse)*sunVec;
 
 #define DHVLFOG
 
-// uniform float far;
 uniform float near;
 
 float linearizeDepthFast(const in float depth, const in float near, const in float far) {
@@ -106,7 +105,6 @@ vec3 rodSample(vec2 Xi){
 	return normalize(vec3(cos(phi) * r, sin(phi) * r, Xi.x)).xzy;
 }
 
-uniform float dayChangeSmooth;
 uniform bool worldTimeChangeCheck;
 
 uniform int hideGUI;
@@ -139,7 +137,7 @@ void main() {
 		vec3 AmbientLightTint = vec3(AmbientLight_R, AmbientLight_G, AmbientLight_B);
 
 		// --- the color of the atmosphere + the average color of the atmosphere.
-		vec3 skyGroundCol = skyFromTex(vec3(0, -1 ,0), colortex4).rgb + aurAvg;// * clamp(WsunVec.y*2.0,0.2,1.0);
+		vec3 skyGroundCol = skyFromTex(vec3(0, -1 ,0), colortex4).rgb;// * clamp(WsunVec.y*2.0,0.2,1.0);
 
 		/// --- Save light values
 		if (gl_FragCoord.x < 1. && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1)

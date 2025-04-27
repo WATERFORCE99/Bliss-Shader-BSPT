@@ -80,6 +80,7 @@ in vec3 flatnormal;
 
 uniform float near;
 // uniform float far;
+// uniform float dhFarPlane;
 
 uniform int isEyeInWater;
 uniform float skyIntensityNight;
@@ -193,8 +194,6 @@ vec2 CleanSample(
 float ld(float dist) {
 	return (2.0 * near) / (far + near - dist * (far - near));
 }
-
-uniform float dhFarPlane;
 
 // #undef BASIC_SHADOW_FILTER
 #ifdef OVERWORLD_SHADER
@@ -396,7 +395,7 @@ void main() {
 		#if defined PHYSICSMOD_OCEAN_SHADER && defined PHYSICS_OCEAN
 			WavePixelData wave = physics_wavePixel(physics_localPosition.xz, physics_localWaviness, physics_iterationsNormal, physics_gameTime);
 
-			#if defined DISTANT_HORIZONS
+			#ifdef DISTANT_HORIZONS
 				float PHYSICS_OCEAN_TRANSITION = 1.0-pow(1.0-pow(1.0-clamp(1.0-length(feetPlayerPos.xz)/max(far,0.0),0,1),5),5);
 			#else
 				float PHYSICS_OCEAN_TRANSITION = 0.0;

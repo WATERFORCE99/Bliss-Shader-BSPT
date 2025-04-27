@@ -58,7 +58,6 @@ uniform float sunElevation;
 out vec4 tangent_other;
 
 uniform int frameCounter;
-// uniform float far;
 uniform float aspectRatio;
 uniform float viewHeight;
 uniform float viewWidth;
