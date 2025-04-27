@@ -683,16 +683,6 @@ screen.EXPERIMENTAL_STUFF=Experimental Settings
 	option.LIGHTNING_FLASH=Lightning Flash Fix
 	option.Texture_MipMap_Bias=Texture Mipmap Bias
 
-screen.the_end_orb=Orb in End
-	option.THE_ORB=Orb in End
-	option.ORB_X=Orb X
-	option.ORB_Y=Orb Y
-	option.ORB_Z=Orb Z
-	option.ORB_ColMult=Orb Color Multiplier
-	option.ORB_R=Orb R
-	option.ORB_G=Orb G
-	option.ORB_B=Orb B
-
 	option.DEBUG_VIEW=DEBUG View
 		value.DEBUG_VIEW.debug_OFF=OFF
 		value.DEBUG_VIEW.debug_SHADOWMAP=Shadowmap
@@ -1084,8 +1074,6 @@ option.LARGE_WAVE_DISPLACEMENT.comment=Toggle the alternative large wave normal 
 option.OLD_LIGHTLEAK_FIX.comment=Toggle the old light leak fix method.
 option.LIGHTNING_FLASH.comment=Toggle the fixed lightning flash to avoid disabling lightning with specific RPs for Optifine users. 
 option.Texture_MipMap_Bias.comment=Configure the level of Mipmap texture use. Use lower value to get more detailed texture, Higher value can improve performance at the cost of details. 
-
-option.THE_ORB.comment=[WIP]
 
 option.DEBUG_VIEW.comment=Configure the DEBUG view.
 

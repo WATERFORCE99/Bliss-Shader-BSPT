@@ -682,16 +682,6 @@ screen.EXPERIMENTAL_STUFF=实验性选项
 	option.LIGHTNING_FLASH=闪电闪烁
 	option.Texture_MipMap_Bias=纹理 Mipmap 偏移
 
-screen.the_end_orb=末地球形天体
-	option.THE_ORB=球形天体
-	option.ORB_X=天体位置 - X轴坐标
-	option.ORB_Y=天体位置 - Y轴坐标
-	option.ORB_Z=天体位置 - Z轴坐标
-	option.ORB_ColMult=天体颜色倍率
-	option.ORB_R=天体颜色 - 红色
-	option.ORB_G=天体颜色 - 绿色
-	option.ORB_B=天体颜色 - 蓝色
-
 	option.DEBUG_VIEW=DEBUG视图
 		value.DEBUG_VIEW.debug_OFF=关闭
 		value.DEBUG_VIEW.debug_SHADOWMAP=阴影图
@@ -1083,8 +1073,6 @@ option.LARGE_WAVE_DISPLACEMENT.comment=WIP选项. 开启此选项以应用大型
 option.OLD_LIGHTLEAK_FIX.comment=开启此选项以替换为旧版洞穴阳光泄露修复.
 option.LIGHTNING_FLASH.comment=开启此选项以启用全局覆盖的闪电闪烁. 用以在使用 Optifine 时避免在使用一些改变天空盒颜色资源包时影响闪电闪烁的BUG.
 option.Texture_MipMap_Bias.comment=配置纹理 Mipmap 的级别. 使用较低的值可以得到更精细的纹理, 而较高的值则会以损失纹理细节而获得更高的性能.
-
-option.THE_ORB.comment=WIP选项. 开启此选项以在末地天空中放置一个球形天体.
 
 option.DEBUG_VIEW.comment=配置 DEBUG 视图模式. 正常游玩请勿使用.
 
