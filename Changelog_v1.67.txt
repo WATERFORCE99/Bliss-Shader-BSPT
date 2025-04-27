@@ -1,3 +1,37 @@
+2025-4-27 v1.67
+1. Improve edge fade of end fog.
+~ end_fog 优化末地雾气边缘淡出
+2. Adjust main light source color of end fog.
+~ end_fog 调整末地漩涡的主光源颜色
+3. Cloud improved.
+~ volumetric_clouds 优化云层外观
+4. Fix a visual issue with rainbow.
+~ rainbow 修复了一个关于彩虹的问题
+5. Fix the see-through cumulus cloud issue.
+~ volumetric_clouds 暂时性修复大积云透视问题
+6. Fix LPV redstone wire shaodow-ish issue. (from @fayer3)
+~ setup 修复了LPV红石线产生不正常阴影的问题
+
+2025-4-26 v1.66 (from @Merlin1809)
+1. Improve BoP compability.
+~ block 优化BoP兼容性
+2. Improve FD compability.
+~ block 优化FD兼容性
+3. Improve supplementaries compability.
+~ block 优化supplementaries兼容性
+4. Add ender's delight compability.
+~ block 添加ender's delight兼容性
+
+2025-4-25 v1.65
+1. Improve ripple perf.
+~ ripple 优化涟漪性能
+2. Improve time code to make it more linear.
+~ shader 优化时间代码使其过渡更为线性
+3. Force effects for night time stop calculate at day time to squeeze out a bit perf.
+~ xxx 强制夜晚特效在白天停止运算以避免一些无意义的计算
+4. Adjust some codes to make them more efficient.
+~ xxx 调整一些代码使其更高效
+
 2025-4-24 v1.64
 1. Remove unnecessary codes.
 ~ ROBOBO_sky 移除无意义代码
