@@ -111,7 +111,7 @@ vec3 RT_alternate(vec3 dir, vec3 position, float dither, float quality, bool isL
 	vec3 worldpos = mat3(gbufferModelViewInverse) * position;
 
 	float dist = 1.0 + 2.0 * length(worldpos)/far; // step length as distance increases
-	float stepSize = 10.0/dist;
+	float stepSize = dist/10.0;
 
 	vec3 clipPosition = toClipSpace3(position);
 	float rayLength = ((position.z + dir.z * far * sqrt(3.0)) > -sqrt(3.0) * near)
@@ -120,7 +120,7 @@ vec3 RT_alternate(vec3 dir, vec3 position, float dither, float quality, bool isL
 	vec3 end = toClipSpace3(position + dir * rayLength) ;
 	vec3 direction = end - clipPosition ; //convert to clip space
 
-	float len = max(abs(direction.x) * viewSize.x, abs(direction.y) * viewSize.y)/stepSize;
+	float len = max(abs(direction.x) * viewSize.x, abs(direction.y) * viewSize.y) * stepSize;
 
 	//get at which length the ray intersects with the edge of the screen
 	vec3 maxLengths = (step(0.0,direction)-clipPosition)/direction;

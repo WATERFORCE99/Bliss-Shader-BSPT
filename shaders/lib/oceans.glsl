@@ -34,7 +34,7 @@ uniform int physics_iterationsNormal;
 uniform vec2 physics_waveOffset;
 // used for offsetting the local position to fetch the right pixel of the waviness texture
 uniform ivec2 physics_textureOffset;
-// time in seconds that can go faster dependent on weather conditions (affected by weather strength
+// time in seconds that can go faster dependent on weather conditions (affected by weather strength)
 // multiplier in ocean settings
 uniform float physics_gameTime;
 // base value is 13 and gets multiplied by wave height in ocean settings
@@ -187,7 +187,7 @@ WavePixelData physics_wavePixel(const in vec2 position, const in float factor, c
 	data.worldPos = wavePos / physics_oceanWaveHorizontalScale / PHYSICS_XZ_SCALE;
 	data.height = height / waveSum * physics_oceanHeight * factor - physics_oceanHeight * factor * 0.5;
 
-	data.normal = physics_waveNormal(position, data.direction, factor, time) ;
+	data.normal = physics_waveNormal(position, data.direction, factor, time);
 
 	float waveAmplitude = data.height * pow(max(data.normal.y, 0.0), 4.0);
 	vec2 waterUV = mix(position - physics_waveOffset, data.worldPos, clamp(factor * 2.0, 0.2, 1.0));

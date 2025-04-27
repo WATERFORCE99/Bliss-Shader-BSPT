@@ -119,11 +119,11 @@ void applyGameplayEffects(inout vec3 color, in vec2 texcoord, float noise){
 //////////////////////// HEAT DISTORTION /////////////////////
 	#ifdef ON_FIRE_DISTORT_EFFECT
 		if(onFire > 0.0){
-			vec2 zoomin = 0.5 + (texcoord - 0.5) * (1.0-pow(1.0-clamp(-texcoord.y*0.5+0.75,0.0,1.0),1.0)) * (1.0-pow(1.0-onFire,2.0));
+			vec2 zoomin = 0.5 + (texcoord - 0.5) * (1.0 - pow(1.0 - clamp(-texcoord.y * 0.5 + 0.75, 0.0, 1.0), 1.0)) * (1.0 - pow(1.0 - onFire, 2.0));
 
 			vec2 UV = zoomin;
 
-			float flameDistort = texture2D(noisetex,  UV * vec2(aspectRatio,1.0) - vec2(0.0,frameTimeCounter*0.3)).b * clamp(-texcoord.y*0.3+0.3,0.0,1.0) * DISTORT_EFFECT_AMOUNT * onFire;
+			float flameDistort = texture2D(noisetex, UV * vec2(aspectRatio, 1.0) - vec2(0.0, frameTimeCounter * 0.3)).b * clamp(-texcoord.y * 0.3 + 0.3, 0.0, 1.0) * DISTORT_EFFECT_AMOUNT * onFire;
  
 			distortmask = max(distortmask, flameDistort);
 		}

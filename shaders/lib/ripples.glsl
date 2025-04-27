@@ -9,10 +9,10 @@ vec3 drawRipples(vec2 uv, float time) {
 	for (int j = -MAX_RADIUS; j < MAX_RADIUS; ++j) {
 		for (int i = -MAX_RADIUS; i < MAX_RADIUS; ++i) {
 			vec2 pi = p0 + vec2(i, j);
-			vec2 randHash = hash22(pi);
-			vec2 p = pi + randHash * 2.0;
+			vec2 rand = simpleRand22(pi);
+			vec2 p = pi + rand;
 
-			float t = fract(0.6 * time + randHash.x);
+			float t = fract(0.6 * time + rand.x);
 			vec2 v = p - uv;
 			float d = length(v) - (float(MAX_RADIUS) + 1.0) * t;
 

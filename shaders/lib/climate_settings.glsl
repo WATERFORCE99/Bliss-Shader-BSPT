@@ -139,20 +139,17 @@ uniform float sandStorm_red;
 	void FogDensities(
 		inout float Uniform, inout float Cloudy, inout float Rainy, float maxDistance, float DailyWeather_UniformFogDensity, float DailyWeather_CloudyFogDensity
 	) {
-
-		// set schedules for fog to appear at specific ranges of time in the day.
-
-		// set densities.		   morn, noon, even, night
+		// set densities.
 		vec4 UniformDensity = TOD_Fog_mult * vec4(Morning_Uniform_Fog, Noon_Uniform_Fog, Evening_Uniform_Fog, Night_Uniform_Fog);
-		vec4 CloudyDensity =  TOD_Fog_mult * vec4(Morning_Cloudy_Fog, Noon_Cloudy_Fog, Evening_Cloudy_Fog, Night_Cloudy_Fog);
-		
-		Rainy = Rainy*RainFog_amount;
+		vec4 CloudyDensity = TOD_Fog_mult * vec4(Morning_Cloudy_Fog, Noon_Cloudy_Fog, Evening_Cloudy_Fog, Night_Cloudy_Fog);
+
+		Rainy = Rainy * RainFog_amount;
 
 		#ifdef PER_BIOME_ENVIRONMENT
-			BiomeFogDensity(UniformDensity, CloudyDensity, maxDistance); // let biome fog hijack to control densities, and overrride any other density controller...
+			BiomeFogDensity(UniformDensity, CloudyDensity, maxDistance); // let biome fog hijack to control densities, and overrride any other density controller.
 		#endif
 
-		Uniform *= Morning*UniformDensity.r + Noon*UniformDensity.g + Evening*UniformDensity.b + Night*UniformDensity.a;
-		Cloudy *= Morning*CloudyDensity.r + Noon*CloudyDensity.g + Evening*CloudyDensity.b + Night*CloudyDensity.a;
+		Uniform *= Morning * UniformDensity.r + Noon * UniformDensity.g + Evening * UniformDensity.b + Night * UniformDensity.a;
+		Cloudy *= Morning * CloudyDensity.r + Noon * CloudyDensity.g + Evening * CloudyDensity.b + Night * CloudyDensity.a;
 	}
 #endif
