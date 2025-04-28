@@ -1,3 +1,13 @@
+2025-4-28 v1.68
+1. Improve 1.21.4 blocks effects.
+~ block / item 优化1.21.4支持
+2. Add 1.21.5 blocks effects.
+~ block / item 添加1.21.5支持
+3. Disable HQ cloud by default.
+~ settings 默认禁用高质量云层
+4. Fix cloud render sequence when camera position is above the cloud.
+~ volumtric_clouds 修复当相机高于云层时云层的渲染顺序问题
+
 2025-4-27 v1.67
 1. Improve edge fade of end fog.
 ~ end_fog 优化末地雾气边缘淡出
