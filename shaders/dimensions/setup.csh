@@ -457,6 +457,13 @@ void main() {
 		mixWeight = 1.0;
 	}
 
+	if (blockId == BLOCK_FIREFLY_BUSH || blockId == ITEM_FIREFLY_BUSH) {
+		lightColor = vec3(1.0, 1.0, 0.5);
+            
+		lightRange = 4.0;
+		mixWeight = 0.2;
+	}
+
 	#ifdef LPV_REDSTONE_LIGHTS
 		if (blockId == BLOCK_COMPARATOR_LIT) {
 			lightColor = LightColor_RedstoneTorch;
