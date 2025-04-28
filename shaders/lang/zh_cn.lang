@@ -907,7 +907,7 @@ option.VOLUMETRIC_CLOUDS.comment=体积云所有功能的总开关.
 option.CLOUDS_QUALITY.comment=配置体积云渲染分辨率. §a性能开销高.
 option.CLOUDS_SHADOWS.comment=开启此选项以允许云层或雾气向地面投射阴影. §a性能开销中等.
 option.CLOUD_SHADOW_STRENGTH.comment=配置云雾阴影的强度.
-option.HQ_CLOUDS.comment=开启此选项以应用更精细的云层外形. §a性能开销较低.
+option.HQ_CLOUDS.comment=开启此选项以应用更精细的云层密度. §a性能开销较低.
 option.ERODE_AMOUNT.comment=配置云层边缘不规则侵蚀的强度.
 option.Cloud_Speed.comment=配置体积云移动的速度.
 

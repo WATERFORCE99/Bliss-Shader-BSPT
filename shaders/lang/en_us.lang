@@ -908,7 +908,7 @@ option.VOLUMETRIC_CLOUDS.comment=Toggle the volumetric clouds.
 option.CLOUDS_QUALITY.comment=Configure the resolution of the volumetric clouds.
 option.CLOUDS_SHADOWS.comment=Toggle shadows that are casted from the clouds onto the ground, and fog below them.
 option.CLOUD_SHADOW_STRENGTH.comment=Configure the strength of cloud shadows.
-option.HQ_CLOUDS.comment=Toggle extra erosion for the cloud to make it more realistic.
+option.HQ_CLOUDS.comment=Toggle high quality cloud density.
 option.ERODE_AMOUNT.comment=Configure the erosion strength of the cloud edge.
 option.Cloud_Speed.comment=Configure cloud movement speed. It's based on world day, an overlarge world day value may cause clouds freezing.
 
