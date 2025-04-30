@@ -969,9 +969,9 @@ void main() {
 		#endif
 		
 		#ifdef END_SHADER
-			Indirect_lighting = vec3(0.3,0.6,1.0);
+			Indirect_lighting = vec3(END_FOG_R, END_FOG_G, END_FOG_B);
 			Indirect_lighting = Indirect_lighting + 0.7*mix(-Indirect_lighting, Indirect_lighting * dot(slopednormal, feetPlayerPos_normalized), clamp(pow(1.0-pow(1.0-SSAO_SSS.x, 0.5),2.0),0.0,1.0));
-			Indirect_lighting *= 0.1;
+			Indirect_lighting *= 0.2;
 
 			Indirect_lighting += lightColors * (endPhase*endPhase) * (1.0-exp(vec3(0.6,2.0,2.0) * -(endPhase*0.01))) /1000.0;
 		#endif

@@ -582,7 +582,7 @@ void main() {
 
 			Direct_lighting += lightColors * endPhase * end_NdotL * fogShadow;
 
-			vec3 AmbientLightColor = vec3(END_FOG_R, END_FOG_G, END_FOG_B) ;
+			vec3 AmbientLightColor = vec3(END_FOG_R, END_FOG_G, END_FOG_B);
 			
 			Indirect_lighting = AmbientLightColor + 0.7 * AmbientLightColor * dot(worldSpaceNormal, normalize(feetPlayerPos));
 			Indirect_lighting *= 0.1;
