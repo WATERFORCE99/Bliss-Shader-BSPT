@@ -1,11 +1,19 @@
+2025-4-30 v1.69
+1. Merge X0nk's latest commit. (adaptive motion blur)
+~ final 整合了X0nk最新的更新 (自适应动态模糊)
+2. Fix block light missing under RT in nether/end dimension.
+~ indirect_lighting_effects 修复方块光照在启用RT时在下界/末地消失的问题
+3. Improve HQ cloud density.
+~ volumetric_clouds 优化高质量云层密度
+4. Fix an issue with fog when disabling small/large VL cloud.
+~ volumetric_clouds 修复当禁用小/大积云时雾气被连带剔除的问题
+
 2025-4-28 v1.68
 1. Improve 1.21.4 blocks effects.
 ~ block / item 优化1.21.4支持
 2. Add 1.21.5 blocks effects.
 ~ block / item 添加1.21.5支持
-3. Disable HQ cloud by default.
-~ settings 默认禁用高质量云层
-4. Fix cloud render sequence when camera position is above the cloud.
+3. Fix cloud render sequence when camera position is above the cloud.
 ~ volumtric_clouds 修复当相机高于云层时云层的渲染顺序问题
 
 2025-4-27 v1.67
