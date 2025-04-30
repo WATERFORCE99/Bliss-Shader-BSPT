@@ -67,8 +67,8 @@ vec3 rayTrace_GI(vec3 dir,vec3 position,float dither, float quality){
 	quality *= 5.0;
 	vec3 clipPosition = toClipSpace3(position);
 	float rayLength = ((position.z + dir.z * far * sqrt(3.0)) > -near)
-					? (-near - position.z)/dir.z
-					: far * sqrt(3.0);
+		? (-near - position.z)/dir.z
+		: far * sqrt(3.0);
 	vec3 direction = normalize(toClipSpace3(position + dir * rayLength) - clipPosition); //convert to clip space
 	direction.xy = normalize(direction.xy);
 
@@ -115,8 +115,8 @@ vec3 RT_alternate(vec3 dir, vec3 position, float dither, float quality, bool isL
 
 	vec3 clipPosition = toClipSpace3(position);
 	float rayLength = ((position.z + dir.z * far * sqrt(3.0)) > -sqrt(3.0) * near)
-					? (-sqrt(3.0) * near - position.z)/dir.z
-					: sqrt(3.0) * far;
+		? (-sqrt(3.0) * near - position.z)/dir.z
+		: sqrt(3.0) * far;
 	vec3 end = toClipSpace3(position + dir * rayLength) ;
 	vec3 direction = end - clipPosition ; //convert to clip space
 
@@ -200,10 +200,14 @@ vec3 ApplySSRT(
 		#endif
 
 		#ifdef OVERWORLD_SHADER
-			skycontribution = doIndirectLighting(skyCloudsFromTex(rayDir, colortex4).rgb/1200.0, minimumLightColor, lightmap);
-			skycontribution = mix(skycontribution, vec3(luma(skycontribution)), 0.25) + blockLightColor;
+			#if indirect_RTGI == 0
+				skycontribution = unchangedIndirect * (max(rayDir.y, pow(1.0-lightmap, 2.0)) * 0.95 + 0.05);
+			#else
+				skycontribution = doIndirectLighting(skyCloudsFromTex(rayDir, colortex4).rgb/1200.0, minimumLightColor, lightmap);
+				skycontribution = mix(skycontribution, vec3(luma(skycontribution)), 0.25) + blockLightColor;
+			#endif
 		#else
-			skycontribution = volumetricsFromTex(rayDir, colortex4, 6).rgb/1200.0;
+			skycontribution = volumetricsFromTex(rayDir, colortex4, 6).rgb/1200.0 + blockLightColor;
 		#endif
 
 		radiance += skycontribution;
