@@ -1,4 +1,5 @@
 #include "/lib/settings.glsl"
+#include "/lib/projections.glsl"
 #include "/lib/DistantHorizons_projections.glsl"
 
 uniform sampler2D colortex4;
