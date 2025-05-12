@@ -16,6 +16,7 @@ uniform float onFire;
 // uniform float exitPowderSnow;
 uniform int isEyeInWater;
 uniform float rainyAreas;
+uniform float smoothBiome_Dry;
 
 uniform ivec2 eyeBrightness;
 
@@ -55,11 +56,17 @@ vec3 distortedRain(){
 
 		if (dropData.r < (5.0 - r) * 0.08 && dropShape > 0.5) {
 			vec3 normal = normalize(-vec3(cos(p), mix(0.2, 2.0, dropShape - 0.5)));
-			vec2 refractedUV = uv - normal.xy;
-			return texture2D(colortex7, refractedUV).rgb * 0.4;
+			vec2 refractedUV = uv - normal.xy * 0.6;
+			return texture2D(colortex7, refractedUV).rgb * 0.5;
 		}
 	}
 	return vec3(0.0);
+}
+
+float distortionBase(float c, float t){
+	vec2 zoomin = 0.5 + (texcoord - 0.5) * (1.0 - pow(1.0 - clamp(-texcoord.y * 0.5 + 0.75, 0.0, 1.0), 1.0)) * (1.0 - pow(1.0 - c, 2.0));
+	vec2 UV = zoomin * vec2(aspectRatio, 1.0);
+	return texture2D(noisetex, UV * 0.5 - vec2(0.0, t)).b * clamp(-texcoord.y * 0.3 + 0.3, 0.0, 1.0) * c;
 }
 
 void applyGameplayEffects(inout vec3 color, in vec2 texcoord, float noise){
@@ -96,18 +103,17 @@ void applyGameplayEffects(inout vec3 color, in vec2 texcoord, float noise){
 
 			scale.xy = (isEyeInWater == 1 ? vec2(0.3) : vec2(0.5 * aspectRatio, 0.25 + (exitWater * exitWater) * 0.25));
 			scale.z = isEyeInWater == 1 ? 0.0 : exitWater;
-			vec2 motion = isEyeInWater == 1 ? vec2(sin(frameTimeCounter * 1.4 + texcoord.x * 5.0) * 0.02 + cos(frameTimeCounter * 1.8) * 0.015, sin(frameTimeCounter * 1.6 - texcoord.y * 4.0) * 0.018 + cos(frameTimeCounter * 2.0) * 0.016) : vec2(0.0);
 
-			vec2 distortedTexCoord = texcoord - vec2(0.0, scale.z) + motion;
-			distortedTexCoord *= scale.xy;
-
-			float waterDrops = texture2D(noisetex, distortedTexCoord).r;
-			waterDrops = isEyeInWater == 1 ? waterDrops * waterDrops * WATER_DISTORTION_AMOUNT : sqrt(min(max(waterDrops - (1.0 - sqrt(exitWater)) * 0.7, 0.0) * (1.0 + exitWater), 1.0)) * DISTORT_EFFECT_AMOUNT;
+			float waterDrops = texture2D(noisetex, (texcoord - vec2(0.0, scale.z)) * scale.xy).r ;
+			waterDrops = isEyeInWater == 0 ? sqrt(min(max(waterDrops - (1.0 - sqrt(exitWater)) * 0.7,0.0) * (1.0 + exitWater),1.0)) * 0.3 : 0.0;
 
 			// apply distortion effects for exiting water and under water
 			distortmask = max(distortmask, waterDrops);
-		}
 
+			float waterDistort = isEyeInWater == 1 ? distortionBase(isEyeInWater, frameTimeCounter * 0.05) * WATER_DISTORTION_AMOUNT : 0.0;
+			distortmask = max(distortmask, waterDistort);
+		}
+    
 		if(enterWater > 0.0){
 			vec2 zoomTC = 0.5 + (texcoord - 0.5) * (1.0 - (1.0-sqrt(1.0-enterWater)));
 			float waterSplash = texture2D(noisetex, zoomTC * vec2(aspectRatio,1.0)).r * DISTORT_EFFECT_AMOUNT * (1.0-enterWater);
@@ -118,15 +124,9 @@ void applyGameplayEffects(inout vec3 color, in vec2 texcoord, float noise){
 
 //////////////////////// HEAT DISTORTION /////////////////////
 	#ifdef ON_FIRE_DISTORT_EFFECT
-		if(onFire > 0.0){
-			vec2 zoomin = 0.5 + (texcoord - 0.5) * (1.0 - pow(1.0 - clamp(-texcoord.y * 0.5 + 0.75, 0.0, 1.0), 1.0)) * (1.0 - pow(1.0 - onFire, 2.0));
-
-			vec2 UV = zoomin;
-
-			float flameDistort = texture2D(noisetex, UV * vec2(aspectRatio, 1.0) - vec2(0.0, frameTimeCounter * 0.3)).b * clamp(-texcoord.y * 0.3 + 0.3, 0.0, 1.0) * DISTORT_EFFECT_AMOUNT * onFire;
+		float flameDistort = distortionBase(onFire, frameTimeCounter * 0.3) * DISTORT_EFFECT_AMOUNT;
  
-			distortmask = max(distortmask, flameDistort);
-		}
+		distortmask = max(distortmask, flameDistort);
 	#endif
 
 //////////////////////// APPLY DISTORTION /////////////////////
