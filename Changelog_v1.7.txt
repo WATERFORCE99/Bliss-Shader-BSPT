@@ -1,3 +1,9 @@
+2025-5-12 v1.7
+1. Fix a compile error.
+~ deffered1 修复一个编译错误问题
+2. Reuse codes to underwater distortion effects to improve pref.
+~ gameplay_effects 为水下失真效果复用代码以提高性能
+
 2025-4-30 v1.69
 1. Merge X0nk's latest commit. (adaptive motion blur)
 ~ final 整合了X0nk最新的更新 (自适应动态模糊)
