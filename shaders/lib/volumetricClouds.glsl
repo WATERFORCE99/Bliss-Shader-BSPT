@@ -5,8 +5,7 @@
 float cloud_movement = (worldTime + mod(worldDay,100)*24000.0) / 24.0 * Cloud_Speed;
 
 float densityAtPos(in vec3 pos){
-	pos /= 18.;
-	pos.xz *= 0.5;
+	pos /= 32.0;
 	vec3 w = floor(pos);
 	vec3 f = fract(pos);
 
@@ -20,10 +19,10 @@ float densityAtPos(in vec3 pos){
 		vec3 p = pos - w;
 		p *= p * (vec3(vec2(3.0/64.0), 3.0) - vec3(vec2(2.0/64.0), 2.0) * p);
 		vec2 uv2 = (16.0 * w.z + w.xy)/64.0 + p.xy;
-		vec2 coord2 = uv2 * 0.00001;
+		vec2 coord2 = uv2 * 0.000015;
 
 		vec2 vn = texture2D(noisetex, coord2).yx;
-		density += mix(vn.x, vn.y, p.z);
+		density += mix(vn.r, vn.g, p.z);
 	#endif
 
 	return density;
@@ -38,8 +37,7 @@ float getCloudShape(int LayerIndex, int LOD, in vec3 position, float minHeight, 
 	float largeCloud = 0.0;
 	float smallCloud = 0.0;
 
-	if(LayerIndex == ALTOSTRATUS_LAYER){
-		
+	if(LayerIndex == ALTOSTRATUS_LAYER){	
 		coverage = parameters.altostratus.x;
 
 		largeCloud = texture2D(noisetex, (position.xz + cloud_movement)/100000. * CloudLayer2_scale).b;
@@ -70,7 +68,7 @@ float getCloudShape(int LayerIndex, int LOD, in vec3 position, float minHeight, 
 		largeCloud = texture2D(noisetex, (samplePos.xz + cloud_movement)/5000.0 * CloudLayer0_scale).b;
 		smallCloud = 1.0-texture2D(noisetex, (samplePos.xz - cloud_movement)/500.0 * CloudLayer0_scale).r;
 
-		smallCloud = abs(largeCloud-0.6) + smallCloud*smallCloud;
+		smallCloud = abs(largeCloud-0.6) + smallCloud * smallCloud;
 
 		shape = min(max(coverage - smallCloud,0.0)/sqrt(coverage),1.0) ;
 	}
@@ -84,11 +82,10 @@ float getCloudShape(int LayerIndex, int LOD, in vec3 position, float minHeight, 
 
 	// carve out the upper part of clouds. make sure it rounds out at its upper bound
 	float topShape = min(max(toTop,0.0) / max(tallness,1.0),1.0);
-	topShape = min(exp(-0.5 * (1.0-topShape)), 1.0-pow(1.0-topShape,5.0));
+	topShape = min(exp(-0.5 * (1.0-topShape)), 1.0-pow(1.0-topShape, 5.0));
+	float bottomShape = smoothstep(0.0, 0.3, toBottom);
 
-	// round out the bottom part slightly
-	float bottomShape = smoothstep(0.01, 0.4, toBottom/25.0);
-	shape = max((shape - 1.0) + topShape * bottomShape,0.0);
+	shape = max((shape - 1.0) + topShape * bottomShape, 0.0);
 
 	/// erosion noise
 	if(shape > 0.001){
@@ -97,16 +94,14 @@ float getCloudShape(int LayerIndex, int LOD, in vec3 position, float minHeight, 
 		if (LOD < 1) return max(shape - 0.27 * ERODE_AMOUNT,0.0);
 
 		samplePos.xz -= cloud_movement/4.0;
-
-		// if(LayerIndex == SMALLCUMULUS_LAYER) 
-		samplePos.xz += pow(max(toBottom - 20.0, 0.0) / (max(tallness, 1.0) * 0.20), 1.5);
+		samplePos.xz += pow(max(toBottom - 20.0, 0.01) / (max(tallness, 1.0) * 0.20), 1.5);
 
  		float erosion = 0.0;
 
 		if(LayerIndex == SMALLCUMULUS_LAYER){
 			erosion += (1.0-densityAtPos(samplePos * 200.0 * CloudLayer0_scale)) * sqrt(1.0-shape);
 
-			float falloff = 1.0 - clamp((maxHeight - position.y)/100.0,0.0,1.0);
+			float falloff = 1.0 - clamp(toTop/100.0,0.0,1.0);
 			erosion += abs(densityAtPos(samplePos * 600.0 * CloudLayer0_scale) - falloff) * 0.75 * (1.0-shape) * (1.0-falloff*0.25);
 
 			erosion = erosion*erosion*erosion*erosion;
@@ -114,7 +109,7 @@ float getCloudShape(int LayerIndex, int LOD, in vec3 position, float minHeight, 
 		if(LayerIndex == LARGECUMULUS_LAYER){
 			erosion += (1.0 - densityAtPos(samplePos * 100.0 * CloudLayer1_scale)) * sqrt(1.0-shape);
 
-			float falloff = 1.0 - clamp((maxHeight - position.y)/200.0,0.0,1.0);
+			float falloff = 1.0 - clamp(toTop/200.0,0.0,1.0);
 			erosion += abs(densityAtPos(samplePos * 450.0 * CloudLayer1_scale) - falloff) * 0.75 * (1.0-shape) * (1.0-falloff*0.5);
 
 			erosion = erosion*erosion*erosion*erosion;
@@ -209,13 +204,13 @@ vec3 getCloudLighting(
 	float indirectShadowMask,
 	vec3 indirectLightCol
 ){
-	float powderEffect = 1.0-exp(-10.0 * shapeFaded);
-	powderEffect *= powderEffect * 2.0;
+	float powderEffect = 1.0 - exp(-16.0 * shapeFaded);
+	powderEffect = powderEffect * powderEffect + 0.25;
 
-	vec3 directScattering = directLightCol_multi * powderEffect * exp(-2.0 * sunShadowMask) + directLightCol * exp(-8.0 * sunShadowMask);
-	vec3 indirectScattering = indirectLightCol * mix(1.0, exp2(-5.0 * shape), indirectShadowMask * indirectShadowMask);
+	vec3 directScattering = directLightCol_multi * exp(-2.0 * sunShadowMask) + directLightCol * exp(-4.0 * sunShadowMask);
+	vec3 indirectScattering = indirectLightCol * mix(1.0, exp2(-1.5 * shape), indirectShadowMask * indirectShadowMask);
 
-	return indirectScattering + directScattering;
+	return directScattering * powderEffect + indirectScattering;
 }
 
 vec4 raymarchCloud(
@@ -283,7 +278,7 @@ vec4 raymarchCloud(
 
 			// can add the initial cloud shape sample for a free shadow starting step :D
 			float sunShadowMask = (shapeWithDensity + getCloudScattering(LayerIndex, rayPosition, sunVector, dither, minHeight, maxHeight, density)) * (1.0-abs(WsunVec.y));
-			float indirectShadowMask = 0.5;
+			float indirectShadowMask = shapeWithDensity;
 
 			vec3 lighting = getCloudLighting(shapeWithDensity, shapeWithDensity, sunShadowMask, sunScattering, sunMultiScattering, indirectShadowMask, skyScattering);
 
