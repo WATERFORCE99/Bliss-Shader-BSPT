@@ -3,6 +3,10 @@
 ~ deffered1 修复一个编译错误问题
 2. Reuse codes to underwater distortion effects to improve pref.
 ~ gameplay_effects 为水下失真效果复用代码以提高性能
+3. Revealing an option.
+~ shader/setting 重启一个可选项
+4. Fix mod support & 1.21.5 block id errors.
+~ block 修复mod支持与1.21.5方块ID错误
 
 2025-4-30 v1.69
 1. Merge X0nk's latest commit. (adaptive motion blur)
