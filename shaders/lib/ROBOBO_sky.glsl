@@ -39,7 +39,7 @@ const mat3 sky_coefficientsAttenuation = mat3(sky_coefficientRayleigh , sky_coef
 	#define sunColorBase vec3(sunColorR, sunColorG, sunColorB) * sun_illuminance * vec3(1-0.1 * Evening, 1-0.65 * Evening, 1-0.8 * Evening)
 	#define moonColorBase vec3(moonColorR,moonColorG,moonColorB) * moon_illuminance * moonlightbrightness
 #else
-	#define sunColorBase blackbody(Sun_temp) * sun_illuminance
+	#define sunColorBase blackbody(Sun_temp) * sun_illuminance * vec3(1-0.1 * Evening, 1-0.65 * Evening, 1-0.8 * Evening)
 	#define moonColorBase blackbody(Moon_temp) * moon_illuminance * moonlightbrightness
 #endif
 
