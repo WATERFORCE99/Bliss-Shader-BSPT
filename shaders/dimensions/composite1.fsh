@@ -139,10 +139,9 @@ float convertHandDepth_2(in float depth, bool hand) {
 	#include "/lib/scene_controller.glsl"
 	#define CLOUDSHADOWSONLY
 	#include "/lib/volumetricClouds.glsl"
+	#include "/lib/aurora.glsl"
+	#include "/lib/rainbow.glsl"
 #endif
-
-#include "/lib/aurora.glsl"
-#include "/lib/rainbow.glsl"
 
 #ifdef IS_LPV_ENABLED
 	#include "/lib/hsv.glsl"
