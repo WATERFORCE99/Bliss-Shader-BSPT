@@ -13,7 +13,6 @@ out vec2 texcoord;
 
 out vec4 tangent;
 out vec4 normalMat;
-// flat out float exposure;
 attribute vec4 at_tangent;
 
 uniform sampler2D colortex4;
@@ -35,14 +34,7 @@ void main() {
 
 	texcoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).st;
 
-	#if defined ENCHANT_GLINT || defined SPIDER_EYES || defined BEACON_BEAM
-		// exposure = texelFetch2D(colortex4,ivec2(10,37),0).r;
-
-		vec3 position = mat3(gl_ModelViewMatrix) * vec3(gl_Vertex) + gl_ModelViewMatrix[3].xyz;
-		gl_Position = toClipSpace4alt(position);
-	#else
-		gl_Position = ftransform();
-	#endif
+	gl_Position = ftransform();
 
 	#ifdef BEACON_BEAM
 		if(gl_Color.a < 1.0) gl_Position = vec4(10,10,10,0);
@@ -50,7 +42,6 @@ void main() {
 
 	#ifdef ENCHANT_GLINT
 		tangent = vec4(normalize(gl_NormalMatrix * at_tangent.rgb), at_tangent.w);
-
 		normalMat = vec4(normalize(gl_NormalMatrix * gl_Normal), 1.0);
 	#endif
 

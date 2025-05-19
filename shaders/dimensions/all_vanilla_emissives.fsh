@@ -7,8 +7,6 @@ uniform sampler2D texture;
 uniform sampler2D normals;
 uniform sampler2D noisetex;
 
-// flat in float exposure;
-
 in vec4 tangent;
 in vec4 normalMat;
 uniform float frameTimeCounter;
@@ -40,22 +38,18 @@ void main() {
 			minimumBrightness = 10.0;
 		#endif
 
-		// float autoBrightnessAdjust = mix(minimumBrightness, 100.0, clamp(exp(-10.0*exposure),0.0,1.0));
-
 		#ifdef DISABLE_VANILLA_EMISSIVES
 			vec3 emissiveColor = vec3(0.0);
 			Albedo.a = 0.0;
 		#else
-			vec3 emissiveColor =  Albedo.rgb * color.a ;//* autoBrightnessAdjust;
+			vec3 emissiveColor =  Albedo.rgb * color.a;
 		#endif
-        
-		gl_FragData[0] = vec4(emissiveColor*0.1, Albedo.a * sqrt(color.a));
+
+		gl_FragData[0] = vec4(emissiveColor * 0.1, Albedo.a * sqrt(color.a));
 	#endif
 
 	#ifdef ENCHANT_GLINT
-		// float autoBrightnessAdjust = mix(0.1, 100.0, clamp(exp(-10.0*exposure),0.0,1.0));
-
-		Albedo.rgb = clamp(Albedo.rgb ,0.0,1.0); // for safety
+		Albedo.rgb = clamp(Albedo.rgb, 0.0, 1.0); // for safety
 
 		#ifdef DISABLE_ENCHANT_GLINT
 			vec3 GlintColor = vec3(0.0);
@@ -64,6 +58,6 @@ void main() {
 			vec3 GlintColor = Albedo.rgb * Emissive_Brightness;
 		#endif
 
-		gl_FragData[0] = vec4(GlintColor*0.1, dot(Albedo.rgb,vec3(0.333)) * Albedo.a);
+		gl_FragData[0] = vec4(GlintColor * 0.1, dot(Albedo.rgb, vec3(0.333)) * Albedo.a);
 	#endif
 }
