@@ -1,10 +1,5 @@
 // this file contains all things for seasons, weather, and biome specific settings.
 
-uniform float Morning;
-uniform float Noon;
-uniform float Evening;
-uniform float Night;
-
 uniform float Summer;
 uniform float Autumn;
 uniform float Winter;
@@ -127,29 +122,5 @@ uniform float sandStorm_red;
 		IndirectLightCol = BiomeColors * max(dot(IndirectLightCol,vec3(0.33333)), MIN_LIGHT_AMOUNT*0.025);
 
 		return Inbiome;
-	}
-
-#endif
-
-///////////////////////////////////////////////////////////////////////////////
-////////////////////////////// FOG CONTROLLER ////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-
-#ifdef TIMEOFDAYFOG
-	void FogDensities(
-		inout float Uniform, inout float Cloudy, inout float Rainy, float maxDistance, float DailyWeather_UniformFogDensity, float DailyWeather_CloudyFogDensity
-	) {
-		// set densities.
-		vec4 UniformDensity = TOD_Fog_mult * vec4(Morning_Uniform_Fog, Noon_Uniform_Fog, Evening_Uniform_Fog, Night_Uniform_Fog);
-		vec4 CloudyDensity = TOD_Fog_mult * vec4(Morning_Cloudy_Fog, Noon_Cloudy_Fog, Evening_Cloudy_Fog, Night_Cloudy_Fog);
-
-		Rainy = Rainy * RainFog_amount;
-
-		#ifdef PER_BIOME_ENVIRONMENT
-			BiomeFogDensity(UniformDensity, CloudyDensity, maxDistance); // let biome fog hijack to control densities, and overrride any other density controller.
-		#endif
-
-		Uniform *= Morning * UniformDensity.r + Noon * UniformDensity.g + Evening * UniformDensity.b + Night * UniformDensity.a;
-		Cloudy *= Morning * CloudyDensity.r + Noon * CloudyDensity.g + Evening * CloudyDensity.b + Night * CloudyDensity.a;
 	}
 #endif

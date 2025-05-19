@@ -1,22 +1,22 @@
 uniform float rainyAreas;
 
 float densityAtPosFog(in vec3 pos){
-	pos /= 18.;
+	pos /= 16.0;
 	pos.xz *= 0.5;
 	vec3 p = floor(pos);
 	vec3 f = fract(pos);
-	f = (f*f) * (3.-2.*f);
-	vec2 uv =  p.xz + f.xz + p.y * vec2(0.0,193.0);
-	vec2 coord =  uv / 512.0;
+	f = (f * f) * (3.0 - 2.0 * f);
+	vec2 uv = p.xz + f.xz + p.y * vec2(0.0,192.0);
+	vec2 coord = uv * 0.002;
 	vec2 xy = texture2D(noisetex, coord).yx;
-	return mix(xy.r,xy.g, f.y);
+	return mix(xy.r, xy.g, f.y);
 }
 
-float cloudVol(in vec3 pos, float maxDistance ){
+float cloudVol(in vec3 pos, float maxDistance){
 	
 	float fogYstart = FOG_START_HEIGHT+3;
-	vec3 samplePos = pos*vec3(1.0,1./24.,1.0);
-	vec3 samplePos2 = pos*vec3(1.0,1./48.,1.0);
+	vec3 samplePos = pos*vec3(1.0,1.0/24.0,1.0);
+	vec3 samplePos2 = pos*vec3(1.0,1.0/48.0,1.0);
 	
 	float uniformFog = 0.0;
 
@@ -32,7 +32,7 @@ float cloudVol(in vec3 pos, float maxDistance ){
 	}
 	
 	float cloudyFog = max(min(max(fog_shape - 0.6 ,0.0) * 2.0 ,1.0) - fog_erosion * 0.4, 0.0) * exp(-0.05 * max(pos.y - (fogYstart+20),0.0));
-	float rainyFog = (low_gradientFog * 0.5 + exp2(-0.06 * max(pos.y - fogYstart,0.0))) * rainStrength * rainyAreas;
+	float rainyFog = (low_gradientFog * 0.5 + exp2(-0.06 * max(pos.y - fogYstart,0.0))) * rainStrength * rainyAreas * RainFog_amount;
 	
 	if(sandStorm > 0.0 || sandStorm_red > 0.0 || snowStorm > 0.0){
 		float IntenseFogs = pow(1.0 - densityAtPosFog((samplePos2 - vec3(frameTimeCounter,0,frameTimeCounter)*15.0) * 100.0),2.0) * mix(1.0, high_gradientFog, snowStorm);
@@ -41,9 +41,18 @@ float cloudVol(in vec3 pos, float maxDistance ){
 		medium_gradientFog = 1.0;
 	}
 
-	FogDensities(medium_gradientFog, cloudyFog, rainyFog, maxDistance, 1.0, 1.0);
+	// set densities.
+	vec4 UniformDensity = TOD_Fog_mult * vec4(Morning_Uniform_Fog, Noon_Uniform_Fog, Evening_Uniform_Fog, Night_Uniform_Fog);
+	vec4 CloudyDensity = TOD_Fog_mult * vec4(Morning_Cloudy_Fog, Noon_Cloudy_Fog, Evening_Cloudy_Fog, Night_Cloudy_Fog);
 
-	return uniformFog + medium_gradientFog + cloudyFog + rainyFog;
+	#ifdef PER_BIOME_ENVIRONMENT
+		BiomeFogDensity(UniformDensity, CloudyDensity, maxDistance);
+	#endif
+
+	uniformFog = (Morning * UniformDensity.r + Noon * UniformDensity.g + Evening * UniformDensity.b + Night * UniformDensity.a) * medium_gradientFog;
+	cloudyFog *= Morning * CloudyDensity.r + Noon * CloudyDensity.g + Evening * CloudyDensity.b + Night * CloudyDensity.a;
+
+	return uniformFog + cloudyFog + rainyFog;
 }
 
 float phaseRayleigh(float cosTheta) {

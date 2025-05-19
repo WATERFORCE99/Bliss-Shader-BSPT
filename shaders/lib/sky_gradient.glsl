@@ -35,8 +35,6 @@ vec3 drawMoon(vec3 PlayerPos, vec3 WorldSunVec, vec3 Color, inout vec3 occludeSt
 	*/
 }
 
-const float pi = 3.141592653589793238462643383279502884197169;
-
 float w0(float a){
 	return (1.0/6.0)*(a*(a*(-a + 3.0) - 3.0) + 1.0);
 }
@@ -94,7 +92,7 @@ vec4 texture2D_bicubic(sampler2D tex, vec2 uv){
 }
 
 vec4 texture2D_bicubic_offset(sampler2D tex, vec2 uv, float noise, float scale){
-	float offsets = noise * (2.0 * 3.141592653589793238462643383279502884197169);
+	float offsets = noise * TAU;
 	vec2 circleOffsets = vec2(sin(offsets), cos(offsets)) * scale;
 	
 	#ifdef SCREENSHOT_MODE
@@ -126,8 +124,8 @@ vec4 texture2D_bicubic_offset(sampler2D tex, vec2 uv, float noise, float scale){
 }
 
 vec2 sphereToCarte(vec3 dir) {
-	float lonlat = clamp(atan(-dir.x, -dir.z), -pi, pi);
-	return vec2(lonlat * (0.5/pi) +0.5, 0.5*dir.y+0.5);
+	float lonlat = clamp(atan(-dir.x, -dir.z), -PI, PI);
+	return vec2(lonlat * (0.5/PI) +0.5, 0.5*dir.y+0.5);
 }
 
 vec3 skyFromTex(vec3 pos,sampler2D sampler){

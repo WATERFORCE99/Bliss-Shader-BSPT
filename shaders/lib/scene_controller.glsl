@@ -1,5 +1,8 @@
 //=============== DECLARE UNIFORMS BELOW HERE ===============
-
+uniform float Morning;
+uniform float Noon;
+uniform float Evening;
+uniform float Night;
 //=============== DECLARE UNIFORMS ABOVE HERE ===============
 
 void applySceneControllerParameters(
@@ -21,6 +24,8 @@ void applySceneControllerParameters(
 
 	fogA = 1.0;
 	fogB = 1.0;
+
+//=============== CONFIGURE CUSTOM SCENE PARAMETERS BELOW HERE ===============
 
 	// cloud & fog controlled by daily weather
 	#ifdef Daily_Weather
@@ -100,10 +105,7 @@ void applySceneControllerParameters(
 	altostratusCoverage *=  1 + rainStrength * Rain_coverage;
 	altostratusDensity *= 1 + rainStrength;
 
-//=============== CONFIGURE CUSTOM SCENE PARAMETERS BELOW HERE ===============
-
 //=============== CONFIGURE CUSTOM SCENE PARAMETERS ABOVE HERE ===============
-
 }
 
 // write various parameters within singular pixels of a texture, which is a non-clearing buffer reprojecting the previous frame of itself, onto itself.
