@@ -80,7 +80,6 @@ float linearizeDepthFast(const in float depth, const in float near, const in flo
 	#include "/lib/scene_controller.glsl"
 
 	#include "/lib/diffuse_lighting.glsl"
-	#define TIMEOFDAYFOG
 	#include "/lib/lightning_stuff.glsl"
 
 	// #define CLOUDSHADOWSONLY

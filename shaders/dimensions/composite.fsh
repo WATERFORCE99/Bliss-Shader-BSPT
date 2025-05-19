@@ -87,7 +87,7 @@ vec2 SpiralSample(
 	
 	float alpha = float(samples + Xi) * (1.0 / float(totalSamples));
 	
-	float theta = (2.0 *3.14159265359) * alpha * rotation;
+	float theta = TAU * alpha * rotation;
 
 	float r = sqrt(Xi);
 	float x = r * sin(theta);

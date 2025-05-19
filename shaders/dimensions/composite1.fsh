@@ -134,14 +134,15 @@ float convertHandDepth_2(in float depth, bool hand) {
 #include "/lib/climate_settings.glsl"
 #include "/lib/sky_gradient.glsl"
 #include "/lib/ripples.glsl"
-#include "/lib/aurora.glsl"
-#include "/lib/rainbow.glsl"
 
 #ifdef OVERWORLD_SHADER
 	#include "/lib/scene_controller.glsl"
 	#define CLOUDSHADOWSONLY
 	#include "/lib/volumetricClouds.glsl"
 #endif
+
+#include "/lib/aurora.glsl"
+#include "/lib/rainbow.glsl"
 
 #ifdef IS_LPV_ENABLED
 	#include "/lib/hsv.glsl"

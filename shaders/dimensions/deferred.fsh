@@ -44,14 +44,15 @@ uniform float nightVision;
 
 vec4 lightCol = vec4(lightSourceColor, float(sunElevation > 1e-5)*2-1.);
 
-#include "/lib/ROBOBO_sky.glsl"
-#include "/lib/sky_gradient.glsl"
 #include "/lib/Shadow_Params.glsl"
 #include "/lib/waterBump.glsl"
 
 #include "/lib/projections.glsl"
 #include "/lib/DistantHorizons_projections.glsl"
 
+#include "/lib/scene_controller.glsl"
+#include "/lib/ROBOBO_sky.glsl"
+#include "/lib/sky_gradient.glsl"
 vec3 WsunVec = mat3(gbufferModelViewInverse)*sunVec;
 
 #define DHVLFOG
@@ -77,14 +78,11 @@ float invLinZ (float lindepth){
 		uniform sampler2DShadow shadowtex1;
 	#endif
 
-	// #define TEST
-	#define TIMEOFDAYFOG
 	#include "/lib/lightning_stuff.glsl"
 
 	#define VL_CLOUDS_DEFERRED
 
 	#include "/lib/climate_settings.glsl"
-	#include "/lib/scene_controller.glsl"
 	#include "/lib/volumetricClouds.glsl"
 	#include "/lib/overworld_fog.glsl"
 	#include "/lib/aurora.glsl"
@@ -100,7 +98,7 @@ float invLinZ (float lindepth){
 
 vec3 rodSample(vec2 Xi){
 	float r = sqrt(1.0f - Xi.x*Xi.y);
-	float phi = 2 * 3.14159265359 * Xi.y;
+	float phi = TAU * Xi.y;
 
 	return normalize(vec3(cos(phi) * r, sin(phi) * r, Xi.x)).xzy;
 }

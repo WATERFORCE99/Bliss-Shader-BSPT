@@ -80,7 +80,7 @@ float GGX(vec3 n, vec3 v, vec3 l, float r, float f0) {
 	float dotNHsq = dotNH*dotNH;
 
 	float denom = dotNHsq * r - dotNHsq + 1.;
-	float D = r / (3.141592653589793 * denom * denom);
+	float D = r / (PI * denom * denom);
 
 	float F = f0 + (1. - f0) * exp2((-5.55473*dotLH-6.98316)*dotLH);
 	float k2 = .25 * r;

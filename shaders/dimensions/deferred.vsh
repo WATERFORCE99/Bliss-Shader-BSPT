@@ -44,12 +44,11 @@ uniform int worldDay;
 uniform float rainStrength;
 uniform float nightVision;
 
-#include "/lib/sky_gradient.glsl"
-#include "/lib/ROBOBO_sky.glsl"
 #include "/lib/climate_settings.glsl"
-#include "/lib/aurora.glsl"
-
 #include "/lib/scene_controller.glsl"
+#include "/lib/ROBOBO_sky.glsl"
+#include "/lib/sky_gradient.glsl"
+#include "/lib/aurora.glsl"
 
 vec3 rodSample(vec2 Xi) {
 	float r = sqrt(1.0 - Xi.x * Xi.y);
@@ -115,7 +114,7 @@ void main() {
 		float moonVis = clamp(-sunElevation,0.0,0.05)/0.05*clamp(-sunElevation,0.0,0.05)/0.05;
 
 		sunColor = calculateAtmosphere(vec3(0.0), sunVec, vec3(0.0,1.0,0.0), sunVec, -sunVec, planetSphere, skyAbsorb, 25,0.0);
-		sunColor = sunColorBase/4000.0 * skyAbsorb * vec3(1-0.1 * Evening, 1-0.85 * Evening, 1-0.8 * Evening);
+		sunColor = sunColorBase/4000.0 * skyAbsorb;
 		moonColor = moonColorBase/4000.0;
 
 		// lightSourceColor = sunVis >= 1e-5 ? sunColor * sunVis : moonColor * moonVis;

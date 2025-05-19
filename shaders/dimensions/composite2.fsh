@@ -104,9 +104,6 @@ float invLinZ (float lindepth){
 
 	flat in vec3 refractedSunVec;
 
-	// uniform int dhRenderDistance;
-	#define TIMEOFDAYFOG
-
 	#include "/lib/lightning_stuff.glsl"
 	#include "/lib/climate_settings.glsl"
 	#include "/lib/scene_controller.glsl"
