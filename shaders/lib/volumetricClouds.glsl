@@ -130,15 +130,15 @@ float getPlanetShadow(vec3 playerPos, vec3 WsunVec){
 float getSunOcculsion(vec3 playerPos, vec3 sunVector){
 	float density = 0.0;
 	#ifdef CloudLayer0
-		vec3 pos0 = playerPos + sunVector / abs(sunVector.y) * max((CloudLayer0_height + 50.0) - playerPos.y, 0.0);
+		vec3 pos0 = playerPos + sunVector / abs(sunVector.y) * max((CloudLayer0_height + 20.0) - playerPos.y, 0.0);
 		density += getCloudShape(SMALLCUMULUS_LAYER, 0, pos0, CloudLayer0_height, CloudLayer0_height + 100.0) * parameters.smallCumulus.y;
 	#endif
 	#ifdef CloudLayer1
-		vec3 pos1 = playerPos + sunVector / abs(sunVector.y) * max((CloudLayer1_height + 100.0) - playerPos.y, 0.0);
+		vec3 pos1 = playerPos + sunVector / abs(sunVector.y) * max((CloudLayer1_height + 40.0) - playerPos.y, 0.0);
 		density += getCloudShape(LARGECUMULUS_LAYER, 0, pos1, CloudLayer1_height, CloudLayer1_height + 200.0) * parameters.largeCumulus.y;
 	#endif
 	#ifdef CloudLayer2
-		vec3 pos2 = playerPos + sunVector / abs(sunVector.y) * max((CloudLayer2_height + 2.5) - playerPos.y, 0.0);
+		vec3 pos2 = playerPos + sunVector / abs(sunVector.y) * max((CloudLayer2_height + 1.0) - playerPos.y, 0.0);
 		density += getCloudShape(ALTOSTRATUS_LAYER, 0, pos2, CloudLayer2_height, CloudLayer2_height + 5.0) * parameters.altostratus.y;
 	#endif
 	return density;
