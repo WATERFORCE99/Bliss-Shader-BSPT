@@ -1,104 +1,88 @@
-2025-5-12 v1.7
-1. Fix a compile error.
-~ deffered1 修复一个编译错误问题
-2. Reuse codes to underwater distortion effects to improve pref.
-~ gameplay_effects 为水下失真效果复用代码以提高性能
-3. Revealing an option.
-~ shader/setting 重启一个可选项
-4. Fix mod support & 1.21.5 block id errors.
-~ block 修复mod支持与1.21.5方块ID错误
+2025-5-19 v1.71
+1. Make cloud shadow a little bit more obvious.
+~ volumetricclouds 使云影略微明显一些
+2. Merge X0nk's latest commit. (emissive z-fighting)
+~ xxx 整合了X0nk最新的更新 (发光物深度冲突)
 
-2025-4-30 v1.69
-1. Merge X0nk's latest commit. (adaptive motion blur)
-~ final 整合了X0nk最新的更新 (自适应动态模糊)
-2. Fix block light missing under RT in nether/end dimension.
-~ indirect_lighting_effects 修复方块光照在启用RT时在下界/末地消失的问题
-3. Improve HQ cloud density.
-~ volumetric_clouds 优化高质量云层密度
-4. Fix an issue with fog when disabling small/large VL cloud.
-~ volumetric_clouds 修复当禁用小/大积云时雾气被连带剔除的问题
+2025-4-26 ~ 5-12 v1.66 ~ v1.7
+1.	Improve BoP/FD/supplementaries compability (from @Merlin1809).
+	优化BoP/FD/supplementaries兼容
+2.	Add ender's delight compability (from @Merlin1809).
+	添加ender's delight兼容
+3.	Improve edge fade of end fog.
+	优化末地雾气边缘淡出
+4.	Adjust main light source color of end fog.
+	调整末地漩涡的主光源颜色
+5.	Cloud improved.
+	优化云层外观
+6.	Fix a visual issue with rainbow.
+	修复了一个关于彩虹的问题
+7.	Fix LPV redstone wire shaodow-ish issue. (from @fayer3)
+	修复了LPV红石线产生不正常阴影的问题
+8.	Improve 1.21.4 blocks effects.
+	优化1.21.4支持
+9.	Add 1.21.5 blocks effects.
+	添加1.21.5支持
+10.	Fix cloud render sequence when camera position is above the cloud.
+	修复当相机高于云层时云层的渲染顺序问题
+11.	Merge X0nk's latest commit. (adaptive motion blur)
+	整合了X0nk最新的更新 (自适应动态模糊)
+12.	Fix block light missing under RT in nether/end dimension.
+	修复方块光照在启用RT时在下界/末地消失的问题
+13.	Improve HQ cloud density.
+	优化高质量云层密度
+14.	Fix an issue with fog when disabling small/large VL cloud.
+	修复当禁用小/大积云时雾气被连带剔除的问题
+15.	Fix a compile error.
+	修复一个编译错误问题
+16.	Reuse codes to underwater distortion effects to improve pref.
+	为水下失真效果复用代码以提高性能
+17.	Revealing an option.
+	重启一个可选项
+18.	Fix mod support & 1.21.5 block id errors.
+	修复mod支持与1.21.5方块ID错误
 
-2025-4-28 v1.68
-1. Improve 1.21.4 blocks effects.
-~ block / item 优化1.21.4支持
-2. Add 1.21.5 blocks effects.
-~ block / item 添加1.21.5支持
-3. Fix cloud render sequence when camera position is above the cloud.
-~ volumtric_clouds 修复当相机高于云层时云层的渲染顺序问题
-
-2025-4-27 v1.67
-1. Improve edge fade of end fog.
-~ end_fog 优化末地雾气边缘淡出
-2. Adjust main light source color of end fog.
-~ end_fog 调整末地漩涡的主光源颜色
-3. Cloud improved.
-~ volumetric_clouds 优化云层外观
-4. Fix a visual issue with rainbow.
-~ rainbow 修复了一个关于彩虹的问题
-5. Fix the see-through cumulus cloud issue.
-~ volumetric_clouds 暂时性修复大积云透视问题
-6. Fix LPV redstone wire shaodow-ish issue. (from @fayer3)
-~ setup 修复了LPV红石线产生不正常阴影的问题
-
-2025-4-26 v1.66 (from @Merlin1809)
-1. Improve BoP compability.
-~ block 优化BoP兼容性
-2. Improve FD compability.
-~ block 优化FD兼容性
-3. Improve supplementaries compability.
-~ block 优化supplementaries兼容性
-4. Add ender's delight compability.
-~ block 添加ender's delight兼容性
-
-2025-4-25 v1.65
-1. Improve ripple perf.
-~ ripple 优化涟漪性能
-2. Improve time code to make it more linear.
-~ shader 优化时间代码使其过渡更为线性
-3. Force effects for night time stop calculate at day time to squeeze out a bit perf.
-~ xxx 强制夜晚特效在白天停止运算以避免一些无意义的计算
-4. Adjust some codes to make them more efficient.
-~ xxx 调整一些代码使其更高效
-
-2025-4-24 v1.64
-1. Remove unnecessary codes.
-~ ROBOBO_sky 移除无意义代码
-2. Improve SSGI perf.
-~ indirect_lighting_effects 优化SSGI性能
-3. Improve setting layout & LANG.
-~ shaders/en_us/zh_cn 优化设置布局与翻译文件
-4. Revert portal / end portal effect / color.
-~ all_solid/all_translucent 回退下界/末地传送门特效/颜色
-5. Revert lava colored lighting
-~ setup 回退岩浆照明
-6. Arrange codes.
-~ xxx 整理代码
-
-2025-4-21 v1.63
-1. Fix DH shadowmap compile issue.
-~ world0/dh_shadow 修复了DH阴影贴图的编译错误
-2. Merge X0nk's latest commit. (SSS & cloud tweaks)
-~ xxx 整合了X0nk最新的更新 (SSS与云层的调整)
-3. Fix daily weather mistakes.
-~ deferred 修复每日天气错误
-
-2025-4-17 v1.62
-1. Merge rainy scene configurations into scene_controller
-~ deferred/scene_controller 将雨天控制整合进场景控制器中
-2. Split few functions
-~ xxx 拆分一些功能
-3. Adjust clouds look.
-~ volumetric_clouds 调整了云层外观
-
-2025-4-15 v1.61
-1. Revert specular change.
-~ specular 回退高光优化
-2. Add rainstrength threshold to avoid visual issue of ripple.
-~ composite1 为涟漪添加雨水强度阈值以避免一些视觉问题
-3. Increase cloud coverage/density while rain.
-~ volumetric_clouds 增加了下雨时云层的覆盖率与密度以避免太阳雨的问题
-4. Avoid rainbow appear at night.
-~ rainbow 避免彩虹在夜间出现
+2025-4-15 ~ 4-25 v1.61 ~ v1.65
+1.	Revert specular change.
+	回退高光优化
+2.	Add rainstrength threshold to avoid visual issue of ripple.
+	为涟漪添加雨水强度阈值以避免一些视觉问题
+3.	Increase cloud coverage/density while rain.
+	增加了下雨时云层的覆盖率与密度以避免太阳雨的问题
+4.	Avoid rainbow appear at night.
+	避免彩虹在夜间出现
+5.	Merge rainy scene configurations into scene_controller
+	将雨天控制整合进场景控制器中
+6.	Split few functions
+	拆分一些功能
+7.	Adjust clouds look.
+	调整了云层外观
+8.	Fix DH shadowmap compile issue.
+	修复了DH阴影贴图的编译错误
+9.	Merge X0nk's latest commit. (SSS & cloud tweaks)
+	整合了X0nk最新的更新 (SSS与云层的调整)
+10.	Fix daily weather mistakes.
+	修复每日天气错误
+11.	Remove unnecessary codes.
+	移除无意义代码
+12.	Improve SSGI perf.
+	优化SSGI性能
+13.	Improve setting layout & LANG.
+	优化设置布局与翻译文件
+14.	Revert portal / end portal effect / color.
+	回退下界/末地传送门特效/颜色
+15.	Revert lava colored lighting.
+	回退岩浆照明
+16.	Arrange codes.
+	整理代码
+17.	Improve ripple perf.
+	优化涟漪性能
+18.	Improve time code to make it more linear.
+	优化时间代码使其过渡更为线性
+19.	Force effects for night time stop calculate at day time to squeeze out a bit perf.
+	强制夜晚特效在白天停止运算以避免一些无意义的计算
+20.	Adjust some codes to make them more efficient.
+	调整一些代码使其更高效
 
 2025-3-25 ~ 4-8 v1.56 ~ 1.6
 1.	Adjust darkening and transparency of all translucents to make them prettier.
