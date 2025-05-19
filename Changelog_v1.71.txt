@@ -3,6 +3,10 @@
 ~ volumetricclouds 使云影略微明显一些
 2. Merge X0nk's latest commit. (emissive z-fighting)
 ~ xxx 整合了X0nk最新的更新 (发光物深度冲突)
+3. Split codes.
+~ xxx 拆分代码
+4. Improve sunset scene.
+~ xxx 优化黄昏场景
 
 2025-4-26 ~ 5-12 v1.66 ~ v1.7
 1.	Improve BoP/FD/supplementaries compability (from @Merlin1809).
