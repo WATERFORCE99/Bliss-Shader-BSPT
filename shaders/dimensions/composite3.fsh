@@ -465,7 +465,7 @@ void main() {
 
 ////// --------------- bloomy rain effect
 	#ifdef OVERWORLD_SHADER
-		float rainDrops =  clamp(texture2D(colortex9,texcoord).a, 0.0, 1.0) * RAIN_VISIBILITY; 
+		float rainDrops = clamp(texture2D(colortex9,texcoord).a, 0.0, 1.0) * RAIN_VISIBILITY; 
 		if(rainDrops > 0.0) bloomyFogMult *= clamp(1.0 - pow(rainDrops*5.0,2),0.0,1.0);
 	#endif
   
@@ -508,9 +508,4 @@ void main() {
 	// color.rgb = testThing.rgb;
 	gl_FragData[0].r = bloomyFogMult; // pass fog alpha so bloom can do bloomy fog
 	gl_FragData[1].rgb = clamp(color.rgb, 0.0,68000.0);
-
-	// gl_FragData[1].rgb =  vec3(tangentNormals.xy,0.0) * 0.1  ;
-	// gl_FragData[1].rgb =  vec3(1.0) * ld((data.a > 0.0 ? data.a : texture2D(depthtex0, texcoord).x))   ;
-	// gl_FragData[1].rgb = gl_FragData[1].rgb * (1.0-TranslucentShader.a) + TranslucentShader.rgb*10.0;
-	// gl_FragData[1].rgb = 1-(texcoord.x > 0.5 ? vec3(TranslucentShader.a) : vec3(data.a));
 }

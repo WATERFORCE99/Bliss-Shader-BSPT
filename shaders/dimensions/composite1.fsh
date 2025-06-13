@@ -129,7 +129,6 @@ float convertHandDepth_2(in float depth, bool hand) {
 #include "/lib/waterBump.glsl"
 
 #include "/lib/Shadow_Params.glsl"
-#include "/lib/Shadows.glsl"
 #include "/lib/stars.glsl"
 #include "/lib/climate_settings.glsl"
 #include "/lib/sky_gradient.glsl"
@@ -487,6 +486,35 @@ vec4 BilateralUpscale_VLFOG(sampler2D tex, sampler2D depth, vec2 coord, float re
 	}
 #endif
 
+// Emin's and Gri's combined ideas to stop peter panning and light leaking, also has little shadowacne so thats nice
+// https://www.complementary.dev/reimagined
+// https://github.com/gri573
+void GriAndEminShadowFix(
+	inout vec3 WorldPos,
+	vec3 FlatNormal,
+	float VanillaAO,
+	float SkyLightmap
+){
+
+	float MinimumValue = 0.05;
+
+	// give a tiny boost to the distance mulitplier when shadowmap resolution is below 2048.0
+	// float ResMultiplier = 1.0 + (shadowDistance/8.0)*(1.0 - min(shadowMapResolution,2048)/2048.0)*0.3;
+
+	float theDistance = max(1.0 - length(WorldPos) / shadowDistance,0.0);
+	float DistanceMultiplier =  mix(0.5, 0.05, theDistance);
+	float DistanceMultiplier2 = mix(1.0, 0.02, theDistance);
+
+	vec3 Bias = (FlatNormal * DistanceMultiplier + WsunVec * DistanceMultiplier2);
+
+	// stop lightleaking by zooming up, centered on blocks
+	vec2 scale = vec2(0.5); scale.y *= 0.5;
+	vec3 zoomShadow =  scale.y - scale.x * fract(WorldPos + cameraPosition + Bias*scale.y*0.1);
+	if(SkyLightmap < 0.1 && isEyeInWater != 1) Bias = zoomShadow;
+
+	WorldPos += Bias;
+}
+
 float CustomPhase(float LightPos){
 
 	float PhaseCurve = 1.0 - LightPos;
@@ -837,6 +865,7 @@ void main() {
 			float flatNormNdotL = clamp((-15 + dot((FlatNormals), WsunVec)*255.0) / 240.0  ,0.0,1.0);
 
 	////////////////////////////////	SHADOWMAP		////////////////////////////////
+
 			// setup shadow projection
 			vec3 shadowPlayerPos = toWorldSpace(viewPos);
 			if(!hand) GriAndEminShadowFix(shadowPlayerPos, FlatNormals, vanilla_AO, lightmap.y);
@@ -1120,9 +1149,13 @@ void main() {
 				orbitstar.xy *= rotationMatrix;
 
  				#ifdef TWILIGHT_FOREST_FLAG
- 					Background += stars(orbitstar) * 100.0;
+ 					Background += drawStars(orbitstar) * 100.0;
    				#else
- 					Background += stars(orbitstar) * 10.0 * clamp(-unsigned_WsunVec.y*2.0,0.0,1.0);
+ 					Background += drawStars(orbitstar) * 10.0 * clamp(-unsigned_WsunVec.y*2.0,0.0,1.0);
+ 				#endif
+
+				#ifdef SHOOTING_STARS
+ 					Background += drawShootingStars(feetPlayerPos_normalized) * clamp(-unsigned_WsunVec.y*2.0,0.0,1.0);
  				#endif
 
 				#if !defined ambientLight_only && (RESOURCEPACK_SKY == 0 || RESOURCEPACK_SKY == 1)
@@ -1162,7 +1195,7 @@ void main() {
 		#endif
 
 		#ifdef END_SHADER
-			Background += stars(feetPlayerPos_normalized) * 20.0;
+			Background += drawStars(feetPlayerPos_normalized) * 20.0;
 		#endif
 
 		gl_FragData[0].rgb = clamp(fp10Dither(Background, triangularize(noise_2)), 0.0, 65000.);

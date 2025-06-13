@@ -322,11 +322,6 @@ vec4 raymarchTest(
 	vec3 dVWorld = wpos - gbufferModelViewInverse[3].xyz;
 	vec3 dVWorldN = normalize(dVWorld);
 
-	// dVWorld *= dVWorldN/abs(dVWorldN.y);
-	// float maxLength = min(length(dVWorld), 16 * 8)/length(dVWorld);
-	// dVWorld *= maxLength;
-
-	// float cloudRange = max(minHeight - cameraPosition.y,0.0);
 	float cloudRange = max(minHeight - cameraPosition.y, 0.0);
 
 	vec3 rayDirection = dVWorldN.xyz * ((maxHeight - minHeight) / length(alterCoords(dVWorldN, false)) / SAMPLECOUNT);
@@ -336,11 +331,6 @@ vec4 raymarchTest(
 	vec3 rayProgress = rayDirection + cameraPosition + (rayDirection / length(alterCoords(rayDirection, false))) * 200.0;
 
 	float dL = length(rayDirection);
-	
-	// vec3 rayDirection = dVWorldN.xyz * ((maxHeight - minHeight) / abs(dVWorldN.y) / SAMPLECOUNT);
-	// float flip = mix(max(cameraPosition.y - maxHeight,0.0), max(minHeight - cameraPosition.y,0.0), clamp(rayDirection.y,0.0,1.0));
-	// vec3 rayProgress = rayDirection*dither.x + cameraPosition + (rayDirection / abs(rayDirection.y)) *flip;
-	// float dL = length(rayDirection);
 
 	for (int i = 0; i < SAMPLECOUNT; i++) {
 		if(length(rayProgress - cameraPosition) > referenceDistance) break;
@@ -438,8 +428,6 @@ void main() {
 
 		VolumetricFog = vec4(underWaterFog.rgb, 1.0);
 	}
-
-	// VolumetricFog = raymarchTest(viewPos0, BN);
 
 	gl_FragData[0] = clamp(VolumetricFog, 0.0, 65000.0);
 }
