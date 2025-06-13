@@ -1,3 +1,11 @@
+2025-6-13 v1.72
+1. Add shooting stars.
+~ stars 新增流星特效
+2. Slightly improve code readability.
+~ xxx 微微提升代码可读性
+3. Fix an issue of TOD fog being verwrited by biome fog.
+~ overworld_fog 修复了一个全天雾气被群系雾气覆写的问题
+
 2025-5-19 v1.71
 1. Make cloud shadow a little bit more obvious.
 ~ volumetricclouds 使云影略微明显一些
