@@ -106,9 +106,9 @@ uniform float sandStorm_red;
 
 		BiomeFogDensity.x = smoothSwamps*SWAMP_UNIFORM_DENSITY + smoothJungles*JUNGLE_UNIFORM_DENSITY + smoothDarkForests*DARKFOREST_UNIFORM_DENSITY + smoothBiome_Snowy*SNOWY_UNIFORM_DENSITY + snowStorm*0.01 + smoothBiome_Dry*DRY_UNIFORM_DENSITY + sandStorm*0.0 + sandStorm_red*0.0;
 		BiomeFogDensity.y = smoothSwamps*SWAMP_CLOUDY_DENSITY + smoothJungles*JUNGLE_CLOUDY_DENSITY + smoothDarkForests*DARKFOREST_CLOUDY_DENSITY + smoothBiome_Snowy*SNOWY_CLOUDY_DENSITY + snowStorm*0.5 + smoothBiome_Dry*DRY_CLOUDY_DENSITY + sandStorm*0.5 + sandStorm_red*0.5;
-		
-		UniformDensity = mix(UniformDensity, vec4(BiomeFogDensity.x), Inbiome*maxDistance);
-		CloudyDensity  = mix(CloudyDensity,  vec4(BiomeFogDensity.y), Inbiome*maxDistance);
+
+		UniformDensity = UniformDensity + vec4(BiomeFogDensity.x) * Inbiome * maxDistance;
+		CloudyDensity  = CloudyDensity + vec4(BiomeFogDensity.y) * Inbiome * maxDistance;
 	}
 
 	float BiomeVLFogColors(inout vec3 DirectLightCol, inout vec3 IndirectLightCol){

@@ -207,7 +207,7 @@ float luma(vec3 color) {
 }
 
 vec2 simpleRand22(vec2 p) {
-    mat2 m = mat2(12.9898,.16180,78.233,.31415);
+	mat2 m = mat2(12.9898,.16180,78.233,.31415);
 	return fract(sin(m * p) * vec2(43758.5453, 14142.1));
 }
 
