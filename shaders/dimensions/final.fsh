@@ -140,7 +140,7 @@ vec3 applyFishEye(vec2 uv, vec3 color) {
 	coords = (coords - 0.5) * 2.0;
 
 	vec2 coordOffset = vec2(0.0);
-	coordOffset.x = (1.0 - coords.y * coords.y) * coords.x * aspectRatio;
+	coordOffset.x = (1.0 - coords.y * coords.y) * coords.x;
 	coordOffset.y = (1.0 - coords.x * coords.x) * coords.y;
 	coordOffset *= 0.1 * FISHEYE_STRENGTH;
 
