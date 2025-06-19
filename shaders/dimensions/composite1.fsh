@@ -1174,8 +1174,8 @@ void main() {
 			Background += drawAurora(feetPlayerPos_normalized, noise) * AURORA_BRIGHTNESS * applyAurora;
 
 			#if RAINBOW == 1 || RAINBOW == 2
-				vec3 rainbow = drawRainbow(viewPos, feetPlayerPos_normalized, noise);
-				if(isEyeInWater == 0) Background += rainbow * RAINBOW_STRENGTH;
+				vec3 rainbow = drawRainbow(feetPlayerPos_normalized) * clamp(unsigned_WsunVec.y*2.0,0.0,1.0);
+				if(isEyeInWater == 0) Background += rainbow;
 			#endif
 
 			#ifndef ISOLATE_RESOURCEPACK_SKY

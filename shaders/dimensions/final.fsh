@@ -90,7 +90,6 @@ void doCameraGridLines(inout vec3 color, vec2 UV){
 }
 
 vec3 doMotionBlur(vec2 texcoord, float depth, float noise, bool hand){
-  
 	float samples = 4.0;
 	vec3 color = vec3(0.0);
 
@@ -126,7 +125,6 @@ uniform sampler2D shadowcolor1;
 float doVignette(in vec2 texcoord, in float noise){
 	float vignette = 1.0-clamp(1.0-length(texcoord-0.5),0.0,1.0);
   
-	// vignette = pow(1.0-pow(1.0-vignette,3),5);
 	vignette *= vignette*vignette;
 	vignette = 1.0-vignette;
 	vignette *= vignette*vignette*vignette*vignette;
@@ -135,6 +133,22 @@ float doVignette(in vec2 texcoord, in float noise){
 	vignette = vignette + vignette*(noise-0.5)*0.01;
   
 	return mix(1.0, vignette, VIGNETTE_STRENGTH);
+}
+
+vec3 applyFishEye(vec2 uv, vec3 color) {
+	vec2 coords = uv;
+	coords = (coords - 0.5) * 2.0;
+
+	vec2 coordOffset = vec2(0.0);
+	coordOffset.x = (1.0 - coords.y * coords.y) * coords.x * aspectRatio;
+	coordOffset.y = (1.0 - coords.x * coords.x) * coords.y;
+	coordOffset *= 0.1 * FISHEYE_STRENGTH;
+
+	vec2 fisheyeUV = uv - coordOffset;
+
+	fisheyeUV = clamp(fisheyeUV, vec2(0.0), vec2(1.0));
+
+	return texture2D(colortex7, fisheyeUV).rgb;
 }
 
 void main() {
@@ -148,6 +162,10 @@ void main() {
 		float depth2 = convertHandDepth_2(depth, hand);
 
 		COLOR = doMotionBlur(texcoord, depth2, noise, hand);
+	#endif
+
+	#ifdef FISHEYE_EFFECT
+		COLOR = applyFishEye(texcoord, COLOR);
 	#endif
 
 	#ifdef OVERWORLD_SHADER
@@ -233,10 +251,6 @@ void main() {
 
 	#if DEBUG_VIEW == debug_SHADOWMAP
 		vec2 shadowUV = texcoord * vec2(2.0, 1.0) ;
-
-		// shadowUV -= vec2(0.5,0.0);
-		// float zoom = 0.1;
-		// shadowUV = ((shadowUV-0.5) - (shadowUV-0.5)*zoom) + 0.5;
 
 		if(shadowUV.x < 1.0 && shadowUV.y < 1.0 && hideGUI == 1) COLOR = texture2D(shadowcolor1,shadowUV).rgb;
 	#elif DEBUG_VIEW == debug_DEPTHTEX0
