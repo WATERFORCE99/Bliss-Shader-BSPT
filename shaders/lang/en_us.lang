@@ -60,6 +60,14 @@ screen.Aurora=Aurora
 	option.AURORA_LOWER_G=Aurora Lower Color G
 	option.AURORA_LOWER_B=Aurora Lower Color B
 
+screen.Shooting_Stars=Shooting Stars
+	option.SHOOTING_STARS=Shooting Stars
+	option.SHOOTING_STARS_SPEED=Shooting Star Speed
+	option.SHOOTING_STARS_FREQUENCY=Shooting Star Frequency
+	option.SHOOTING_STARS_TRAIL_VISIBILITY=Shooting Star Trail Visibility
+	option.SHOOTING_STARS_TRAIL_LENGTH=Shooting Star Trail Length
+	option.SHOOTING_STARS_TRAIL_WIDTH=Shooting Star Trail Width
+
 screen.Weather=Weather
 	option.RAIN_VISIBILITY=Rain/Snow Visibility
 	option.Rain_coverage=Rain Cloud Coverage
@@ -802,6 +810,13 @@ option.AURORA_BRIGHTNESS.comment=Configure the brightness of the aurora.
 option.AURORA_SPEED.comment=Configure the moving speed of the aurora.
 option.AURORA_SNOWY.comment=Toggle to restrict aurora to snowy biomes only.
 option.AUR_ENV_OFFSET.comment=Configure the contribution of lighting to the ground/cloud from the aurora.
+
+option.SHOOTING_STARS.comment=Toggle to enable shooting stars.
+option.SHOOTING_STARS_SPEED.comment=Configure the speed of shooting stars.
+option.SHOOTING_STARS_FREQUENCY.comment=Configure the amount of shooting stars.
+option.SHOOTING_STARS_TRAIL_VISIBILITY.comment=Configure the visibility of the shooting stars' trails.
+option.SHOOTING_STARS_TRAIL_LENGTH.comment=Configure the length of the shooting stars' trails.
+option.SHOOTING_STARS_TRAIL_WIDTH.comment=Configure the width of the shooting stars' trails.
 
 option.Rain_coverage.comment=Configure how much of the sky the clouds cover during rain.
 option.RainFog_amount.comment=Configure how dense the fog gets during rain.
