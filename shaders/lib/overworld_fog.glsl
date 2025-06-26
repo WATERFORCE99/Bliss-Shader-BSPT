@@ -13,7 +13,6 @@ float densityAtPosFog(in vec3 pos){
 }
 
 float cloudVol(in vec3 pos, float maxDistance){
-	
 	float fogYstart = FOG_START_HEIGHT+3;
 	vec3 samplePos = pos*vec3(1.0,1.0/24.0,1.0);
 	vec3 samplePos2 = pos*vec3(1.0,1.0/48.0,1.0);
@@ -111,7 +110,7 @@ vec4 GetVolumetricFog(
 	vec3 dVWorld = wpos - gbufferModelViewInverse[3].xyz;
 
 	#ifdef DISTANT_HORIZONS
-		float maxLength = min(length(dVWorld), max(far, dhRenderDistance))/length(dVWorld);
+		float maxLength = min(length(dVWorld), dhRenderDistance)/length(dVWorld);
 	#else
 		float maxLength = min(length(dVWorld), far)/length(dVWorld);
 	#endif
@@ -134,7 +133,6 @@ vec4 GetVolumetricFog(
 	vec3 totalAbsorbance = vec3(1.0);
 
 	float fogAbsorbance = 1.0;
-	vec3 atmosphereAbsorbance = vec3(1.0);
 
 	float SdotV = dot(mat3(gbufferModelView) * sunVector, normalize(viewPosition));
 
@@ -194,10 +192,9 @@ vec4 GetVolumetricFog(
 		//------------------------------------
 		//------ SAMPLE SHADOWS FOR FOG EFFECTS
 		//------------------------------------
+		float distortFactor = 1.0;
 		#ifdef DISTORT_SHADOWMAP
-			float distortFactor = calcDistort(progress.xy);
-		#else
-			float distortFactor = 1.0;
+			distortFactor = calcDistort(progress.xy);
 		#endif
 		vec3 shadowPos = vec3(progress.xy*distortFactor, progress.z);
 
@@ -290,10 +287,10 @@ vec4 GetVolumetricFog(
 		//------------------------------------
 
 		// maximum range for atmosphere haze, basically.
-		float planetVolume = 1.0 - exp(clamp(1.0 - length(progressW-cameraPosition) / (16*150), 0.0,1.0) * -10);
+		float planetVolume = 1.0 - exp(clamp(1.0 - length(progressW-cameraPosition) / (16 * 150), 0.0, 1.0) * -10);
 
 		// just air
-		vec2 airCoef = (exp2(-max(progressW.y-SEA_LEVEL,0.0)/vec2(8.0e3, 1.2e3)*vec2(6.,7.0)) * 192.0 * Haze_amount) * planetVolume;
+		vec2 airCoef = (exp2(-max(progressW.y-SEA_LEVEL,0.0) / vec2(8.0e3, 1.2e3) * vec2(6.0, 7.0)) * 192.0 * Haze_amount) * planetVolume;
 
 		// Pbr for air, yolo mix between mie and rayleigh for water droplets
 		vec3 rL = rC*airCoef.x;
@@ -302,10 +299,8 @@ vec4 GetVolumetricFog(
 		// calculate the atmosphere haze seperately and purely additive to color, do not contribute to absorbtion.
 		vec3 atmosphereVolumeCoeff = exp(-(rL+m)*dd*dL);
 		// vec3 Atmosphere = LightSourcePhased * sh * (rayL*rL + sunPhase*m) + AveragedAmbientColor * (rL+m);
-		vec3 Atmosphere = (LightSourcePhased * sh * (rayL*rL + sunPhase*m) + AveragedAmbientColor * (rL+m) * (lightLevelZero*0.99 + 0.01)) * inACave;
-		color += (Atmosphere - Atmosphere * atmosphereVolumeCoeff) / (rL+m+1e-6) * atmosphereAbsorbance;
-			
-		atmosphereAbsorbance *= atmosphereVolumeCoeff*fogVolumeCoeff;
+		vec3 Atmosphere = (LightSourcePhased * sh * (rayL*rL + sunPhase*m) + AveragedAmbientColor * (rL+m) * (lightLevelZero*0.99 + 0.01)) * luma(AmbientColor) * inACave;
+		color += (Atmosphere - Atmosphere * atmosphereVolumeCoeff) / (rL+m+1e-6);
 
 		//------------------------------------
 		//------ LPV FOG EFFECT

@@ -37,7 +37,10 @@ const mat3 sky_coefficientsAttenuation = mat3(sky_coefficientRayleigh , sky_coef
 
 float sunHeight = normalize(mat3(gbufferModelViewInverse) * sunPosition).y;
 float sunHeightFactor = pow(clamp(1.0 - sunHeight * 4.5, 0.0, 1.0), 0.7);
-vec3 atomsphereAbsorbance = vec3(0.1 * sunHeightFactor, 0.75 * sunHeightFactor, 0.85 * sunHeightFactor);
+vec3 atomsphereAbsorbance = vec3(0.0);
+#ifdef ATMOSPHERE_ABSORBANCE
+	atomsphereAbsorbance = vec3(0.1 * sunHeightFactor, 0.75 * sunHeightFactor, 0.85 * sunHeightFactor);
+#endif
 
 #if colortype == 1
 	#define sunColorBase (vec3(sunColorR, sunColorG, sunColorB) - atomsphereAbsorbance) * sun_illuminance
