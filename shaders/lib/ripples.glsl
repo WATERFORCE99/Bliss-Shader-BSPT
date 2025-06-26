@@ -28,5 +28,5 @@ vec3 drawRipples(vec2 uv, float time) {
 	circles /= float((MAX_RADIUS * 2) * (MAX_RADIUS * 2));
 
 	vec3 n = vec3(circles, sqrt(1.0 - dot(circles, circles)));
-	return n;
+	return n.xzy;
 }

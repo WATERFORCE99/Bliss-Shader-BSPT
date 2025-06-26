@@ -19,7 +19,7 @@ float densityAtPos(in vec3 pos){
 		vec3 p = pos - w;
 		p *= p * (vec3(vec2(3.0/64.0), 3.0) - vec3(vec2(2.0/64.0), 2.0) * p);
 		vec2 uv2 = (16.0 * w.z + w.xy)/64.0 + p.xy;
-		vec2 coord2 = uv2 * 0.000015;
+		vec2 coord2 = uv2 * 0.00015;
 
 		vec2 vn = texture2D(noisetex, coord2).yx;
 		density += mix(vn.r, vn.g, p.z);
@@ -517,11 +517,11 @@ vec4 GetVolumetricClouds(
 
    	////------- BLEND LAYERS
 
-		#if defined CloudLayer0 && !defined CloudLayer1 && !defined CloudLayer2
+		#if defined CloudLayer0 && !defined CloudLayer1
 			cloudPlaneDistance = cloudLayer0_Distance.x;
 		#endif
- 
-		#if !defined CloudLayer0 && defined CloudLayer1 && !defined CloudLayer2
+
+		#if !defined CloudLayer0 && defined CloudLayer1
 			cloudPlaneDistance = cloudLayer1_Distance.x;
 		#endif
 
@@ -529,21 +529,13 @@ vec4 GetVolumetricClouds(
 			cloudPlaneDistance = cloudLayer2_Distance.x;
 		#endif
 
-		#if defined CloudLayer0 && defined CloudLayer1 && !defined CloudLayer2
-			cloudPlaneDistance = mix(cloudLayer0_Distance.x, cloudLayer1_Distance.x, cloudLayer0_Distance.y);
-		#endif
-
-		#if defined CloudLayer0 && !defined CloudLayer1 && defined CloudLayer2
-			cloudPlaneDistance = cloudLayer0_Distance.x;
-		#endif
-
-		#if !defined CloudLayer0 && defined CloudLayer1 && defined CloudLayer2
-			cloudPlaneDistance = cloudLayer1_Distance.x;
-		#endif
-
-		#if defined CloudLayer0 && defined CloudLayer1 && defined CloudLayer2
-			cloudPlaneDistance = mix(cloudLayer2_Distance.x, cloudLayer1_Distance.x, cloudLayer2_Distance.y);
-			cloudPlaneDistance = mix(cloudLayer0_Distance.x, cloudPlaneDistance, cloudLayer0_Distance.y);
+		#if defined CloudLayer0 && defined CloudLayer1
+			#ifdef CloudLayer2
+				cloudPlaneDistance = mix(cloudLayer2_Distance.x, cloudLayer1_Distance.x, cloudLayer2_Distance.y);
+				cloudPlaneDistance = mix(cloudLayer0_Distance.x, cloudPlaneDistance, cloudLayer0_Distance.y);
+			#else
+				cloudPlaneDistance = mix(cloudLayer0_Distance.x, cloudLayer1_Distance.x, cloudLayer0_Distance.y);
+			#endif
 		#endif
 
 		#ifdef CloudLayer2

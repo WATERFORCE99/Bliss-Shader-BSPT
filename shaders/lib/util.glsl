@@ -271,8 +271,8 @@ vec4 encode (vec3 n, vec2 lightmaps) {
 
 //encoding by jodie
 float encodeVec2(vec2 a) {
-	const vec2 constant1 = vec2( 1., 256.) / 65535.;
-	vec2 temp = floor( a * 255. );
+	const vec2 constant1 = vec2(1.0, 256.0) / 65535.0;
+	vec2 temp = floor(a * 255.0);
 	return temp.x*constant1.x+temp.y*constant1.y;
 }
 
