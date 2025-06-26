@@ -1,3 +1,19 @@
+2025-6-26 v1.75
+1. Add light absorbance with atomsphere options.
+~ ROBOBO_sky 新增大气光线吸收选项
+2. Improve skylight contribution to fog while raining and add settings.
+~ overworld_fog 优化了雨天时天空光对雾气的贡献并加入对应设置
+3. Improve setting screen and lang.
+~ shader 优化设置界面及翻译
+
+2025-6-25 v1.74 (Thanks to @Merlin1809)
+1. Fix ripple normal & side leaking from blocks issue.
+~ all_translucent 修复了涟漪法线问题以及侧面渗漏问题
+2. Fix glitch on horse.
+~ all_translucent 修复了马贴图闪烁的问题
+3. Fix lang mistakes.
+~ zh_cn/en_us 更新设置翻译
+
 2025-6-14 v1.73
 1. Update lang.
 ~ zh_cn/en_us 更新设置翻译
