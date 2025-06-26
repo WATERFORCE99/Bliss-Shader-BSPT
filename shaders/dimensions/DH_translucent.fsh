@@ -92,12 +92,11 @@ uniform int framemod8;
 #include "/lib/TAA_jitter.glsl"
 
 vec3 rayTrace(vec3 dir, vec3 position,float dither, float fresnel, bool inwater){
-
 	float quality = mix(5.0, SSR_STEPS, fresnel);
 	vec3 clipPosition = DH_toClipSpace3(position);
 	float rayLength = ((position.z + dir.z * dhFarPlane*sqrt(3.0)) > -dhNearPlane)
-					?(-dhNearPlane - position.z) / dir.z
-					:dhFarPlane*sqrt(3.0);
+					? (-dhNearPlane - position.z) / dir.z
+					: dhFarPlane*sqrt(3.0);
 	vec3 direction = normalize(DH_toClipSpace3(position+dir*rayLength)-clipPosition);  //convert to clip space
 	direction.xy = normalize(direction.xy);
 
@@ -114,8 +113,6 @@ vec3 rayTrace(vec3 dir, vec3 position,float dither, float fresnel, bool inwater)
 	spos.xy += offsets[framemod8]*texelSize*0.5/RENDER_SCALE;
 
 	for (int i = 0; i <= int(quality); i++) {
-
-		// float sp = DH_inv_ld(sqrt(texelFetch2D(colortex12,ivec2(spos.xy/texelSize/4),0).a/65000.0));
 		float sp = DH_inv_ld(sqrt(texelFetch2D(colortex12,ivec2(spos.xy/texelSize/4),0).a/64000.0));
 
 		if(sp < max(minZ,maxZ) && sp > min(minZ,maxZ)) return vec3(spos.xy/RENDER_SCALE,sp);
@@ -177,7 +174,7 @@ void main() {
 
 			float bumpmult = WATER_WAVE_STRENGTH;
 
-			bump = bump * vec3(bumpmult, bumpmult, bumpmult) + vec3(0.0f, 0.0f, 1.0f - bumpmult);
+			bump = bump * bumpmult + vec3(0.0f, 0.0f, 1.0f - bumpmult);
 
 			waterNormals.xz = bump.xy;
 		}

@@ -188,30 +188,28 @@ void main() {
 		#if DOF_QUALITY < 5
 			float pcoc = min(abs(aperture * (focal/100.0 * (z - focus)) / (z * (focus - focal/100.0))),texelSize.x*15.0);
 
-		#ifdef FAR_BLUR_ONLY
-			pcoc *= float(z > focus);
-		#endif
+			#ifdef FAR_BLUR_ONLY
+				pcoc *= float(z > focus);
+			#endif
 
-		#ifdef REMOVE_HAND_BLUR
- 			pcoc *= float(z > 0.56);
- 		#endif
+			#ifdef REMOVE_HAND_BLUR
+ 				pcoc *= float(z > 0.56);
+ 			#endif
 
-		vec3 bcolor = vec3(0.);
-		float nb = 0.0;
-		vec2 bcoord = vec2(0.0);
-		/*--------------------------------*/
-		float dofLodLevel = pcoc * 200.0;
+			vec3 bcolor = vec3(0.);
+			float nb = 0.0;
+			vec2 bcoord = vec2(0.0);
+			/*--------------------------------*/
+			float dofLodLevel = pcoc * 200.0;
 
- 		vec2 dispersion = (texcoord - 0.5) * pcoc * 200.0 * DOF_DISPERSION_MULT;
+ 			vec2 dispersion = (texcoord - 0.5) * pcoc * 200.0 * DOF_DISPERSION_MULT;
 
-		for (int i = 0; i < BOKEH_SAMPLES; i++) {
-			// bcolor += texture2DLod(colortex5, texcoord.xy + bokeh_offsets[i]*pcoc*vec2(DOF_ANAMORPHIC_RATIO,aspectRatio), dofLodLevel).rgb;
- 
- 			bcolor.r += texture2DLod(colortex5, texcoord.xy + (bokeh_offsets[i] + dispersion)*pcoc*vec2(DOF_ANAMORPHIC_RATIO,aspectRatio), dofLodLevel).r;
- 			bcolor.g += texture2DLod(colortex5, texcoord.xy + bokeh_offsets[i]*pcoc*vec2(DOF_ANAMORPHIC_RATIO,aspectRatio), dofLodLevel).g;
- 			bcolor.b += texture2DLod(colortex5, texcoord.xy + (bokeh_offsets[i] - dispersion)*pcoc*vec2(DOF_ANAMORPHIC_RATIO,aspectRatio), dofLodLevel).b;
-		}
-		col = bcolor/BOKEH_SAMPLES;
+			for (int i = 0; i < BOKEH_SAMPLES; i++) { 
+ 				bcolor.r += texture2DLod(colortex5, texcoord.xy + (bokeh_offsets[i] + dispersion)*pcoc*vec2(DOF_ANAMORPHIC_RATIO,aspectRatio), dofLodLevel).r;
+ 				bcolor.g += texture2DLod(colortex5, texcoord.xy + bokeh_offsets[i]*pcoc*vec2(DOF_ANAMORPHIC_RATIO,aspectRatio), dofLodLevel).g;
+ 				bcolor.b += texture2DLod(colortex5, texcoord.xy + (bokeh_offsets[i] - dispersion)*pcoc*vec2(DOF_ANAMORPHIC_RATIO,aspectRatio), dofLodLevel).b;
+			}
+			col = bcolor/BOKEH_SAMPLES;
 		#endif
 	#endif
 

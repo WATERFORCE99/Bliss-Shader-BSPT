@@ -409,22 +409,22 @@ void main() {
 		vec4 VolumetricClouds = GetVolumetricClouds(viewPos0, BN, WsunVec, directLightColor + aurEmit * 0.2, indirectLightColor + aurEmit * 0.01, cloudPlaneDistance);
 
 		#ifdef CAVE_FOG
-  	  		float skyhole = pow(clamp(1.0-pow(max(playerPos_normalized.y - 0.6,0.0)*5.0,2.0),0.0,1.0),2)* caveDetection;
+  	  		float skyhole = pow(clamp(1.0-pow(max(playerPos_normalized.y - 0.6,0.0)*5.0,2.0),0.0,1.0),2) * caveDetection;
 			VolumetricClouds.rgb *= 1.0-skyhole;
-			VolumetricClouds.a = mix(VolumetricClouds.a, 1.0,  skyhole);
+			VolumetricClouds.a = mix(VolumetricClouds.a, 1.0, skyhole);
 		#endif
 
 		float atmosphereAlpha = 1.0;
 
 		vec3 sceneColor = texelFetch2D(colortex3,ivec2(tc/texelSize),0).rgb * VolumetricClouds.a + VolumetricClouds.rgb;
 		vec4 VolumetricFog = GetVolumetricFog(viewPos0, WsunVec, BN, directLightColor, indirectLightColor, indirectLightColor_dynamic, atmosphereAlpha, VolumetricClouds.rgb, cloudPlaneDistance);
-		VolumetricFog = vec4(VolumetricClouds.rgb * VolumetricFog.a  + VolumetricFog.rgb, VolumetricFog.a * VolumetricClouds.a);
+		VolumetricFog = vec4(VolumetricClouds.rgb * VolumetricFog.a + VolumetricFog.rgb, VolumetricFog.a * VolumetricClouds.a);
 	#else
 		vec4 VolumetricFog = GetVolumetricFog(viewPos0, BN.x, BN.y);
 	#endif
 
 	if (isEyeInWater == 1){
-		vec4 underWaterFog =  waterVolumetrics(vec3(0.0), viewPos0_water, length(viewPos0_water), BN, totEpsilon, scatterCoef, indirectLightColor_dynamic, directLightColor , dot(normalize(viewPos0_water), normalize(sunVec* lightCol.a )));
+		vec4 underWaterFog = waterVolumetrics(vec3(0.0), viewPos0_water, length(viewPos0_water), BN, totEpsilon, scatterCoef, indirectLightColor_dynamic, directLightColor , dot(normalize(viewPos0_water), normalize(sunVec* lightCol.a )));
 
 		VolumetricFog = vec4(underWaterFog.rgb, 1.0);
 	}

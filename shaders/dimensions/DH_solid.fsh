@@ -127,7 +127,7 @@ void main() {
 
 	#ifdef AEROCHROME_MODE
 		if(dh_material_id == DH_BLOCK_LEAVES || dh_material_id == DH_BLOCK_WATER) { // leaves and waterlogged blocks
-			float grey = dot(Albedo.rgb, vec3(0.2, 01.0, 0.07));
+			float grey = dot(Albedo.rgb, vec3(0.2, 1.0, 0.07));
 			Albedo.rgb = mix(vec3(grey), aerochrome_color, 0.7);
 
 		} else if(dh_material_id == DH_BLOCK_GRASS) { // grass

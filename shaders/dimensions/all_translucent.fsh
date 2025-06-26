@@ -163,7 +163,7 @@ vec3 getParallaxDisplacement(vec3 waterPos, vec3 playerPos) {
 
 vec3 applyBump(mat3 tbnMatrix, vec3 bump, float puddle_values){
 	float bumpmult = puddle_values;
-	bump = bump * vec3(bumpmult, bumpmult, bumpmult) + vec3(0.0f, 0.0f, 1.0f - bumpmult);
+	bump = bump * bumpmult + vec3(0.0f, 0.0f, 1.0f - bumpmult);
 
 	return normalize(bump*tbnMatrix);
 }
@@ -195,11 +195,8 @@ float ld(float dist) {
 	return (2.0 * near) / (far + near - dist * (far - near));
 }
 
-// #undef BASIC_SHADOW_FILTER
 #ifdef OVERWORLD_SHADER
 	float ComputeShadowMap(inout vec3 directLightColor, vec3 playerPos, float maxDistFade, float noise){
-
-		// if(maxDistFade <= 0.0) return 1.0;
 
 		// setup shadow projection
 		vec3 projectedShadowPosition = toShadowSpaceProjected(playerPos);
@@ -306,7 +303,6 @@ uniform vec3 eyePosition;
 
 void main() {
 	if(gl_FragCoord.x * texelSize.x < 1.0  && gl_FragCoord.y * texelSize.y < 1.0){
-
 		vec3 FragCoord = gl_FragCoord.xyz;
 
 		#ifdef TAA
@@ -445,21 +441,18 @@ void main() {
 				waterPos.xy = newPos;
 		
 				waterPos.xyz = getParallaxDisplacement(waterPos, playerPos);
-			
-				vec3 bump = getWaveNormal(waterPos, playerPos, false);
 
 				#ifdef WATER_RIPPLES
 					vec3 rippleNormal = vec3(0.0);
-					if (rainStrength > 0.01) rippleNormal = drawRipples(worldPos.xz * 5.0, frameTimeCounter) * 0.5 * rainStrength * rainyAreas * lightmap * clamp(1.0 - length(playerPos) / 128.0, 0.0, 1.0);
-
-					bump += rippleNormal;
+					if (rainStrength > 0.01 && abs(worldSpaceNormal.x) < 0.95 && abs(worldSpaceNormal.z) < 0.95) rippleNormal = drawRipples(worldPos.xz * 5.0, frameTimeCounter) * 0.5 * rainStrength * rainyAreas * lightmap * clamp(1.0 - length(playerPos) / 128.0, 0.0, 1.0);
+					waterPos += rippleNormal;
 				#endif
 
-				bump = normalize(bump);
+				vec3 bump = getWaveNormal(waterPos, playerPos, false);
+
 				float bumpmult = WATER_WAVE_STRENGTH + 0.5 * rainStrength;
 
 				bump = bump * bumpmult + vec3(0.0, 0.0, 1.0 - bumpmult);
-
 				NormalTex.xyz = bump;
 			}
 		#endif

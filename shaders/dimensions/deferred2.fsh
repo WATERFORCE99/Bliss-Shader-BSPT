@@ -12,7 +12,7 @@ uniform vec2 texelSize;
 
 float interleaved_gradientNoise(){
 	vec2 coord = gl_FragCoord.xy;
-	float noise = fract(52.9829189 * fract( (coord.x * 0.06711056) + (coord.y * 0.00583715)));
+	float noise = fract(52.9829189 * fract((coord.x * 0.06711056) + (coord.y * 0.00583715)));
 	return noise;
  }
 

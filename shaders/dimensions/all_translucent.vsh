@@ -141,12 +141,16 @@ void main() {
    	vec3 worldpos = toWorldSpace(position);
 	#ifdef PLANET_CURVATURE
 		float curvature = length(worldpos) / (16*8);
-		worldpos.y -= curvature*curvature * CURVATURE_AMOUNT;
+		worldpos.y -= curvature * curvature * CURVATURE_AMOUNT;
 	#endif
 
 	position = mat3(gbufferModelView) * worldpos + gbufferModelView[3].xyz;
 
  	gl_Position = toClipSpace4alt(position);
+
+	#ifdef ENTITIES
+		gl_Position = ftransform();
+	#endif
 
 	HELD_ITEM_BRIGHTNESS = 0.0;
 

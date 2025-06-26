@@ -75,10 +75,10 @@ float ld(float depth) {
 #include "/lib/DistantHorizons_projections.glsl"
 
 vec4 blueNoise(vec2 coord){
-	return texelFetch2D(colortex6, ivec2(coord)%512 , 0) ;
+	return texelFetch2D(colortex6, ivec2(coord)%512 , 0);
 }
 
-vec3 normVec (vec3 vec){
+vec3 normVec(vec3 vec){
 	return vec*inversesqrt(dot(vec,vec));
 }
 
