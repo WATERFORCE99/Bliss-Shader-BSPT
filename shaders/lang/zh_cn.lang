@@ -9,15 +9,6 @@ profile.veryHigh=§c高质量
 
 screen.World=世界
 screen.Sky=天空配置
-	option.sunPathRotation=太阳角度
-		suffix.sunPathRotation=°
-	option.sun_illuminance=阳光照度
-		suffix.sun_illuminance=LX
-	option.moon_illuminance=月光照度
-		suffix.moon_illuminance=LX
-	option.MOONPHASE_BASED_MOONLIGHT=月相亮度水平
-	option.STAR_DENSITY=星星密度
-	option.STAR_MOVEMENT_MULT=星星旋转速度
 	option.RAINBOW=彩虹类型
 		value.RAINBOW.0=关
 		value.RAINBOW.1=真实
@@ -33,7 +24,7 @@ screen.Sky_coefficients=天空系数
 	option.sky_coefficientMieG=天空米氏系数 - 绿色比重
 	option.sky_coefficientMieB=天空米氏系数 - 蓝色比重
 
-screen.Sun_and_Moon_Colors=日月颜色
+screen.Sun_and_Moon=日月
 	option.sunColorR=太阳 - 红色比重
 	option.sunColorG=太阳 - 绿色比重
 	option.sunColorB=太阳 - 蓝色比重
@@ -47,6 +38,11 @@ screen.Sun_and_Moon_Colors=日月颜色
 		suffix.Sun_temp=K
 	option.Moon_temp=月光色温
 		suffix.Moon_temp=K
+	option.sun_illuminance=阳光照度
+		suffix.sun_illuminance=LX
+	option.moon_illuminance=月光照度
+		suffix.moon_illuminance=LX
+	option.MOONPHASE_BASED_MOONLIGHT=月相亮度水平
 
 screen.Aurora=极光配置
 	option.AURORA_BRIGHTNESS=极光亮度
@@ -60,7 +56,9 @@ screen.Aurora=极光配置
 	option.AURORA_LOWER_G=极光下部 - 绿色比重
 	option.AURORA_LOWER_B=极光下部 - 蓝色比重
 
-screen.Shooting_Stars=流星配置
+screen.Stars_and_Shooting_Stars=星星与流星
+	option.STAR_DENSITY=星星密度
+	option.STAR_MOVEMENT_MULT=星星旋转速度
 	option.SHOOTING_STARS=流星
 	option.SHOOTING_STARS_SPEED=流星速度
 	option.SHOOTING_STARS_FREQUENCY=流星频率
@@ -71,9 +69,14 @@ screen.Shooting_Stars=流星配置
 screen.Weather=天气配置
 	option.RAIN_VISIBILITY=雨雪能见度
 	option.Rain_coverage=雨云覆盖率
-	option.RainFog_amount=雨雾倍率
 	option.WATER_RIPPLES=水面涟漪
 	option.GROUND_RIPPLES=地表涟漪
+
+screen.Rain_Fog=雨雾配置
+	option.RainFog_amount=雨雾倍率
+	option.RAINFOG_R=雨雾 - 红色比重
+	option.RAINFOG_G=雨雾 - 绿色比重
+	option.RAINFOG_B=雨雾 - 蓝色比重
 
 screen.DAILY_WEATHER=周期循环的天气配置
 	option.Daily_Weather=周期循环的天气
@@ -226,6 +229,11 @@ screen.Waving_Stuff=摇晃相关
 	option.RP_MODEL_FIX=禁用 3D 植物摇晃
 	option.WAVY_STRENGTH=摇晃强度
 	option.WAVY_SPEED=摇晃速度
+
+screen.Atomsphere_Absorbance=大气吸收率
+	option.ATOMSPHERE_ABSORBANCE_R=大气红色吸收率
+	option.ATOMSPHERE_ABSORBANCE_G=大气绿色吸收率
+	option.ATOMSPHERE_ABSORBANCE_B=大气蓝色吸收率
 
 	option.SKY_GROUND=地表大气
 
@@ -527,6 +535,8 @@ screen.TAA_OPTIONS = 抗锯齿配置
 	option.CAMERA_GRIDLINES = 相机网格线
 	option.MOTION_BLUR = 动态模糊
 	option.MOTION_BLUR_STRENGTH = 动态模糊强度
+	option.FISHEYE_EFFECT = 鱼眼镜头
+	option.FISHEYE_STRENGTH = 鱼眼镜头畸变强度
 	option.CHROMATIC_ABERRATION = 色差
 	option.CHROMATIC_ABERRATION_STRENGTH = 色差强度
 	option.VIGNETTE = 相机暗角
@@ -640,9 +650,10 @@ screen.GAMEPLAY_EFFECTS=游玩效果配置
 	option.LOW_HEALTH_EFFECT=低生命值效果
 	option.LOW_HEALTH_EFFECT_START=配置低生命值的剩余 HP
 	option.CRITICALLY_LOW_HEALTH_EFFECT_START=配置危险生命值的剩余 HP
+	option.DISTORT_EFFECT_AMOUNT=失真效果强度
 	option.WATER_ON_CAMERA_EFFECT=相机覆水效果
-	option.RAIN_ON_CAMERA_EFFECT=相机覆雨效果
 	option.ON_FIRE_DISTORT_EFFECT=灼烧扭曲效果
+	option.RAIN_ON_CAMERA_EFFECT=相机覆雨效果
 
 screen.Aerochrome_Mode=Aerochrome 模式
 	option.AEROCHROME_MODE=Aerochrome 模式
@@ -976,6 +987,8 @@ option.COLOR_GRADING_ENABLED.comment=开启此选项以启用后处理的颜色�
 option.CAMERA_GRIDLINES.comment=开启此选项以启用相机网格线效果. §a性能开销很低.
 option.MOTION_BLUR.comment=开启此选项以启用动态模糊效果. §a性能开销很低.
 option.MOTION_BLUR_STRENGTH.comment=配置动态模糊效果的强度.
+option.FISHEYE_EFFECT.comment=开启此选项以启用鱼眼镜头效果.
+option.FISHEYE_STRENGTH.comment=配置鱼眼镜头畸变效果的强度.
 option.CHROMATIC_ABERRATION.comment=开启此选项以启用应用于图像两侧的红蓝色差效果. 用以创造一些独特的图像效果. §a性能开销很低.
 option.CHROMATIC_ABERRATION_STRENGTH.comment=配置色差效果的强度.
 option.VIGNETTE.comment=开启此选项以启用相机暗角效果. §a性能开销很低.
@@ -1043,13 +1056,16 @@ option.EMISSIVE_ORE.comment=开启此选项以应用着色器的矿物发光特�
 option.EMISSIVE_ORE_RANGE.comment=配置矿物发光的光照距离.
 
 option.MOTION_AMOUNT.comment=配置屏幕特效滤镜的效果强度. §aIRIS限定功能.
-option.DAMAGE_TAKEN_EFFECT.comment=开启此选项以启用受击效果. §aIRIS限定功能.
-option.LOW_HEALTH_EFFECT.comment=开启此选项以启用低生命值效果. §aIRIS限定功能.
-option.LOW_HEALTH_EFFECT_START.comment=配置低生命值的阈值. §aIRIS限定功能.
-option.CRITICALLY_LOW_HEALTH_EFFECT_START.comment=配置危险生命值的阈值. §aIRIS限定功能.
-option.WATER_ON_CAMERA_EFFECT.comment=开启此选项以在进出水体时启用相机覆水效果. §aIRIS限定功能.
-option.RAIN_ON_CAMERA_EFFECT.comment=开启此选项以在下雨时启用相机覆雨效果. §aIRIS限定功能.
-option.ON_FIRE_DISTORT_EFFECT.comment=开启此选项以在着火时启用扭曲效果. §aIRIS限定功能.
+option.DAMAGE_TAKEN_EFFECT.comment=开启此选项以启用受击效果.
+option.LOW_HEALTH_EFFECT.comment=开启此选项以启用低生命值效果.
+option.LOW_HEALTH_EFFECT_START.comment=配置低生命值的阈值.
+option.CRITICALLY_LOW_HEALTH_EFFECT_START.comment=配置危险生命值的阈值.
+
+option.DISTORT_EFFECT_AMOUNT.comment=配置失真扭曲滤镜的效果强度.
+option.WATER_ON_CAMERA_EFFECT.comment=开启此选项以在进出水体时启用相机覆水效果.
+option.ON_FIRE_DISTORT_EFFECT.comment=开启此选项以在着火时启用扭曲效果.
+
+option.RAIN_ON_CAMERA_EFFECT.comment=开启此选项以在下雨时启用相机覆雨效果.
 
 option.AEROCHROME_MODE.comment=开启此选项以启用受Chrome浏览器启发而开发的 Aerochrome 红外胶片效果.
 option.AEROCHROME_PINKNESS.comment=配置 Aerochrome 模式的颜色. 数值越高越接近粉色, 反之越接近红色.
@@ -1105,10 +1121,10 @@ option.DH_AMBIENT_OCCLUSION.comment=WIP选项. 开启此选项以在 LOD 区块�
 option.DH_SUBSURFACE_SCATTERING.comment=WIP选项. 开启此选项以在 LOD 区块内使用 SSS.
 option.DH_SCREENSPACE_REFLECTIONS.comment=WIP选项. 开启此选项以在 LOD 区块内使用 SSR.
 option.DH_TAA_JITTER.comment=开启此选项以在 DH 区块内使用特殊的噪声贴图.
-option.DH_NOISE_TEXTURE=开启此选项以在 DH 区块内使用特殊的噪声贴图. 用以使普通区块与 DH 区块之间的过渡更自然.
-option.NOISE_RESOLUTION=配置 DH 区块内的噪声分辨率.
-option.NOISE_INTENSITY=配置 DH 区块内的噪声强度.
-option.NOISE_DROPOFF=配置 DH 区块内的噪声衰减速度/容易程度.
+option.DH_NOISE_TEXTURE.comment=开启此选项以在 DH 区块内使用特殊的噪声贴图. 用以使普通区块与 DH 区块之间的过渡更自然.
+option.NOISE_RESOLUTION.comment=配置 DH 区块内的噪声分辨率.
+option.NOISE_INTENSITY.comment=配置 DH 区块内的噪声强度.
+option.NOISE_DROPOFF.comment=配置 DH 区块内的噪声衰减速度/容易程度.
 
 option.DH_KNOWN_ISSUES.comment=点击以循环已知问题.
 

@@ -9,15 +9,6 @@ profile.veryHigh=§cVery High
 
 screen.World=World
 screen.Sky=Sky Configuration
-	option.sunPathRotation=Sun Angle
-		suffix.sunPathRotation=°
-	option.sun_illuminance=Sun Illuminance
-		suffix.sun_illuminance=LX
-	option.moon_illuminance=Moon Illuminance
-		suffix.moon_illuminance=LX
-	option.MOONPHASE_BASED_MOONLIGHT=Moonphase Brightness Levels
-	option.STAR_DENSITY=Star Density
-	option.STAR_MOVEMENT_MULT=Star Rotation Speed
 	option.RAINBOW=Rainbow Type
 		value.RAINBOW.0=OFF
 		value.RAINBOW.1=Realistic
@@ -33,7 +24,7 @@ screen.Sky_coefficients=Sky
 	option.sky_coefficientMieG=Mie G
 	option.sky_coefficientMieB=Mie B
 
-screen.Sun_and_Moon_Colors=Sun/Moon Colors
+screen.Sun_and_Moon=Sun & Moon
 	option.sunColorR=Sun R
 	option.sunColorG=Sun G
 	option.sunColorB=Sun B
@@ -47,6 +38,11 @@ screen.Sun_and_Moon_Colors=Sun/Moon Colors
 		suffix.Sun_temp=K
 	option.Moon_temp=Moon Temperature
 		suffix.Moon_temp=K
+	option.sun_illuminance=Sun Illuminance
+		suffix.sun_illuminance=LX
+	option.moon_illuminance=Moon Illuminance
+		suffix.moon_illuminance=LX
+	option.MOONPHASE_BASED_MOONLIGHT=Moonphase Brightness Levels
 
 screen.Aurora=Aurora
 	option.AURORA_BRIGHTNESS=Aurora Brightness
@@ -60,7 +56,9 @@ screen.Aurora=Aurora
 	option.AURORA_LOWER_G=Aurora Lower Color G
 	option.AURORA_LOWER_B=Aurora Lower Color B
 
-screen.Shooting_Stars=Shooting Stars
+screen.Shooting_Stars=Stars & Shooting Stars
+	option.STAR_DENSITY=Star Density
+	option.STAR_MOVEMENT_MULT=Star Rotation Speed
 	option.SHOOTING_STARS=Shooting Stars
 	option.SHOOTING_STARS_SPEED=Shooting Star Speed
 	option.SHOOTING_STARS_FREQUENCY=Shooting Star Frequency
@@ -71,9 +69,14 @@ screen.Shooting_Stars=Shooting Stars
 screen.Weather=Weather
 	option.RAIN_VISIBILITY=Rain/Snow Visibility
 	option.Rain_coverage=Rain Cloud Coverage
-	option.RainFog_amount=Rain Fog Density
 	option.WATER_RIPPLES=Water Ripples
 	option.GROUND_RIPPLES=Ground Ripples
+
+screen.Rain_Fog= Rain Fog
+	option.RainFog_amount=Rain Fog Density
+	option.RAINFOG_R=Rain Fog Color R
+	option.RAINFOG_G=Rain Fog Color G
+	option.RAINFOG_B=Rain Fog Color B
 
 screen.DAILY_WEATHER=Daily Weather Settings
 	option.Daily_Weather=Daily Weather
@@ -226,6 +229,11 @@ screen.Waving_Stuff=Waving Stuff
 	option.RP_MODEL_FIX=Disable 3D Plants Waving
 	option.WAVY_STRENGTH=Waving Strength
 	option.WAVY_SPEED=Waving Speed
+
+screen.Atomsphere_Absorbance=Atomsphere Absorbance
+	option.ATOMSPHERE_ABSORBANCE_R=Atmosphere Absorbance Ratio R
+	option.ATOMSPHERE_ABSORBANCE_G=Atmosphere Absorbance Ratio G
+	option.ATOMSPHERE_ABSORBANCE_B=Atmosphere Absorbance Ratio B
 
 	option.SKY_GROUND=Atmosphere ground
 
@@ -528,6 +536,9 @@ screen.TAA_OPTIONS = Anti-Aliasing Settings
 	option.CAMERA_GRIDLINES = Camera Gridlines
 	option.MOTION_BLUR = Motion Blur
 	option.MOTION_BLUR_STRENGTH = Motion Blur Strength
+	option.FISHEYE_EFFECT = Fish Eye Lens
+	option.FISHEYE_STRENGTH = Fish Eye Lens Aberration Strength
+	option.MOTION_BLUR_STRENGTH = Motion Blur Strength
 	option.CHROMATIC_ABERRATION = Chromatic Aberration
 	option.CHROMATIC_ABERRATION_STRENGTH = Chromatic Aberration Strength
 	option.VIGNETTE = Vignette
@@ -641,9 +652,10 @@ screen.GAMEPLAY_EFFECTS=Gameplay Effect Settings
 	option.LOW_HEALTH_EFFECT=Low Health Effect
 	option.LOW_HEALTH_EFFECT_START=HP for Low Health
 	option.CRITICALLY_LOW_HEALTH_EFFECT_START=HP for Critical Health
+	option.DISTORT_EFFECT_AMOUNT=Distortion Amount
 	option.WATER_ON_CAMERA_EFFECT=Water on Camera Effect
-	option.RAIN_ON_CAMERA_EFFECT=Rain on Camera Effect
 	option.ON_FIRE_DISTORT_EFFECT=Fire Distortion Effect
+	option.RAIN_ON_CAMERA_EFFECT=Rain on Camera Effect
 
 screen.Aerochrome_Mode=Aerochrome Mode Settings
 	option.AEROCHROME_MODE=Aerochrome Mode
@@ -977,6 +989,8 @@ option.COLOR_GRADING_ENABLED.comment=Toggle the color grading. The RGB sliders w
 option.CAMERA_GRIDLINES.comment=Toggle the camera grindlines overlay.
 option.MOTION_BLUR.comment=Toggle the motion blur effect.
 option.MOTION_BLUR_STRENGTH.comment=Configure the motion blur strength.
+option.FISHEYE_EFFECT.comment=Toggle the fish eye lens effect.
+option.FISHEYE_STRENGTH.comment=Configure the fish eye lens aberration strength.
 option.CHROMATIC_ABERRATION.comment=Toggle the chromatic aberration effect to create unique graphic.
 option.CHROMATIC_ABERRATION_STRENGTH.comment=Configure the chromatic aberration strength.
 option.VIGNETTE.comment=Toggle the camera vignette effect.
@@ -1044,13 +1058,16 @@ option.EMISSIVE_ORE.comment=Toggle the ore emission rendered by shader.
 option.EMISSIVE_ORE_RANGE.comment=Toggle the ore emission range.
 
 option.MOTION_AMOUNT.comment=Configure the effect strength of bellowing settings. §aFor Iris users ONLY.
-option.DAMAGE_TAKEN_EFFECT.comment=Toggle the damage taken effect filter. §aFor Iris users ONLY.
-option.LOW_HEALTH_EFFECT.comment=Toggle the low health effect filter. §aFor Iris users ONLY.
-option.LOW_HEALTH_EFFECT_START.comment=Configure how much HP left is considered low health. §aFor Iris users ONLY.
+option.DAMAGE_TAKEN_EFFECT.comment=Toggle the damage taken effect filter.
+option.LOW_HEALTH_EFFECT.comment=Toggle the low health effect filter.
+option.LOW_HEALTH_EFFECT_START.comment=Configure how much HP left is considered low health.
 option.CRITICALLY_LOW_HEALTH_EFFECT_START.comment=Configure how much HP left is considered critical health.
-option.WATER_ON_CAMERA_EFFECT.comment=Toggle the effect of water drops slicing over the camera while entering and leaving the water. §aFor Iris users ONLY.
-option.RAIN_ON_CAMERA_EFFECT.comment=Toggle the effect of rain drops slicing over the camera while raining. §aFor Iris users ONLY.
-option.ON_FIRE_DISTORT_EFFECT.comment=Toggle the heat distortion effect while on fire. §aFor Iris users ONLY.
+
+option.DISTORT_EFFECT_AMOUNT.comment=Configure the distortion strength of bellowing settings.
+option.WATER_ON_CAMERA_EFFECT.comment=Toggle the effect of water drops slicing over the camera while entering and leaving the water.
+option.ON_FIRE_DISTORT_EFFECT.comment=Toggle the heat distortion effect while on fire.
+
+option.RAIN_ON_CAMERA_EFFECT.comment=Toggle the effect of rain drops slicing over the camera while raining.
 
 option.AEROCHROME_MODE.comment=Toggle the infrared film mode. Google "Aerochrome" to get an idea of what it does.
 option.AEROCHROME_PINKNESS.comment=Configure the Aerochrome mode color. Higher = Pink. Lower = Red.
@@ -1106,10 +1123,10 @@ option.DH_AMBIENT_OCCLUSION.comment=[WIP] Toggle the AO in DH chunks. ONLY work 
 option.DH_SUBSURFACE_SCATTERING.comment=[WIP] Toggle the SSS in DH chunks.
 option.DH_SCREENSPACE_REFLECTIONS.comment=[WIP] Toggle the SSR in DH chunks.
 option.DH_TAA_JITTER.comment=Toggle TAA Jitter in DH chuncks.
-option.DH_NOISE_TEXTURE=Toggle noise texture in DH chuncks to make transition between normal chunks and DH chuncks less obvious.
-option.NOISE_RESOLUTION=Configure the noise resolution used in DH chunks.
-option.NOISE_INTENSITY=Configure the noise intensity used in DH chunks.
-option.NOISE_DROPOFF=Configure the dropoff of noise.
+option.DH_NOISE_TEXTURE.comment=Toggle noise texture in DH chuncks to make transition between normal chunks and DH chuncks less obvious.
+option.NOISE_RESOLUTION.comment=Configure the noise resolution used in DH chunks.
+option.NOISE_INTENSITY.comment=Configure the noise intensity used in DH chunks.
+option.NOISE_DROPOFF.comment=Configure the dropoff of noise.
 
 option.DH_KNOWN_ISSUES.comment=Click to cycle the known issues.
 
