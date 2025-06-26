@@ -1,3 +1,9 @@
+2025-6-26 v1.76
+1. Fix glowing haze at night.
+~ overworld_fog 修复了夜晚发光的雾霾
+2. Add options for atmosphere absorbance.
+~ setting 为大气吸收率添加选项
+
 2025-6-26 v1.75
 1. Add light absorbance with atomsphere options.
 ~ ROBOBO_sky 新增大气光线吸收选项
