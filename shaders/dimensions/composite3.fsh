@@ -323,7 +323,7 @@ void main() {
 	// 0.9 = entity mask
 	// 0.8 = reflective entities
 	// 0.7 = reflective blocks
-  float translucentMasks = texture2D(colortex7, texcoord).a;
+	float translucentMasks = texture2D(colortex7, texcoord).a;
 
 	bool isWater = translucentMasks > 0.99;
 	bool isReflectiveEntity = abs(translucentMasks - 0.8) < 0.01;
@@ -366,9 +366,9 @@ void main() {
   
   	#ifdef BorderFog
 		#ifdef DISTANT_HORIZONS
-			float fog = smoothstep(1.0, 0.0, min(max(1.0 - linearDistance_cylinder / dhRenderDistance,0.0)*3.0,1.0)   );
+			float fog = smoothstep(1.0, 0.0, min(max(1.0 - linearDistance_cylinder / dhRenderDistance,0.0)*3.0,1.0));
 		#else
-			float fog = smoothstep(1.0, 0.0, min(max(1.0 - linearDistance_cylinder / far,0.0)*3.0,1.0)   );
+			float fog = smoothstep(1.0, 0.0, min(max(1.0 - linearDistance_cylinder / far,0.0)*3.0,1.0));
 		#endif
 
 		fog *= exp(-10.0 * pow(clamp(playerPos_normalized.y,0.0,1.0)*4.0,2.0));

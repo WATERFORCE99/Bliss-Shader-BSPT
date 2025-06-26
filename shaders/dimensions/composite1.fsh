@@ -608,7 +608,7 @@ void applyPuddles(
 	
 	// if(isWater || f0 > 229.5/255.0) snow = 0.0;
 
-	// normals = mix(no rmals, unchangedNormals, snow);
+	// normals = mix(normals, unchangedNormals, snow);
 	// roughness = mix(roughness, 0.5, snow);
 	// albedo = mix(albedo, vec3(1.0), snow);
 }
