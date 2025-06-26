@@ -230,10 +230,11 @@ screen.Waving_Stuff=Waving Stuff
 	option.WAVY_STRENGTH=Waving Strength
 	option.WAVY_SPEED=Waving Speed
 
-screen.Atomsphere_Absorbance=Atomsphere Absorbance
-	option.ATOMSPHERE_ABSORBANCE_R=Atmosphere Absorbance Ratio R
-	option.ATOMSPHERE_ABSORBANCE_G=Atmosphere Absorbance Ratio G
-	option.ATOMSPHERE_ABSORBANCE_B=Atmosphere Absorbance Ratio B
+screen.Atmosphere_Absorbance=Atmosphere Absorbance
+	option.ATMOSPHERE_ABSORBANCE=Atmosphere Absorbance
+	option.ATMOSPHERE_ABSORBANCE_R=Atmosphere Absorbance Ratio R
+	option.ATMOSPHERE_ABSORBANCE_G=Atmosphere Absorbance Ratio G
+	option.ATMOSPHERE_ABSORBANCE_B=Atmosphere Absorbance Ratio B
 
 	option.SKY_GROUND=Atmosphere ground
 
@@ -757,7 +758,7 @@ screen.FOG_LIGHTING_COLORS=Fog Color Settings
 	option.INDIRECTLIGHT_FOG_R = Ambient R
 	option.INDIRECTLIGHT_FOG_G = Ambient G
 	option.INDIRECTLIGHT_FOG_B = Ambient B
-	option.USE_CUSTOM_SKY_GROUND_LIGHTING_COLORS = Custom Atomsphere Ground Color
+	option.USE_CUSTOM_SKY_GROUND_LIGHTING_COLORS = Custom Atmosphere Ground Color
 screen.SKY_GROUND_LIGHTING_COLORS=Atmosphere Ground Color Settings
 	option.SKY_GROUND_R = Ground R
 	option.SKY_GROUND_G = Ground G
@@ -852,6 +853,8 @@ option.WAVY_PLANTS.comment=Toggle the plant waving animation.
 option.RP_MODEL_FIX.comment=Toggle to disable specific groups of plant waving animation. Some RPs may contain 3D models for vanilla plants, disable them from waving will avoid some graphic flaws.
 option.WAVY_STRENGTH.comment=Configure the amount the plants wave.
 option.WAVY_SPEED.comment=Configure the speed the plants wave.
+
+option.ATMOSPHERE_ABSORBANCE.comment=Toggle to enable sun light absorbance by atmosphere to create better visual at sunrise/sunset.
 
 option.SKY_GROUND.comment=Configure the strength of atomsphere color affected by sky light.
 

@@ -230,10 +230,11 @@ screen.Waving_Stuff=摇晃相关
 	option.WAVY_STRENGTH=摇晃强度
 	option.WAVY_SPEED=摇晃速度
 
-screen.Atomsphere_Absorbance=大气吸收率
-	option.ATOMSPHERE_ABSORBANCE_R=大气红色吸收率
-	option.ATOMSPHERE_ABSORBANCE_G=大气绿色吸收率
-	option.ATOMSPHERE_ABSORBANCE_B=大气蓝色吸收率
+screen.Atmosphere_Absorbance=大气吸收率
+	option.ATMOSPHERE_ABSORBANCE=大气光线吸收
+	option.ATMOSPHERE_ABSORBANCE_R=大气红色吸收率
+	option.ATMOSPHERE_ABSORBANCE_G=大气绿色吸收率
+	option.ATMOSPHERE_ABSORBANCE_B=大气蓝色吸收率
 
 	option.SKY_GROUND=地表大气
 
@@ -850,6 +851,8 @@ option.WAVY_PLANTS.comment=开启此选项以启用植物摇晃的所有功能. 
 option.RP_MODEL_FIX.comment=开启此选项以禁用一些可能含有 3D 模型的植物摇晃. 用以避免一些图像问题.
 option.WAVY_STRENGTH.comment=配置植物摇晃的强度.
 option.WAVY_SPEED.comment=配置植物摇晃的速度.
+
+option.ATMOSPHERE_ABSORBANCE.comment=开启此选项将使太阳光颜色随太阳角度降低而改变以达到更好的日出/日落画面.
 
 option.SKY_GROUND.comment=配置天空光对地表的作用程度.
 
