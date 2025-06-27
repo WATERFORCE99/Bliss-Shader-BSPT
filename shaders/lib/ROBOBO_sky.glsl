@@ -37,16 +37,18 @@ const mat3 sky_coefficientsAttenuation = mat3(sky_coefficientRayleigh , sky_coef
 
 float sunHeight = normalize(mat3(gbufferModelViewInverse) * sunPosition).y;
 float sunHeightFactor = pow(clamp(1.0 - sunHeight * 4.5, 0.0, 1.0), 0.7);
-vec3 atomsphereAbsorbance = vec3(0.0);
+
 #ifdef ATMOSPHERE_ABSORBANCE
-	atomsphereAbsorbance = vec3(0.1 * sunHeightFactor, 0.75 * sunHeightFactor, 0.85 * sunHeightFactor);
+	vec3 atmosphereAbsorbance = vec3(ATMOSPHERE_ABSORBANCE_R * sunHeightFactor, ATMOSPHERE_ABSORBANCE_G * sunHeightFactor, ATMOSPHERE_ABSORBANCE_B * sunHeightFactor);
+#else
+	vec3 atmosphereAbsorbance = vec3(0.0);
 #endif
 
 #if colortype == 1
-	#define sunColorBase (vec3(sunColorR, sunColorG, sunColorB) - atomsphereAbsorbance) * sun_illuminance
+	#define sunColorBase (vec3(sunColorR, sunColorG, sunColorB) - atmosphereAbsorbance) * sun_illuminance
 	#define moonColorBase vec3(moonColorR,moonColorG,moonColorB) * moon_illuminance * moonlightbrightness
 #else
-	#define sunColorBase (blackbody(Sun_temp) - atomsphereAbsorbance) * sun_illuminance
+	#define sunColorBase (blackbody(Sun_temp) - atmosphereAbsorbance) * sun_illuminance
 	#define moonColorBase blackbody(Moon_temp) * moon_illuminance * moonlightbrightness
 #endif
 
