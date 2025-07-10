@@ -9,6 +9,8 @@ profile.veryHigh=§c高质量
 
 screen.World=世界
 screen.Sky=天空配置
+	option.sunPathRotation=日月倾角
+		suffix.sunPathRotation=°
 	option.RAINBOW=彩虹类型
 		value.RAINBOW.0=关
 		value.RAINBOW.1=真实

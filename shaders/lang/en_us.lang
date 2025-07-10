@@ -9,6 +9,8 @@ profile.veryHigh=§cVery High
 
 screen.World=World
 screen.Sky=Sky Configuration
+	option.sunPathRotation=Sun Angle
+		suffix.sunPathRotation=°
 	option.RAINBOW=Rainbow Type
 		value.RAINBOW.0=OFF
 		value.RAINBOW.1=Realistic
