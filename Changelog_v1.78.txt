@@ -1,3 +1,13 @@
+2025-7-10 v1.78
+1. Merge X0nk's latest commit. (shadow, ssrt etc.)
+~xxx 整合了X0nk最新的更新 (阴影，SSRT等）
+
+2025-7-4 v1.77
+1. Restore sun path rotation.
+~ settings 还原了日月倾角选项
+2. Fix ripple issue.
+~ all_translucent 修复了涟漪问题
+
 2025-6-26 v1.76
 1. Fix glowing haze at night.
 ~ overworld_fog 修复了夜晚发光的雾霾
