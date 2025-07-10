@@ -473,7 +473,7 @@ vec4 GetVolumetricClouds(
 	///------- do color stuff outside of the raymarcher loop
 	vec3 sunScattering = directLightCol * (phaseCloud(SdotV, 0.85) + phaseCloud(SdotV, 0.75)) * PI;
 	vec3 sunMultiScattering = directLightCol;
-	vec3 skyScattering = indirectLightCol * 2.0;
+	vec3 skyScattering = indirectLightCol * (1.0 + pow(1.0-pow(1.0-clamp(sunVector.y,0.0,1.0),5.0),5.0));
  
    	////-------  RENDER SMALL / LARGE CUMULUS CLOUDS
 		vec4 smallCumulusClouds = cloudColor;

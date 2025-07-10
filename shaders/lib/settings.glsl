@@ -1,4 +1,4 @@
-#define SHADER_VERSION_LABEL 1.77 // [1.77]
+#define SHADER_VERSION_LABEL 1.78 // [1.78]
 
 ////////////////////////////////////////
 // ----- WATER RELATED SETTINGS ----- //
@@ -281,6 +281,7 @@ const float shadowDistance = 128; // [16 32 48 64 80 96 128 160 192 256 512 1024
 #define ambientsss_brightness 1.0 // [0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0 2.1 2.2 2.3 2.4 2.5 2.6 2.7 2.8 2.9 3.0 4.0 5.0]
 #define sss_absorbance_multiplier 1.0 // [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0 2.1 2.2 2.3 2.4 2.5 2.6 2.7 2.8 2.9 3.0 4.0 5.0]
 #define sss_density_multiplier 1.0 // [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0 2.1 2.2 2.3 2.4 2.5 2.6 2.7 2.8 2.9 3.0 4.0 5.0]
+#define SCREENSPACE_DIRECT_SSS_BLENDING 0.5 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 
 #define Porosity
 #define Puddles
@@ -485,9 +486,6 @@ const float shadowDistance = 128; // [16 32 48 64 80 96 128 160 192 256 512 1024
 // #define RESPONSIVE_TAA
 // #define TAA_UPSCALING
 // #define SCREENSHOT_MODE
-#ifdef SCREENSHOT_MODE
-	#undef RESPONSIVE_TAA
-#endif
 
 #define BLEND_FACTOR 0.125 // [0.01 0.02 0.03 0.04 0.05 0.06 0.08 0.1 0.12 0.125 0.14 0.16 0.18 0.20 0.25 0.30 0.40 0.50 0.60 0.70 0.80 0.90 1.00]
 
@@ -681,7 +679,7 @@ const vec3 aerochrome_color = mix(vec3(1.0, 0.0, 0.0), vec3(0.715, 0.303, 0.631)
 #define SELECT_BOX_COL_B 0.0 // [0.0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
 
 // #define OLD_CAVE_DETECTION
-// #define OLD_LIGHTLEAK_FIX
+#define LIGHTLEAKFIX_MODE 1 // [0 1 2]
 #define FORCE_TRANSLUCENT_GLASS
 
 // #define PLANET_CURVATURE
