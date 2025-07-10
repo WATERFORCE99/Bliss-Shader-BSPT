@@ -93,40 +93,38 @@ float shlickFresnelRoughness(float XdotN, float roughness){
 
 vec3 rayTraceSpeculars(vec3 dir, vec3 position, float dither, float quality, bool hand, inout float reflectionLength, float fresnel){
 
-	float biasAmount = mix(0.0001, 0.00002, fresnel);
+	float biasAmount = 0.0001;
 
 	vec3 clipPosition = toClipSpace3(position);
 	float rayLength = ((position.z + dir.z * far * sqrt(3.0)) > -near)
 					? (-near - position.z) / dir.z
 					: far * sqrt(3.0);
-	vec3 direction = normalize(toClipSpace3(position+dir*rayLength)-clipPosition);  //convert to clip space
-	direction.xy = normalize(direction.xy);
+	vec3 direction = toClipSpace3(position + dir * rayLength) - clipPosition; //convert to clip space
 
 	//get at which length the ray intersects with the edge of the screen
-	vec3 maxLengths = (step(0.0,direction)-clipPosition) / direction;
-	float mult = min(min(maxLengths.x,maxLengths.y),maxLengths.z);
+	vec3 maxLengths = (step(0.0, direction) - clipPosition) / direction;
+	float mult = min(min(maxLengths.x, maxLengths.y), maxLengths.z);
 
-	vec3 stepv = direction * mult / quality*vec3(RENDER_SCALE,1.0);
+	vec3 stepv = direction * mult / quality;
+	clipPosition.xy *= RENDER_SCALE;
+	stepv.xy *= RENDER_SCALE;
 
-	vec3 spos = clipPosition*vec3(RENDER_SCALE,1.0) + stepv*(dither-0.5);
+	vec3 spos = clipPosition + stepv * dither;
 
 	#if defined DEFERRED_SPECULAR && defined TAA
 		spos.xy += TAA_Offset*texelSize*0.5/RENDER_SCALE;
 	#endif
 
-	float minZ = spos.z;
+	float minZ = spos.z - 0.00025 / linZ(spos.z);
 	float maxZ = spos.z;
 
   	for (int i = 0; i <= int(quality); i++) {
-
-		float sp = invLinZ(sqrt(texelFetch2D(colortex4,ivec2(spos.xy/texelSize/4.0),0).a/65000.0));
+		float sampleDepth = sqrt(texelFetch2D(colortex4,ivec2(spos.xy/texelSize/4.0),0).a/65000.0);
+		float sp = invLinZ(sampleDepth);
 	
-		float currZ = linZ(spos.z);
-		float nextZ = linZ(sp);
+		if(sp < max(minZ, maxZ) && sp > min(minZ, maxZ)) return vec3(spos.xy/RENDER_SCALE,sp);
 
-		if(sp < max(minZ,maxZ) && sp > min(minZ,maxZ)) return vec3(spos.xy/RENDER_SCALE,sp);
-
-		minZ = maxZ-biasAmount / currZ;
+		minZ = maxZ - biasAmount / linZ(spos.z);
 		maxZ += stepv.z;
 
 		spos += stepv;
@@ -239,14 +237,14 @@ float getReflectionVisibility(float f0, float roughness){
 // derived from N and K from labPBR wiki https://shaderlabs.org/wiki/LabPBR_Material_Standard
 // using ((1.0 - N)^2 + K^2) / ((1.0 + N)^2 + K^2)
 vec3 HCM_F0 [8] = vec3[](
-	vec3(0.531228825312, 0.51235724246, 0.495828545714),// iron	
-	vec3(0.944229966045, 0.77610211732, 0.373402004593),// gold		
-	vec3(0.912298031535, 0.91385063144, 0.919680580954),// Aluminum
-	vec3(0.55559681715,  0.55453707574, 0.554779427513),// Chrome
-	vec3(0.925952196272, 0.72090163805, 0.504154241735),// Copper
-	vec3(0.632483812932, 0.62593707362, 0.641478899539),// Lead
-	vec3(0.678849234658, 0.64240055565, 0.588409633571),// Platinum
-	vec3(0.961999998804, 0.94946811207, 0.922115710997)	// Silver
+	vec3(0.531228825312, 0.51235724246, 0.495828545714), // iron	
+	vec3(0.944229966045, 0.77610211732, 0.373402004593), // gold		
+	vec3(0.912298031535, 0.91385063144, 0.919680580954), // Aluminum
+	vec3(0.55559681715,  0.55453707574, 0.554779427513), // Chrome
+	vec3(0.925952196272, 0.72090163805, 0.504154241735), // Copper
+	vec3(0.632483812932, 0.62593707362, 0.641478899539), // Lead
+	vec3(0.678849234658, 0.64240055565, 0.588409633571), // Platinum
+	vec3(0.961999998804, 0.94946811207, 0.922115710997) // Silver
 );
 
 vec3 specularReflections(
@@ -283,10 +281,6 @@ vec3 specularReflections(
 
 	f0 = f0 == 0.0 ? 0.02 : f0;
 
-	// if(isHand){
-		// f0 = 0.9;
-		// roughness = 0.0;
-	// }
 	bool isMetal = f0 > 229.5/255.0;
 
 	// get reflected vector

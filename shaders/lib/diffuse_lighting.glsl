@@ -108,12 +108,16 @@ vec3 doBlockLightLighting(
 
 		// create a smooth falloff at the edges of the voxel volume.
 		float fadeLength = 10.0; // in meters
-		vec3 cubicRadius = clamp( min(((LpvSize3-1.0) - lpvPos)/fadeLength,      lpvPos/fadeLength) ,0.0,1.0);
+		vec3 cubicRadius = clamp( min(((LpvSize3-1.0) - lpvPos)/fadeLength, lpvPos/fadeLength) ,0.0,1.0);
 		float voxelRangeFalloff = cubicRadius.x*cubicRadius.y*cubicRadius.z;
 		voxelRangeFalloff = 1.0 - pow(1.0-pow(voxelRangeFalloff,1.5),3.0);
         
 		// outside the voxel volume, lerp to vanilla lighting as a fallback
-		blockLight = mix(blockLight, lpvSample.rgb, voxelRangeFalloff);
+		// blockLight = mix(blockLight, lpvSample.rgb, voxelRangeFalloff);
+
+		// to fix optifine/continuity custom emissives, only allow the vanilla lightmap at high torch light levels.
+		vec3 mix_lpvsample = mix(max(lpvSample.rgb, lightColor * 2.5 * min(max(lightmap - 0.999, 0.0)/(1.0 - 0.999), 1.0)), lpvSample.rgb, clamp(dot(lpvSample.rgb, vec3(1.0)), 0.0, 1.0));
+		blockLight = mix(blockLight, mix_lpvsample, voxelRangeFalloff);
 
 		#ifdef Hand_Held_lights
 			// create handheld lightsources
@@ -170,9 +174,9 @@ vec3 doIndirectLighting(
 	vec3 lightColor, vec3 minimumLightColor, float lightmap
 ){
 
-	float lightmapCurve = pow(lightmap, 15.0) + pow(lightmap, 2.5) * 0.5;
+	float lightmapCurve = pow(lightmap, 15.0) + pow(lightmap, 2.5) / 3.0; //make sure its 0.0-1.0;
 
-	vec3 indirectLight = lightColor * lightmapCurve * ambient_brightness * 0.7; 
+	vec3 indirectLight = lightColor * lightmapCurve * ambient_brightness; 
 
 	indirectLight += minimumLightColor * ((MIN_LIGHT_AMOUNT * 0.2 + nightVision) * 0.02);
 
@@ -189,8 +193,7 @@ uniform float centerDepthSmooth;
  	uniform mat4 vivecraftRelativeOffHandRot;
  #endif
 
-vec3 calculateFlashlight(in vec2 texcoord, in vec3 viewPos, in vec3 albedo, in vec3 normal, out vec4 flashLightSpecularData, bool hand){
-
+vec3 calculateFlashlight(in vec2 texcoord, in vec3 viewPos, in vec3 albedo, in vec3 normal, out vec4 flashLightSpecularData, bool hand) {
  	vec3 shiftedViewPos;
 	vec3 shiftedPlayerPos;
  	float forwardOffset;
