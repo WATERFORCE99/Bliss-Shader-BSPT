@@ -442,13 +442,15 @@ void main() {
 		
 				waterPos.xyz = getParallaxDisplacement(waterPos, playerPos);
 
+				vec3 bump = getWaveNormal(waterPos, playerPos, false);
+
 				#ifdef WATER_RIPPLES
 					vec3 rippleNormal = vec3(0.0);
 					if (rainStrength > 0.01 && abs(worldSpaceNormal.x) < 0.95 && abs(worldSpaceNormal.z) < 0.95) rippleNormal = drawRipples(worldPos.xz * 5.0, frameTimeCounter) * 0.5 * rainStrength * rainyAreas * lightmap * clamp(1.0 - length(playerPos) / 128.0, 0.0, 1.0);
-					waterPos += rippleNormal;
+					bump += rippleNormal;
 				#endif
 
-				vec3 bump = getWaveNormal(waterPos, playerPos, false);
+				bump = normalize(bump);
 
 				float bumpmult = WATER_WAVE_STRENGTH + 0.5 * rainStrength;
 

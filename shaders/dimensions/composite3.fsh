@@ -183,10 +183,10 @@ vec4 bilateralUpsample(out float outerEdgeResults, float referenceDepth, sampler
 	ivec2 UV_NOISE = ivec2(gl_FragCoord.xy*texelSize + 1);
 
 	ivec2 OFFSET[5] = ivec2[](
-		ivec2(-1,-1),
+		ivec2(-2,-2),
 		ivec2( 1, 1),
 		ivec2(-1, 1),
-		ivec2( 1,-1),
+		ivec2( 2,-2),
 		ivec2( 0, 0)
 	);
 
