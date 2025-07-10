@@ -136,12 +136,14 @@ void main() {
 		vec3 skyGroundCol = skyFromTex(vec3(0, -1 ,0), colortex4).rgb;// * clamp(WsunVec.y*2.0,0.2,1.0);
 
 		/// --- Save light values
-		if (gl_FragCoord.x < 1. && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1)
+		if (gl_FragCoord.x < 1. && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1) {
 			gl_FragData[0] = vec4(averageSkyCol_Clouds * AmbientLightTint,1.0);
-
-		if (gl_FragCoord.x > 1. && gl_FragCoord.x < 2.  && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1)
+			if(worldTimeChangeCheck) mixhistory = 1.0;
+		}
+		if (gl_FragCoord.x > 1. && gl_FragCoord.x < 2.  && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1) {
 			gl_FragData[0] = vec4((skyGroundCol/150.0) * AmbientLightTint,1.0);
-
+			if(worldTimeChangeCheck) mixhistory = 1.0;
+		}
 		#ifdef ambientLight_only
 			if (gl_FragCoord.x > 6. && gl_FragCoord.x < 7.  && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1)
 				gl_FragData[0] = vec4(0.0,0.0,0.0,1.0);
@@ -152,14 +154,20 @@ void main() {
 			if (gl_FragCoord.x > 13. && gl_FragCoord.x < 14.  && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1)
 				gl_FragData[0] = vec4(0.0,0.0,0.0,1.0);
 		#else
-			if (gl_FragCoord.x > 6. && gl_FragCoord.x < 7.  && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1)
+			if (gl_FragCoord.x > 6. && gl_FragCoord.x < 7.  && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1) {
 				gl_FragData[0] = vec4(lightSourceColor,1.0);
+				if(worldTimeChangeCheck) mixhistory = 1.0;
+			}
 
-			if (gl_FragCoord.x > 8. && gl_FragCoord.x < 9.  && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1)
+			if (gl_FragCoord.x > 8. && gl_FragCoord.x < 9.  && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1) {
 				gl_FragData[0] = vec4(sunColor,1.0);
+				if(worldTimeChangeCheck) mixhistory = 1.0;
+			}
 
-			if (gl_FragCoord.x > 9. && gl_FragCoord.x < 10.  && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1)
+			if (gl_FragCoord.x > 9. && gl_FragCoord.x < 10.  && gl_FragCoord.y > 19.+18. && gl_FragCoord.y < 19.+18.+1) {
 				gl_FragData[0] = vec4(moonColor,1.0);
+				if(worldTimeChangeCheck) mixhistory = 1.0;
+			}
 		#endif
 
 		#if defined FLASHLIGHT && defined FLASHLIGHT_BOUNCED_INDIRECT
@@ -195,7 +203,7 @@ void main() {
 
 			vec3 mC = vec3(fog_coefficientMieR*1e-6, fog_coefficientMieG*1e-6, fog_coefficientMieB*1e-6);
 
-			sky = calculateAtmosphere((averageSkyCol*4000./2.0), viewVector, vec3(0.0,1.0,0.0), WsunVec, -WsunVec, planetSphere, skyAbsorb, 10, blueNoise());
+			sky = calculateAtmosphere((averageSkyCol*4000.0/2.0), viewVector, vec3(0.0,1.0,0.0), WsunVec, -WsunVec, planetSphere, skyAbsorb, 10, blueNoise());
 
 			// fade atmosphere conditions for rain away when you pass above the cloud plane.
 			float heightRelativeToClouds = clamp(1.0 - max(eyeAltitude - CloudLayer0_height,0.0) / 200.0 ,0.0,1.0);
@@ -235,7 +243,6 @@ void main() {
 				suncol = vec3(0.0);
 			#endif
 
-			float rejection = 1.0;
 			float cloudPlaneDistance = 0.0;
  			vec4 volumetricClouds = GetVolumetricClouds(viewPos, vec2(noise, 1.0-noise), WsunVec, suncol*2.5, skyGroundCol/30.0, cloudPlaneDistance);
 

@@ -73,10 +73,9 @@ uniform vec2 texelSize;
 
 uniform int framemod8;
 
-#ifdef HAND
-	uniform mat4 gbufferPreviousModelView;
-	uniform vec3 previousCameraPosition;
+#include "/lib/projections.glsl"
 
+#ifdef HAND
 	float detectCameraMovement(){
 		// simply get the difference of modelview matrices and cameraPosition across a frame.
 		vec3 fakePos = vec3(0.5, 0.5, 0.0);
@@ -89,8 +88,6 @@ uniform int framemod8;
 #endif
 
 #include "/lib/TAA_jitter.glsl"
-
-#include "/lib/projections.glsl"
 
 vec2 calcWave(in vec3 pos) {
 	float magnitude = abs(sin(dot(vec4(frameTimeCounter, pos),vec4(1.0,0.005,0.005,0.005)))*0.5+0.72)*0.013;

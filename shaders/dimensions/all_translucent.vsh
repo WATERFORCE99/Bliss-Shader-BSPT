@@ -50,6 +50,9 @@ flat out int glass;
 
 attribute vec4 at_tangent;
 attribute vec4 mc_Entity;
+#if defined ENTITIES
+	uniform int entityId;
+#endif
 
 uniform vec3 sunPosition;
 uniform vec3 moonPosition;
@@ -102,6 +105,11 @@ vec3 getWaveNormal(vec3 posxz, float range){
 //////////////////////////////VOID MAIN//////////////////////////////
 
 void main() {
+ 	gl_Position = ftransform();
+	#if defined ENTITIES && defined IS_IRIS
+		// force out of frustum
+		if (entityId == 1599) gl_Position.z -= 10000.0;
+	#endif
 
 	#if defined PHYSICSMOD_OCEAN_SHADER && defined PHYSICS_OCEAN
 		// basic texture to determine how shallow/far away from the shore the water is
@@ -146,10 +154,8 @@ void main() {
 
 	position = mat3(gbufferModelView) * worldpos + gbufferModelView[3].xyz;
 
- 	gl_Position = toClipSpace4alt(position);
-
-	#ifdef ENTITIES
-		gl_Position = ftransform();
+	#if !defined ENTITIES && !defined HAND
+ 		gl_Position = toClipSpace4alt(position);
 	#endif
 
 	HELD_ITEM_BRIGHTNESS = 0.0;
