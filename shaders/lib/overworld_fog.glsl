@@ -298,8 +298,8 @@ vec4 GetVolumetricFog(
 
 		// calculate the atmosphere haze seperately and purely additive to color, do not contribute to absorbtion.
 		vec3 atmosphereVolumeCoeff = exp(-(rL+m)*dd*dL);
-		// vec3 Atmosphere = LightSourcePhased * sh * (rayL*rL + sunPhase*m) + AveragedAmbientColor * (rL+m);
-		vec3 Atmosphere = (LightSourcePhased * sh * (rayL*rL + sunPhase*m) + AveragedAmbientColor * (rL+m) * (lightLevelZero*0.99 + 0.01)) * luma(AmbientColor) * inACave;
+
+		vec3 Atmosphere = (LightSourcePhased * sh * (rayL*rL + sunPhase*m) + AveragedAmbientColor * (rL+m) * (lightLevelZero*0.99 + 0.01)) * inACave;
 		color += (Atmosphere - Atmosphere * atmosphereVolumeCoeff) / (rL+m+1e-6);
 
 		//------------------------------------

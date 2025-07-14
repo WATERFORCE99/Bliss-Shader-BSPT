@@ -2,7 +2,7 @@
 #define LARGECUMULUS_LAYER 1
 #define SMALLCUMULUS_LAYER 0
 
-float cloud_movement = (worldTime + mod(worldDay,100)*24000.0) / 24.0 * Cloud_Speed;
+float cloud_movement = (worldTime + mod(worldDay,100) * 24000.0) / 24.0 * Cloud_Speed;
 
 float densityAtPos(in vec3 pos){
 	pos /= 32.0;
@@ -14,16 +14,6 @@ float densityAtPos(in vec3 pos){
 
 	vec2 hn = texture2D(noisetex, coord1).yx;
 	float density = mix(hn.r, hn.g, f.y);
-
-	#ifdef HQ_CLOUDS
-		vec3 p = pos - w;
-		p *= p * (vec3(vec2(3.0/64.0), 3.0) - vec3(vec2(2.0/64.0), 2.0) * p);
-		vec2 uv2 = (16.0 * w.z + w.xy)/64.0 + p.xy;
-		vec2 coord2 = uv2 * 0.00015;
-
-		vec2 vn = texture2D(noisetex, coord2).yx;
-		density += mix(vn.r, vn.g, p.z);
-	#endif
 
 	return density;
 }
