@@ -158,41 +158,42 @@ vec2 SSAO(
 
 	float n = 0.0;
 	for (int i = 0; i < samples; i++) {
-		
 		vec2 offsets = CleanSample(i, samples - 1, noise) / distanceScale;
 
-		ivec2 offsetUV = ivec2(gl_FragCoord.xy + offsets*vec2(viewWidth, viewHeight*aspectRatio)*RENDER_SCALE);
-			
-		// float sampleDepth = convertHandDepth_2(texelFetch2D(depthtex1, offsetUV, 0).x, hand);
-		float sampleDepth = convertHandDepth_2(texelFetch2D(depthtex1, ivec2(clamp(offsetUV*texelSize,screenEdges,1.0-screenEdges)/texelSize), 0).x, hand);
+		ivec2 offsetUV = ivec2(clamp((gl_FragCoord.xy + offsets*vec2(viewWidth, viewHeight*aspectRatio)*RENDER_SCALE)*texelSize,screenEdges,1.0-screenEdges)/texelSize);
 
-		#ifdef DISTANT_HORIZONS
-			float sampleDHDepth = texelFetch2D(dhDepthTex1, offsetUV, 0).x;
-			vec3 offsetViewPos = toScreenSpace_DH((offsetUV*texelSize - jitterOffsets) * (1.0/RENDER_SCALE), sampleDepth, sampleDHDepth);
-		#else
-			vec3 offsetViewPos = toScreenSpace(vec3((offsetUV*texelSize - jitterOffsets) * (1.0/RENDER_SCALE), sampleDepth));
-		#endif
+		if (offsetUV.x >= 0 && offsetUV.y >= 0 && offsetUV.x < viewWidth*RENDER_SCALE.x && offsetUV.y < viewHeight*RENDER_SCALE.y ) {
+		
+			float sampleDepth = convertHandDepth_2(texelFetch2D(depthtex1, offsetUV, 0).x, hand);
 
-		vec3 viewPosDiff = offsetViewPos - viewPos;
-		float viewPosDiffSquared = dot(viewPosDiff, viewPosDiff);
-			
-		float threshHold = max(1.0 - viewPosDiffSquared/depthCancelation, 0.0);
-
-		if (viewPosDiffSquared > 1e-5){
-			n += 1.0;
-			float preAo = 1.0 - clamp(dot(normalize(viewPosDiff), flatnormal)*25.0,0.0,1.0);
-			occlusion += max(0.0, dot(normalize(viewPosDiff), normal) - preAo) * threshHold;
-				
-			#ifdef Ambient_SSS
-				#ifdef OLD_INDIRECT_SSS
-					sss += clamp(-dot(normalize(viewPosDiff), flatnormal),0.0,1.0) * exp(-10*occlusion);
-				#else
-					sss += clamp(-dot(normalize(viewPosDiff), flatnormal) - occlusion/n,0.0,1.0) * 0.25 + (normalize(mat3(gbufferModelViewInverse) * -viewPosDiff).y - occlusion/n) * threshHold;
-				#endif
+			#ifdef DISTANT_HORIZONS
+				float sampleDHDepth = texelFetch2D(dhDepthTex1, offsetUV, 0).x;
+				vec3 offsetViewPos = toScreenSpace_DH((offsetUV*texelSize - jitterOffsets) * (1.0/RENDER_SCALE), sampleDepth, sampleDHDepth);
+			#else
+				vec3 offsetViewPos = toScreenSpace(vec3((offsetUV*texelSize - jitterOffsets) * (1.0/RENDER_SCALE), sampleDepth));
 			#endif
+
+			vec3 viewPosDiff = offsetViewPos - viewPos;
+			float viewPosDiffSquared = dot(viewPosDiff, viewPosDiff);
+			
+			float threshHold = max(1.0 - viewPosDiffSquared/depthCancelation, 0.0);
+
+			if (viewPosDiffSquared > 1e-5){
+				n += 1.0;
+				float preAo = 1.0 - clamp(dot(normalize(viewPosDiff), flatnormal)*25.0,0.0,1.0);
+				occlusion += max(0.0, dot(normalize(viewPosDiff), normal) - preAo) * threshHold;
+				
+				#ifdef Ambient_SSS
+					#ifdef OLD_INDIRECT_SSS
+						sss += clamp(-dot(normalize(viewPosDiff), flatnormal),0.0,1.0) * exp(-10*occlusion);
+					#else
+						sss += clamp(-dot(normalize(viewPosDiff), flatnormal) - occlusion/n,0.0,1.0) * 0.25 + (normalize(mat3(gbufferModelViewInverse) * -viewPosDiff).y - occlusion/n) * threshHold;
+					#endif
+				#endif
+			}
 		}
 	}
-	float finaalAO = max(1.0 - occlusion*AO_Strength/n, 0.0);
+	float finaalAO = max(1.0 - occlusion*AO_Strength/max(n,1e-5), 0.0);
 	float finalSSS = sss/float(samples);
 
 	return vec2(finaalAO, finalSSS);
