@@ -212,16 +212,26 @@ vec3 agxDefaultContrastApprox(vec3 x){
 		+x*(+15.1221))))));
 }
 
-#ifdef WF99_AGX_PRESET
-	vec3 oContrast = vec3(1.175);
-	float oSaturation = 0.98;
-#else
-	vec3 oContrast = vec3(1.0);
-	float oSaturation = 1.25;
+#if AGX_LOOK == 0
+	vec3 slope = vec3(1.0);
+	vec3 power = vec3(1.0);
+	float sat = 1.25;
+#elif AGX_LOOK == 1
+	vec3 slope = vec3(1.0);
+	vec3 power = vec3(1.175);
+	float sat = 0.98;
+#elif AGX_LOOK == 2
+	vec3 slope = vec3(1.0, 0.9, 0.5);
+	vec3 power = vec3(0.8);
+	float sat = 0.8;
+#elif AGX_LOOK == 3
+	vec3 slope = vec3(1.0);
+	vec3 power = vec3(1.35);
+	float sat = 1.4;
 #endif
 
 vec3 ToneMap_AgX(vec3 color){
-	mat3 i = mat3(0.8566, 0.1373,  0.1119, 0.0951, 0.7612, 0.0768, 0.0483, 0.1014, 0.8113);
+	mat3 i = mat3(0.8566, 0.1373, 0.1119, 0.0951, 0.7612, 0.0768, 0.0483, 0.1014, 0.8113);
 
 	// Log2 encoding
 	color = (clamp(log2(i * color), -12.4739, 4.0261) +12.4739) / 16.5;
@@ -230,7 +240,7 @@ vec3 ToneMap_AgX(vec3 color){
 	color = agxDefaultContrastApprox(color);
 
 	// Apply AgX look
-	color = mix(vec3(dot(color, vec3(0.2126,0.7152,0.0722))), pow(color, oContrast), oSaturation);
+	color = mix(vec3(dot(color, vec3(0.2126,0.7152,0.0722))), pow(color, power) * slope, sat);
 
   	// Eotf
   	mat3 o = mat3(1.1271, -0.1413, -0.1413, -0.1106, 1.1578, -0.1106, -0.0165, -0.0165, 1.2519);
@@ -249,7 +259,7 @@ vec3 ToneMap_AgX_minimal(vec3 color) {
 
 	color = agxDefaultContrastApprox(color);
 
-	color = mix(vec3(dot(color, vec3(0.2126,0.7152,0.0722))), pow(color, oContrast), oSaturation);
+	color = mix(vec3(dot(color, vec3(0.2126,0.7152,0.0722))), pow(color, power) * slope, sat);
 
   	mat3 o = mat3(1.1969, -0.0529, -0.0530, -0.0980, 1.1519, -0.0980, -0.0990, -0.0990, 1.1511);
   
