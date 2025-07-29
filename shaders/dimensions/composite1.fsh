@@ -877,7 +877,7 @@ void main() {
 			// transition to fallback lightmap shadow mask.
 			// shadowColor *= mix(isWater ? lightLeakFix : LM_shadowMapFallback, 1.0, shadowMapFalloff2);
 
-			#ifdef LIGHTLEAKFIX_MODE == 2
+			#if LIGHTLEAKFIX_MODE == 2
 				if(isEyeInWater != 1) shadowColor *= lightLeakFix; // light leak fix
 			#endif
 		

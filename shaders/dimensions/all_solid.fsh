@@ -7,7 +7,6 @@
 #include "/lib/util.glsl"
 #include "/lib/projections.glsl"
 #include "/lib/dither.glsl"
-#include "/lib/hsv.glsl"
 
 in vec4 lmtexcoord;
 
@@ -165,12 +164,6 @@ void convertHandDepth(inout float depth) {
 	ndcDepth /= MC_HAND_DEPTH;
 	depth = ndcDepth * 0.5 + 0.5;
 }
-
-float getEmission(vec3 Albedo) {
-	vec3 hsv = RgbToHsv(Albedo.rgb);
-	float emissive = smoothstep(0.05, 0.35, hsv.y) * pow(hsv.z, 3.5);
-	return emissive * 0.5;
- }
  
 //////////////////////////////VOID MAIN//////////////////////////////
 //////////////////////////////VOID MAIN//////////////////////////////
@@ -453,14 +446,14 @@ void main() {
 			gl_FragData[1].a = 0.0;
 
 		#elif EMISSIVE_TYPE == 1
-			gl_FragData[1].a = getEmission(Albedo.rgb) * EMISSIVE;
+			gl_FragData[1].a = EMISSIVE;
 			if EXCEPTIONAL_BLOCK(blockID)
 			gl_FragData[1].a = SpecularTex.a;
 
 		#elif EMISSIVE_TYPE == 2
 			gl_FragData[1].a = SpecularTex.a;
 			if(!EXCEPTIONAL_BLOCK(blockID) && SpecularTex.a <= 0.0)
-			gl_FragData[1].a = getEmission(Albedo.rgb) * EMISSIVE;
+			gl_FragData[1].a = EMISSIVE;
 
 		#elif EMISSIVE_TYPE == 3
 			gl_FragData[1].a = SpecularTex.a;
