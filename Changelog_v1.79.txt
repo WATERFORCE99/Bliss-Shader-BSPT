@@ -1,6 +1,16 @@
+2025-7-10 v1.79
+1. Merge X0nk's latest commit. (motion blur)
+~ xxx 整合了X0nk最新的更新 (动态模糊）
+2. Agx preset slider.
+~ tonemapping 添加AGX预设模式
+3. Some improvements with setting screens.
+~ shader 设置界面调整
+4. Update LANG.
+~ zh_cn/en_us 语言文件更新
+
 2025-7-10 v1.78
 1. Merge X0nk's latest commit. (shadow, ssrt etc.)
-~xxx 整合了X0nk最新的更新 (阴影，SSRT等）
+~ xxx 整合了X0nk最新的更新 (阴影，SSRT等）
 
 2025-7-4 v1.77
 1. Restore sun path rotation.
