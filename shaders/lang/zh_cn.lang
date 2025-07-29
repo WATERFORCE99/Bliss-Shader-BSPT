@@ -538,14 +538,10 @@ screen.TAA_OPTIONS = 抗锯齿配置
 	option.CAMERA_GRIDLINES = 相机网格线
 	option.MOTION_BLUR = 动态模糊
 	option.MOTION_BLUR_STRENGTH = 动态模糊强度
-	option.FISHEYE_EFFECT = 鱼眼镜头
-	option.FISHEYE_STRENGTH = 鱼眼镜头畸变强度
 	option.CHROMATIC_ABERRATION = 色差
 	option.CHROMATIC_ABERRATION_STRENGTH = 色差强度
 	option.VIGNETTE = 相机暗角
 	option.VIGNETTE_STRENGTH = 相机暗角强度
-	option.LENS_FLARE = 镜头光晕
-	option.LENS_FLARE_STRENGTH = 镜头光晕强度
 
 screen.Resource_Pack_Support = 资源包配置
 screen.Reflections = 高光反射
@@ -653,10 +649,16 @@ screen.GAMEPLAY_EFFECTS=游玩效果配置
 	option.LOW_HEALTH_EFFECT=低生命值效果
 	option.LOW_HEALTH_EFFECT_START=配置低生命值的剩余 HP
 	option.CRITICALLY_LOW_HEALTH_EFFECT_START=配置危险生命值的剩余 HP
+
+screen.LENS_EFFECTS=镜头效果配置
 	option.DISTORT_EFFECT_AMOUNT=失真效果强度
 	option.WATER_ON_CAMERA_EFFECT=相机覆水效果
 	option.ON_FIRE_DISTORT_EFFECT=灼烧扭曲效果
 	option.RAIN_ON_CAMERA_EFFECT=相机覆雨效果
+	option.LENS_FLARE = 镜头光晕
+	option.LENS_FLARE_STRENGTH = 镜头光晕强度
+	option.FISHEYE_EFFECT = 鱼眼镜头
+	option.FISHEYE_STRENGTH = 鱼眼镜头畸变强度
 
 screen.Aerochrome_Mode=Aerochrome 模式
 	option.AEROCHROME_MODE=Aerochrome 模式
@@ -668,7 +670,11 @@ screen.Aerochrome_Mode=Aerochrome 模式
 screen.COLOR=色调映射/色彩配置
 	option.TONEMAP=色调映射配置
 	option.USE_ACES_COLORSPACE_APPROXIMATION=启用 ACES 色彩空间的近似值拟合
-	option.WF99_AGX_PRESET=WF99的AGX预设方案
+	option.AGX_LOOK=AGX预设方案
+		value.AGX_LOOK.0=标准
+		value.AGX_LOOK.1=WF99
+		value.AGX_LOOK.2=金色
+		value.AGX_LOOK.3=强对比
 	option.SATURATION=饱和度
 	option.CROSSTALK=光照干扰
 
@@ -700,7 +706,7 @@ screen.EXPERIMENTAL_STUFF=实验性选项
 	option.OLD_CAVE_DETECTION=旧版洞穴检测
 	option.FORCE_TRANSLUCENT_GLASS=强制玻璃半透明
 	option.LARGE_WAVE_DISPLACEMENT=大型波浪
-	option.OLD_LIGHTLEAK_FIX=旧版阳光泄露修复
+	option.LIGHTLEAKFIX_MODE=漏光修复模式
 	option.LIGHTNING_FLASH=闪电闪烁
 	option.Texture_MipMap_Bias=纹理 Mipmap 偏移
 
@@ -1080,7 +1086,7 @@ option.FANCY_END_PORTAL.comment=开启此选项以启用特殊的末地传送门
 
 option.TONEMAP.comment=配置使用的色调映射方案.
 option.USE_ACES_COLORSPACE_APPROXIMATION.comment=开启此选项以启用 ACES 色彩空间的近似值拟合.
-option.WF99_AGX_PRESET.comment=开启此选项以启用WF99风格的AGX预设. 仅在使用 Tonemap_AGX_Minimal 与 Tonemap_AGX 时生效.
+option.AGX_LOOK.comment=配置AGX预设方案. 仅在使用 Tonemap_AGX_Minimal 与 Tonemap_AGX 时生效.
 option.SATURATION.comment=配置图像的整体饱和度.
 option.CROSSTALK.comment=配置图像的光照干扰. 用以减少光照对图像色彩的影响.
 
@@ -1106,7 +1112,7 @@ option.WATER_CAUSTICS_STRENGTH.comment=配置水体底部焦散线的强度.
 option.OLD_CAVE_DETECTION.comment=开启此选项以替换为旧版洞穴检测机制.
 option.FORCE_TRANSLUCENT_GLASS.comment=开启此选项以强制玻璃透光. 用以避免一些潜在的 BUG.
 option.LARGE_WAVE_DISPLACEMENT.comment=WIP选项. 开启此选项以应用大型波浪法线.
-option.OLD_LIGHTLEAK_FIX.comment=开启此选项以替换为旧版洞穴阳光泄露修复.
+option.OLD_LIGHTLEAK_FIX.comment=配置漏光修复模式. 不存在完美的漏光修复, 当你遇到有问题的场景时请尝试切换模式.
 option.LIGHTNING_FLASH.comment=开启此选项以启用全局覆盖的闪电闪烁. 用以在使用 Optifine 时避免在使用一些改变天空盒颜色资源包时影响闪电闪烁的BUG.
 option.Texture_MipMap_Bias.comment=配置纹理 Mipmap 的级别. 使用较低的值可以得到更精细的纹理, 而较高的值则会以损失纹理细节而获得更高的性能.
 

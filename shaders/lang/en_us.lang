@@ -539,15 +539,10 @@ screen.TAA_OPTIONS = Anti-Aliasing Settings
 	option.CAMERA_GRIDLINES = Camera Gridlines
 	option.MOTION_BLUR = Motion Blur
 	option.MOTION_BLUR_STRENGTH = Motion Blur Strength
-	option.FISHEYE_EFFECT = Fish Eye Lens
-	option.FISHEYE_STRENGTH = Fish Eye Lens Aberration Strength
-	option.MOTION_BLUR_STRENGTH = Motion Blur Strength
 	option.CHROMATIC_ABERRATION = Chromatic Aberration
 	option.CHROMATIC_ABERRATION_STRENGTH = Chromatic Aberration Strength
 	option.VIGNETTE = Vignette
 	option.VIGNETTE_STRENGTH = Vignette Strength
-	option.LENS_FLARE = Lens Flare
-	option.LENS_FLARE_STRENGTH = Lens Flare Strength
 
 screen.Resource_Pack_Support=Resource Pack Support
 screen.Reflections=Specular Reflections
@@ -655,10 +650,16 @@ screen.GAMEPLAY_EFFECTS=Gameplay Effect Settings
 	option.LOW_HEALTH_EFFECT=Low Health Effect
 	option.LOW_HEALTH_EFFECT_START=HP for Low Health
 	option.CRITICALLY_LOW_HEALTH_EFFECT_START=HP for Critical Health
+
+screen.LENS_EFFECTS=Lens Effect Settings
 	option.DISTORT_EFFECT_AMOUNT=Distortion Amount
 	option.WATER_ON_CAMERA_EFFECT=Water on Camera Effect
 	option.ON_FIRE_DISTORT_EFFECT=Fire Distortion Effect
 	option.RAIN_ON_CAMERA_EFFECT=Rain on Camera Effect
+	option.LENS_FLARE = Lens Flare
+	option.LENS_FLARE_STRENGTH = Lens Flare Strength
+	option.FISHEYE_EFFECT = Fish Eye Lens
+	option.FISHEYE_STRENGTH = Fish Eye Lens Aberration Strength
 
 screen.Aerochrome_Mode=Aerochrome Mode Settings
 	option.AEROCHROME_MODE=Aerochrome Mode
@@ -670,7 +671,11 @@ screen.Aerochrome_Mode=Aerochrome Mode Settings
 screen.COLOR=Tone-Map / Color Grading Settings
 	option.TONEMAP=Tone-Map
 	option.USE_ACES_COLORSPACE_APPROXIMATION=ACES Colorspace Approximation
-	option.WF99_AGX_PRESET=Alternative Preset of AGX
+	option.AGX_LOOK=Alternative Preset of AGX
+		value.AGX_LOOK.0=Standard
+		value.AGX_LOOK.1=WF99
+		value.AGX_LOOK.2=Golden
+		value.AGX_LOOK.3=Punchy
 	option.SATURATION=Saturation
 	option.CROSSTALK=Crosstalk
 
@@ -702,7 +707,7 @@ screen.EXPERIMENTAL_STUFF=Experimental Settings
 	option.OLD_CAVE_DETECTION=Old Cave Detection
 	option.FORCE_TRANSLUCENT_GLASS=Force Translucent Glass
 	option.LARGE_WAVE_DISPLACEMENT=Large Wave Displacement
-	option.OLD_LIGHTLEAK_FIX=Old Lightleak Fix
+	option.LIGHTLEAKFIX_MODE=Light Leak Fix Mode
 	option.LIGHTNING_FLASH=Lightning Flash Fix
 	option.Texture_MipMap_Bias=Texture Mipmap Bias
 
@@ -1080,9 +1085,9 @@ option.AEROCHROME_WOOL_ENABLED.comment=Toggle the Aerochrome mode for the wool o
 
 option.FANCY_END_PORTAL.comment=Toggle the unique end portal effect.
 
-option.TONEMAP.comment=Configure tonemapping preset.
+option.TONEMAP.comment=Configure the tonemapping preset.
 option.USE_ACES_COLORSPACE_APPROXIMATION.comment=Toggle the ACES colorspace approximation.
-option.WF99_AGX_PRESET.comment=Toggle the alternative preset of AGX tone-map by WF99. Only work with Tonemap_AGX_Minimal & Tonemap_AGX.
+option.AGX_LOOK.comment=Configure the alternative preset of AGX tone-map. Only work with Tonemap_AGX_Minimal & Tonemap_AGX.
 option.SATURATION.comment=Configure the overall saturation of the graphic.
 option.CROSSTALK.comment=Configure the light crosstalk to the graphic.
 
@@ -1108,7 +1113,7 @@ option.WATER_CAUSTICS_STRENGTH.comment=Configure the strength of water caustics.
 option.OLD_CAVE_DETECTION.comment=Toggle the old cave detection method.
 option.FORCE_TRANSLUCENT_GLASS.comment=Toggle to force glass and other transparent objects include water to be translucent.
 option.LARGE_WAVE_DISPLACEMENT.comment=Toggle the alternative large wave normal for water.
-option.OLD_LIGHTLEAK_FIX.comment=Toggle the old light leak fix method.
+option.LIGHTLEAKFIX_MODE.comment=Toggle the light leak fix method. There is no perfect fix for light leaking, switch mode when you encounter a buggy scenario.
 option.LIGHTNING_FLASH.comment=Toggle the fixed lightning flash to avoid disabling lightning with specific RPs for Optifine users. 
 option.Texture_MipMap_Bias.comment=Configure the level of Mipmap texture use. Use lower value to get more detailed texture, Higher value can improve performance at the cost of details. 
 
