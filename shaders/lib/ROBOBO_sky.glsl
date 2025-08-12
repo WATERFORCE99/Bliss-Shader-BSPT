@@ -1,4 +1,3 @@
-// uniform float LowCoverage;
 uniform int moonPhase;
 
 const float sunAngularSize = 0.533333;
@@ -6,22 +5,20 @@ const float moonAngularSize = 0.516667;
 
 // Sky coefficients and heights
 
-#define airNumberDensity 2.5035422e25
-#define ozoneConcentrationPeak 8e-6
-const float ozoneNumberDensity = airNumberDensity * ozoneConcentrationPeak;
-#define ozoneCrossSection vec3(4.51103766177301e-21, 3.2854797958699e-21, 1.96774621921165e-22)
+const float sky_planetRadius = 6731e3;
+const float sky_atmosphereHeight = 140e3;
 
-#define sky_planetRadius 6731e3
+const vec2 sky_scaleHeights = vec2(85e2, 12e2);
 
-#define sky_atmosphereHeight 110e3
-#define sky_scaleHeights vec2(8.0e3, 1.2e3)
+const vec3 ozoneAbsorption = vec3(2.0e-6, 5.8e-6, 0.2e-6);
+const vec3 rayleighBeta = vec3(5.8e-6, 13.5e-6, 33.1e-6);
+const vec3 sky_coefficientRayleigh = vec3(sky_coefficientRayleighR, sky_coefficientRayleighG, sky_coefficientRayleighB) * rayleighBeta + ozoneAbsorption;
 
-#define sky_coefficientRayleigh vec3(sky_coefficientRayleighR*1e-6, sky_coefficientRayleighG*1e-5, sky_coefficientRayleighB*1e-5)
+const float mieBeta = 2.1e-5;
+const vec3 sky_coefficientMie = vec3(sky_coefficientMieR, sky_coefficientMieG, sky_coefficientMieB) * mieBeta;
 
-#define sky_coefficientMie vec3(sky_coefficientMieR*1e-6, sky_coefficientMieG*1e-6, sky_coefficientMieB*1e-6) // Should be >= 2e-6
-const vec3 sky_coefficientOzone = (ozoneCrossSection * (ozoneNumberDensity * 0.2e-6)); // ozone cross section * (ozone number density * (cm ^ 3))
-
-const vec2 sky_inverseScaleHeights = 1.0 / sky_scaleHeights;
+const vec3 sky_coefficientOzone = vec3(4.9799463143e-10, 3.0842607592e-10, -9.1714404502e-12);
+const vec2 sky_inverseScaleHeights = 1.44269502 / sky_scaleHeights;
 const vec2 sky_scaledPlanetRadius = sky_planetRadius * sky_inverseScaleHeights;
 const float sky_atmosphereRadius = sky_planetRadius + sky_atmosphereHeight;
 const float sky_atmosphereRadiusSquared = sky_atmosphereRadius * sky_atmosphereRadius;
@@ -35,31 +32,25 @@ const mat3 sky_coefficientsAttenuation = mat3(sky_coefficientRayleigh , sky_coef
 	float moonlightbrightness = 1.0;
 #endif
 
-float sunHeight = normalize(mat3(gbufferModelViewInverse) * sunPosition).y;
-float sunHeightFactor = pow(clamp(1.0 - sunHeight * 4.5, 0.0, 1.0), 0.7);
-
-#ifdef ATMOSPHERE_ABSORBANCE
-	vec3 atmosphereAbsorbance = vec3(ATMOSPHERE_ABSORBANCE_R * sunHeightFactor, ATMOSPHERE_ABSORBANCE_G * sunHeightFactor, ATMOSPHERE_ABSORBANCE_B * sunHeightFactor);
-#else
-	vec3 atmosphereAbsorbance = vec3(0.0);
-#endif
-
 #if colortype == 1
-	#define sunColorBase (vec3(sunColorR, sunColorG, sunColorB) - atmosphereAbsorbance) * sun_illuminance
+	#define sunColorBase vec3(sunColorR, sunColorG, sunColorB) * sun_illuminance
 	#define moonColorBase vec3(moonColorR,moonColorG,moonColorB) * moon_illuminance * moonlightbrightness
 #else
-	#define sunColorBase (blackbody(Sun_temp) - atmosphereAbsorbance) * sun_illuminance
+	#define sunColorBase blackbody(Sun_temp) * sun_illuminance
 	#define moonColorBase blackbody(Moon_temp) * moon_illuminance * moonlightbrightness
 #endif
 
 float sky_rayleighPhase(float cosTheta) {
-	const vec2 mul_add = vec2(0.1, 0.28) * rPI;
-	return cosTheta * mul_add.x + mul_add.y; // optimized version from [Elek09], divided by 4 pi for energy conservation
+	const float rayleighFactor = 3.0 * rPI / 16.0;
+	return rayleighFactor * (1.0 + cosTheta * cosTheta);
 }
 
 float sky_miePhase(float cosTheta, const float g) {
 	float gg = g * g;
-	return (gg * -0.25 + 0.25) * rPI * pow(-(2.0 * g) * cosTheta + (gg + 1.0), -1.5);
+	float denom = 1.0 + gg - 2.0 * g * cosTheta;
+	if (denom <= 0.0) return 0.0;
+	float num = (1.0 - gg) * (1.0 + cosTheta * cosTheta);
+	return (3.0  * rPI / 8.0) * num / ((2.0 + gg) * pow(denom, 1.5));
 }
 
 vec2 sky_phase(float cosTheta, const float g) {
@@ -67,10 +58,10 @@ vec2 sky_phase(float cosTheta, const float g) {
 }
 
 vec3 sky_density(float centerDistance) {
-	vec2 rayleighMie = exp(centerDistance * -sky_inverseScaleHeights + sky_scaledPlanetRadius);
+	vec2 rayleighMie = exp(sky_scaledPlanetRadius - centerDistance * sky_inverseScaleHeights);
 
 	// Ozone distribution curve by Sergeant Sarcasm - https://www.desmos.com/calculator/j0wozszdwa
-	float ozone = exp(-max(0.0, (35000.0 - centerDistance) - sky_planetRadius) * (1.0 / 5000.0)) * exp(-max(0.0, (centerDistance - 35000.0) - sky_planetRadius) * (1.0 / 15000.0));
+	float ozone = exp(-max(0.0, (35000.0 - centerDistance) - sky_planetRadius) / 5000.0) * exp(-max(0.0, (centerDistance - 35000.0) - sky_planetRadius) / 15000.0);
 	return vec3(rayleighMie, ozone);
 }
 
@@ -83,7 +74,6 @@ vec3 sky_airmass(vec3 position, vec3 direction, float rayLength, const float ste
 	for (int i = 0; i < steps; ++i, position += increment) {
 		airmass += sky_density(length(position));
 	}
-
 	return airmass * stepSize;
 }
 
@@ -96,10 +86,6 @@ vec3 sky_airmass(vec3 position, vec3 direction, const float steps) {
 	return sky_airmass(position, direction, rayLength, steps);
 }
 
-vec3 sky_opticalDepth(vec3 position, vec3 direction, float rayLength, const float steps) {
-	return sky_coefficientsAttenuation * sky_airmass(position, direction, rayLength, steps);
-}
-
 vec3 sky_opticalDepth(vec3 position, vec3 direction, const float steps) {
 	return sky_coefficientsAttenuation * sky_airmass(position, direction, steps);
 }
@@ -109,7 +95,7 @@ vec3 sky_transmittance(vec3 position, vec3 direction, const float steps) {
 }
 
 vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 sunVector, vec3 moonVector, out vec2 pid, out vec3 transmittance, const int iSteps, float noise) {
-	const int jSteps = 4;
+	const int jSteps = 6;
 
 	// darken the ground in the sky.
 	#ifdef SKY_GROUND
@@ -118,7 +104,7 @@ vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 s
 		float planetGround = pow(clamp(viewVector.y+1.0,0.0,1.0),2);
 	#endif
 	
-	float GroundDarkening = max(planetGround * 0.7+0.3,clamp(sunVector.y*2.0,0.0,1.0));
+	float GroundDarkening = max(planetGround * 0.75 + 0.25, sunVector.y);
 
 	vec3 viewPos = (sky_planetRadius + eyeAltitude) * upVector;
 
@@ -135,8 +121,8 @@ vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 s
 	vec3  position  = viewVector * sd.x + viewPos;
 	position += increment * (0.34*noise);
 
-	vec2 phaseSun = sky_phase(dot(viewVector, sunVector), 0.8);
-	vec2 phaseMoon = sky_phase(dot(viewVector, moonVector), 0.8);
+	vec2 phaseSun = sky_phase(dot(viewVector, sunVector), 0.76);
+	vec2 phaseMoon = sky_phase(dot(viewVector, moonVector), 0.76);
 
 	vec3 scatteringSun = vec3(0.0);
 	vec3 scatteringMoon = vec3(0.0);
@@ -147,15 +133,21 @@ vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 s
 	for (int i = 0; i < iSteps; ++i, position += increment) {
 		vec3 density = sky_density(length(position));
 		if (density.y > 1e35) break;
-		vec3 stepAirmass = density * stepSize ;
-		vec3 stepOpticalDepth = sky_coefficientsAttenuation * stepAirmass ;
+		vec3 stepAirmass = density * stepSize;
+		vec3 stepOpticalDepth = sky_coefficientsAttenuation * stepAirmass;
 
 		vec3 stepTransmittance = exp2(-stepOpticalDepth * rLOG2);
-		vec3 stepTransmittedFraction = clamp01((stepTransmittance - 1.0) / -stepOpticalDepth) ;
-		vec3 stepScatteringVisible = transmittance * stepTransmittedFraction * GroundDarkening ;
+		vec3 stepTransmittedFraction = clamp01((stepTransmittance - 1.0) / -stepOpticalDepth);
+		vec3 stepScatteringVisible = transmittance * stepTransmittedFraction * GroundDarkening;
 
-		scatteringSun += sky_coefficientsScattering * (stepAirmass.xy * phaseSun) * stepScatteringVisible * sky_transmittance(position, sunVector, jSteps);
-		scatteringMoon += sky_coefficientsScattering * (stepAirmass.xy * phaseMoon) * stepScatteringVisible * sky_transmittance(position, moonVector, jSteps);
+		vec3 sunTrans = sky_transmittance(position, sunVector, jSteps);
+		vec3 moonTrans = sky_transmittance(position, moonVector, jSteps);
+        
+		scatteringSun += rayleighBeta * (stepAirmass.x * phaseSun.x) * stepScatteringVisible * sunTrans;
+		scatteringSun += vec3(mieBeta) * (stepAirmass.y * phaseSun.y) * stepScatteringVisible * sunTrans;
+        
+		scatteringMoon += rayleighBeta * (stepAirmass.x * phaseMoon.x) * stepScatteringVisible * moonTrans;
+		scatteringMoon += vec3(mieBeta) * (stepAirmass.y * phaseMoon.y) * stepScatteringVisible * moonTrans;
 
 		scatteringAmbient += sky_coefficientsScattering * stepAirmass.xy * stepScatteringVisible;
 
