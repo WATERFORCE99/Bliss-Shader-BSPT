@@ -1,3 +1,7 @@
+2025-8-12 v1.81
+1.Selectively merge X0nk's latest commit.
+~ xxx 有选择性地整合了X0nk最新的更新
+
 2025-7-10 v1.79
 1. Merge X0nk's latest commit. (motion blur)
 ~ xxx 整合了X0nk最新的更新 (动态模糊）
@@ -521,3 +525,4 @@
 	拆分植物摇晃选项以解决一些资源包冲突问题
 12.	Update CHS/ENG lang file.
 	中文/英文语言文件更新
+
