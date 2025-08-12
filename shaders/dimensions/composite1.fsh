@@ -373,6 +373,9 @@ void doEdgeAwareBlur(
 		ssao_RESULT += texelFetch2D(tex2, UV + OFFSET[i] + UV_NOISE, 0).rg*edgeDiff;
 		edgeSum += edgeDiff;
 	}
+	// sample without an offset with texture filtering to get a slightly blurred sample. make sure to average without skewing the rest of the average.
+	filteredShadow = shadow_RESULT/edgeSum * 0.8 + 0.2 * texture2D(tex1, texelSize*gl_FragCoord.xy).rgb;
+	ambientEffects =   ssao_RESULT/edgeSum * 0.8 + 0.2 * texture2D(tex2, texelSize*gl_FragCoord.xy).rg;
 }
 
 vec4 BilateralUpscale_VLFOG(sampler2D tex, sampler2D depth, float referenceDepth){

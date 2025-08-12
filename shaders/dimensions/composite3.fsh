@@ -20,41 +20,46 @@ uniform sampler2D depthtex1;
 #endif
 
 uniform sampler2D colortex0;
-uniform sampler2D colortex1;
+// uniform sampler2D colortex1;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
 uniform sampler2D colortex4;
-uniform sampler2D colortex5;
+// uniform sampler2D colortex5;
 uniform sampler2D colortex6;
 uniform sampler2D colortex7;
-uniform sampler2D colortex8;
+// uniform sampler2D colortex8;
 uniform sampler2D colortex9;
 uniform sampler2D colortex10;
 uniform sampler2D colortex11;
 uniform sampler2D colortex12;
-uniform sampler2D colortex13;
-uniform sampler2D colortex14;
-uniform sampler2D colortex15;
-uniform vec2 texelSize;
+// uniform sampler2D colortex13;
+// uniform sampler2D colortex14;
+// uniform sampler2D colortex15;
 
-uniform float viewHeight;
-uniform float viewWidth;
-uniform vec3 sunVec;
+uniform vec2 texelSize;
+// uniform float viewHeight;
+// uniform float viewWidth;
+// uniform vec3 sunVec;
 uniform float frameTimeCounter;
 uniform float far;
 uniform float near;
 uniform float farPlane;
+uniform int dhRenderDistance;
 
 uniform int hideGUI;
-uniform int dhRenderDistance;
 uniform int isEyeInWater;
 uniform ivec2 eyeBrightnessSmooth;
 uniform ivec2 eyeBrightness;
+uniform float nightVision;
 uniform float rainStrength;
 uniform float blindness;
 uniform float darknessFactor;
 uniform float darknessLightFactor;
 uniform float caveDetection;
+uniform float waterEnteredAltitude;
+uniform float fogEnd;
+uniform vec3 fogColor;
+uniform float eyeAltitude;
 
 #include "/lib/waterBump.glsl"
 #include "/lib/res_params.glsl"
@@ -65,17 +70,6 @@ uniform float caveDetection;
 
 #include "/lib/sky_gradient.glsl"
 #include "/lib/projections.glsl"
-
-uniform float eyeAltitude;
-
-float ld(float depth) {
-	return 1.0 / (zMults.y - depth * zMults.z);		// (-depth * (far - near)) = (2.0 * near)/ld - far - near
-}
-
-float linearize(float dist) {
-	return (2.0 * near) / (far + near - dist * (far - near));
-}
-
 #include "/lib/DistantHorizons_projections.glsl"
 
 vec4 blueNoise(vec2 coord){
@@ -84,6 +78,14 @@ vec4 blueNoise(vec2 coord){
 
 vec3 normVec(vec3 vec){
 	return vec*inversesqrt(dot(vec,vec));
+}
+
+float ld(float depth) {
+	return 1.0 / (zMults.y - depth * zMults.z); // (-depth * (far - near)) = (2.0 * near)/ld - far - near
+}
+
+float linearize(float dist) {
+	return (2.0 * near) / (far + near - dist * (far - near));
 }
 
 float linearizeDepthFast(const in float depth, const in float near, const in float far) {
@@ -157,31 +159,7 @@ vec3 doRefractionEffect(inout vec2 texcoord, vec2 normal, float linearDistance, 
 	return color;
 }
 
-vec3 closestToCamera5taps(vec2 texcoord, sampler2D depth){
-	vec2 du = vec2(texelSize.x*2., 0.0);
-	vec2 dv = vec2(0.0, texelSize.y*2.);
-
-	vec3 dtl = vec3(texcoord,0.) + vec3(-texelSize, 				texture2D(depth, texcoord - dv - du).x);
-	vec3 dtr = vec3(texcoord,0.) + vec3( texelSize.x, -texelSize.y, texture2D(depth, texcoord - dv + du).x);
-	vec3 dmc = vec3(texcoord,0.) + vec3( 0.0, 0.0, 					texture2D(depth, texcoord).x);
-	vec3 dbl = vec3(texcoord,0.) + vec3(-texelSize.x, texelSize.y, 	texture2D(depth, texcoord + dv - du).x);
-	vec3 dbr = vec3(texcoord,0.) + vec3( texelSize.x, texelSize.y, 	texture2D(depth, texcoord + dv + du).x);
-
-	vec3 dmin = dmc;
-	dmin = dmin.z > dtr.z ? dtr : dmin;
-	dmin = dmin.z > dtl.z ? dtl : dmin;
-	dmin = dmin.z > dbl.z ? dbl : dmin;
-	dmin = dmin.z > dbr.z ? dbr : dmin;
-	
-	#ifdef TAA_UPSCALING
-		dmin.xy = dmin.xy/RENDER_SCALE;
-	#endif
-
-	return dmin;
-}
-
 vec4 bilateralUpsample(out float outerEdgeResults, float referenceDepth, sampler2D depth, bool hand){
-
 	vec4 colorSum = vec4(0.0);
 	float edgeSum = 0.0;
 	float threshold = 0.005;
@@ -268,7 +246,83 @@ vec4 VLTemporalFiltering(vec3 viewPos, in float referenceDepth, sampler2D depth,
 	return clamp(mix(reprojectFrame, upsampledCurrentFrame, outerEdgeResults),0.0,65000.0);
 }
 
-uniform float waterEnteredAltitude;
+void blendAllFogTypes(inout vec3 color, inout float bloomyFogMult, vec4 volumetrics, float linearDistance, vec3 playerPos, vec3 cameraPosition, bool isSky){
+
+	// blend cave fog
+	#if defined OVERWORLD_SHADER && defined CAVE_FOG
+		if (isEyeInWater == 0 && eyeAltitude < 1500){
+			vec3 cavefogCol = vec3(CaveFogColor_R, CaveFogColor_G, CaveFogColor_B) * 0.3;
+			cavefogCol *= 1.0-pow(1.0-pow(1.0 - max(1.0 - linearDistance/far,0),2),CaveFogFallOff);
+			cavefogCol *= exp(-7.0*clamp(playerPos.y*0.5+0.5,0,1)) * 0.999 + 0.001;
+
+			#ifdef CAVE_FOG_DARKEN_SKY
+				float skyhole = pow(clamp(1.0-pow(max(playerPos.y - 0.6,0.0)*5.0,2.0),0.0,1.0),2);
+				color.rgb = mix(color.rgb + cavefogCol * caveDetection, cavefogCol, isSky ? skyhole * caveDetection : 0.0);
+			#else
+				color.rgb += cavefogCol * caveDetection;
+			#endif
+		}
+	#endif
+
+	/// water absorption; it is completed when volumetrics are blended.
+	if(isEyeInWater == 1){
+		vec3 totEpsilon = vec3(Water_Absorb_R, Water_Absorb_G, Water_Absorb_B);
+		vec3 scatterCoef = Dirt_Amount * vec3(Dirt_Scatter_R, Dirt_Scatter_G, Dirt_Scatter_B) / 3.14;
+
+		float distanceFromWaterSurface = playerPos.y + 1.0 + (cameraPosition.y - waterEnteredAltitude)/waterEnteredAltitude;
+		distanceFromWaterSurface = clamp(distanceFromWaterSurface,0,1);
+
+		vec3 transmittance = exp(-totEpsilon * linearDistance);
+		color.rgb *= transmittance;
+
+		vec3 transmittance2 = exp(-totEpsilon * 50.0);
+		float fogfade = 1.0 - max((1.0 - linearDistance / min(far, 16.0*7.0) ),0);
+		color.rgb += (transmittance2 * scatterCoef) * fogfade;
+    
+		bloomyFogMult *= 0.5;
+	}
+
+	/// blend volumetrics
+	color = color * volumetrics.a + volumetrics.rgb;
+  
+	// make bloomy fog only work outside of the overworld (unless underwater)
+	#ifndef OVERWORLD_SHADER
+		bloomyFogMult *= volumetrics.a;
+	#endif
+
+	// blend vanilla fogs (blindness, darkness, lava, powdered snow)
+	if(isEyeInWater > 1 || blindness > 0 || darknessFactor > 0){
+		float enviornmentFogDensity = 1.0 - clamp(linearDistance/fogEnd,0,1);
+		enviornmentFogDensity = 1.0 - enviornmentFogDensity*enviornmentFogDensity;
+		enviornmentFogDensity *= enviornmentFogDensity;
+		enviornmentFogDensity =  mix(enviornmentFogDensity, 1.0, min(darknessLightFactor*2.0,1));
+
+		color = mix(color, toLinear(fogColor), enviornmentFogDensity);
+	}
+}
+
+void blendForwardRendering( inout vec3 color, vec4 translucentShader ){
+
+	// REMEMBER that forward rendered color is written as color.rgb/10.0, invert it.
+	if(translucentShader.a > 0) {
+		color = color * (1.0 - translucentShader.a) + translucentShader.rgb * 10.0;
+	}
+}
+
+float getBorderFogDensity(float linearDistance, vec3 playerPos, bool sky){
+	if(sky) return 0.0;
+
+	#ifdef DISTANT_HORIZONS
+		float borderFogDensity = smoothstep(1.0, 0.0, min(max(1.0 - linearDistance / dhRenderDistance,0.0)*3.0,1.0)   );
+	#else
+		float borderFogDensity = smoothstep(1.0, 0.0, min(max(1.0 - linearDistance / far,0.0)*3.0,1.0)   );
+	#endif
+  
+	borderFogDensity *= exp(-10.0 * pow(clamp(playerPos.y,0.0,1.0)*4.0,2.0));
+	borderFogDensity *= (1.0-caveDetection);
+
+	return borderFogDensity;
+}
 
 void main() {
   /* RENDERTARGETS:7,3,10 */
@@ -301,16 +355,17 @@ void main() {
 		float DH_depth0 = 0.0;
 	#endif
 
+	bool isSky = swappedDepth >= 1.0;
+
 	vec3 viewPos = toScreenSpace_DH(texcoord/RENDER_SCALE, z, DH_depth0);
 	vec3 playerPos = toWorldSpace(viewPos);
 
-	vec3 playerPos_normalized = normVec(playerPos);
+	float linearDistance = length(playerPos);
+	float linearDistance_cylinder = length(playerPos.xz);
+	vec3 playerPos_normalized = normalize(playerPos);
 
 	vec3 viewPos_alt = toScreenSpace(vec3(texcoord/RENDER_SCALE, z2));
 	vec3 playerPos_alt = toWorldSpace(viewPos_alt);
-
-	float linearDistance = length(playerPos);
-	float linearDistance_cylinder = length(playerPos.xz);
 
 	float lightleakfix = clamp(pow(eyeBrightnessSmooth.y/240.,2) ,0.0,1.0);
 	float lightleakfixfast = clamp(eyeBrightness.y/240.,0.0,1.0);
@@ -358,150 +413,56 @@ void main() {
 	float bloomyFogMult = 1.0;
 
   ////// --------------- distort texcoords as a refraction effect
-  vec2 refractedCoord = texcoord;
+	vec2 refractedCoord = texcoord;
 
   ////// --------------- MAIN COLOR BUFFER
 	#ifdef FAKE_REFRACTION_EFFECT
-		// ApplyDistortion(refractedCoord, tangentNormals, linearDistance, isEntity);
-		// vec3 color = texture2D(colortex3, refractedCoord).rgb;
 		vec3 color = doRefractionEffect(refractedCoord, tangentNormals.xy, linearDistance, isReflectiveEntity, isWater && isEyeInWater == 1);
 	#else
-		// vec3 color = texture2D(colortex3, refractedCoord).rgb;
-		vec3 color = texelFetch2D(colortex3, ivec2(refractedCoord/texelSize),0).rgb;
+		vec3 color = texture2D(colortex3, refractedCoord).rgb;
 	#endif
 
+  ////// --------------- START BLENDING FOGS AND FORWARD RENDERED COLOR
 	vec4 TranslucentShader = texture2D(colortex2, texcoord);
-	// color = vec3(texcoord-0.5,0.0) * mat3(gbufferModelViewInverse);
-	// apply block breaking effect.
+
+  // blend border fog. be sure to blend before and after forward rendered color blends.
+	#if defined BorderFog && defined OVERWORLD_SHADER
+		vec4 borderFog = vec4(skyGroundColor, getBorderFogDensity(linearDistance_cylinder, playerPos_normalized, swappedDepth >= 1.0));
+
+		#ifndef SKY_GROUND
+			borderFog.rgb = skyFromTex(playerPos, colortex4)/1200.0 * Sky_Brightness;
+		#endif
+
+		#ifndef DISTANT_HORIZONS
+			color = mix(color, borderFog.rgb, getBorderFogDensity(linearDistance_cylinder_alt, normalize(playerPos_alt), z2 >= 1.0 || TranslucentShader.a <= 0));
+		#endif
+	#else
+		vec4 borderFog = vec4(0.0);
+	#endif
+
+  // apply block breaking effect.
 	if(albedo.a > 0.01 && !isWater && TranslucentShader.a <= 0.0 && !isEntity) color = mix(color*6.0, color, luma(albedo.rgb)) * albedo.rgb;
-
-  ////// --------------- BLEND TRANSLUCENT GBUFFERS 
-  //////////// and do border fog on opaque and translucents
   
-  	#ifdef BorderFog
-		#ifdef DISTANT_HORIZONS
-			float fog = smoothstep(1.0, 0.0, min(max(1.0 - linearDistance_cylinder / dhRenderDistance,0.0)*3.0,1.0));
-		#else
-			float fog = smoothstep(1.0, 0.0, min(max(1.0 - linearDistance_cylinder / far,0.0)*3.0,1.0));
-		#endif
-
-		fog *= exp(-10.0 * pow(clamp(playerPos_normalized.y,0.0,1.0)*4.0,2.0));
-
-		fog *= (1.0-caveDetection);
-
-		if(swappedDepth >= 1.0 || isEyeInWater != 0) fog = 0.0;
-
-		#ifdef SKY_GROUND
-			vec3 borderFogColor = skyGroundColor;
-		#else
-			vec3 borderFogColor = skyFromTex(playerPos_normalized, colortex4)/1200.0 * Sky_Brightness;
-		#endif
-
-		color.rgb = mix(color.rgb, borderFogColor, fog);
-	#else
-		float fog = 0.0;
+  // apply multiplicative color blend for glass n stuff
+	#ifdef Glass_Tint
+		if(!isWater) color *= mix(normalize(albedo.rgb+1e-7), vec3(1.0), max(borderFog.a, min(max(0.1-albedo.a,0.0) * 10.0,1.0))) ;
 	#endif
 
-	if (TranslucentShader.a > 0.0){
-		#ifdef Glass_Tint
-			if(!isWater) color *= mix(normalize(albedo.rgb+1e-7), vec3(1.0), max(fog, min(max(0.1-albedo.a,0.0) * 10.0,1.0)));
-		#endif
+  // blend forward rendered programs onto the color.
+	blendForwardRendering(color, TranslucentShader);
 
-		#ifdef BorderFog
-			TranslucentShader = mix(TranslucentShader, vec4(0.0), fog);
-		#endif
-
-		color *= (1.0-TranslucentShader.a);
-		color += TranslucentShader.rgb*10.0; 
-	}
-
-////// --------------- VARIOUS FOG EFFECTS (behind volumetric fog)
-//////////// blindness, liquid fogs and misc fogs
-
-#if defined OVERWORLD_SHADER && defined CAVE_FOG
-	if (isEyeInWater == 0 && eyeAltitude < 1500){
-
-		vec3 cavefogCol = vec3(CaveFogColor_R, CaveFogColor_G, CaveFogColor_B);
-
-		// #ifdef PER_BIOME_ENVIRONMENT
-			// BiomeFogColor(cavefogCol);
-		// #endif
-
-		cavefogCol *= 1.0-pow(1.0-pow(1.0 - max(1.0 - linearDistance/far,0.0),2.0),CaveFogFallOff);
-		cavefogCol *= exp(-7.0*clamp(normalize(playerPos_normalized).y*0.5+0.5,0.0,1.0)) * 0.999 + 0.001;
-		cavefogCol *= 0.3;
-
-		float skyhole = pow(clamp(1.0-pow(max(playerPos_normalized.y - 0.6,0.0)*5.0,2.0),0.0,1.0),2);
-
-		color.rgb = mix(color.rgb + cavefogCol * caveDetection, cavefogCol, z >= 1.0 ? skyhole * caveDetection : 0.0);
-	}
-#endif
-
-////// --------------- underwater fog
-	if (isEyeInWater == 1){
-		// float dirtAmount = Dirt_Amount;
-		// vec3 waterEpsilon = vec3(Water_Absorb_R, Water_Absorb_G, Water_Absorb_B);
-		// vec3 dirtEpsilon = vec3(Dirt_Absorb_R, Dirt_Absorb_G, Dirt_Absorb_B);
-		vec3 totEpsilon = vec3(Water_Absorb_R, Water_Absorb_G, Water_Absorb_B);// dirtEpsilon*dirtAmount + waterEpsilon;
-		vec3 scatterCoef = Dirt_Amount * vec3(Dirt_Scatter_R, Dirt_Scatter_G, Dirt_Scatter_B) / 3.14;
-
-		float distanceFromWaterSurface = normalize(playerPos).y + 1.0 + (cameraPosition.y - waterEnteredAltitude)/waterEnteredAltitude;
-		distanceFromWaterSurface = clamp(distanceFromWaterSurface, 0.0,1.0);
-
-		vec3 transmittance = exp(-totEpsilon * linearDistance);
-		color.rgb *= transmittance;
-
-		vec3 transmittance2 = exp(-totEpsilon * 50.0);
-		float fogfade = 1.0 - max((1.0 - linearDistance / min(far, 16.0*7.0) ),0);
-		color.rgb += (transmittance2 * scatterCoef) * fogfade;
-
-		bloomyFogMult *= 0.5;
-	}
-
-////// --------------- BLEND FOG INTO SCENE
-//////////// apply VL fog over opaque and translucents
-
-	#ifndef OVERWORLD_SHADER
-		bloomyFogMult *= temporallyFilteredVL.a;
+	#if defined BorderFog && defined OVERWORLD_SHADER
+		color = mix(color, borderFog.rgb, getBorderFogDensity(linearDistance_cylinder, playerPos_normalized, swappedDepth >= 1.0));
 	#endif
-  
+
+    // tweaks to VL for nametag rendering
 	#ifdef IS_IRIS
-		// if(z >= 1.0) color = vec3(0,255,0);
-		// else color = vec3(0.01);
-
-		color *= min(temporallyFilteredVL.a + (1.0-nametagbackground),1.0);
-		color += temporallyFilteredVL.rgb * nametagbackground;
-	#else
-		color *= temporallyFilteredVL.a ;
-		color += temporallyFilteredVL.rgb ;
+		temporallyFilteredVL.a = min(temporallyFilteredVL.a + (1.0-nametagbackground),1.0);
+		temporallyFilteredVL.rgb *= nametagbackground;
 	#endif
-  
-////// --------------- VARIOUS FOG EFFECTS (in front of volumetric fog)
-//////////// blindness, liquid fogs and misc fogs
 
-////// --------------- bloomy rain effect
-	#ifdef OVERWORLD_SHADER
-		float rainDrops = clamp(texture2D(colortex9,texcoord).a, 0.0, 1.0) * RAIN_VISIBILITY; 
-		if(rainDrops > 0.0) bloomyFogMult *= clamp(1.0 - pow(rainDrops*5.0,2),0.0,1.0);
-	#endif
-  
-////// --------------- lava.
-	if (isEyeInWater == 2){
-		color.rgb = mix(color.rgb, vec3(0.1,0.0,0.0), 1.0-exp(-10.0*clamp(linearDistance*0.5,0.,1.))*0.5);
-		bloomyFogMult = 0.0;
-	}
-
-///////// --------------- powdered snow
-	if (isEyeInWater == 3){
-		color.rgb = mix(color.rgb,vec3(0.5,0.75,1.0),clamp(linearDistance*0.5,0.,1.));
-		bloomyFogMult = 0.0;
-	}
-
-////// --------------- blindness
-	color.rgb *= mix(1.0,clamp(exp(pow(linearDistance*(blindness*0.2),2) * -5),0.,1.), blindness);
-
-//////// --------------- darkness effect
-	color.rgb *= mix(1.0, (1.0-darknessLightFactor*2.0) * clamp(1.0-pow(length(viewPos)*(darknessFactor*0.07),2.0),0.0,1.0), darknessFactor);
+  // blend all fog types. volumetric fog, volumetric clouds, distance based fogs for lava, powdered snow, blindness, and darkness.
+	blendAllFogTypes(color, bloomyFogMult, temporallyFilteredVL, linearDistance, playerPos_normalized, cameraPosition, isSky);
   
 ////// --------------- FINALIZE
 	#ifdef display_LUT
@@ -516,7 +477,7 @@ void main() {
 
 		if(hideGUI == 1) {
 			#ifdef OVERWORLD_SHADER
-				color.rgb = skyFromTex(playerPos_normalized, colortex4).rgb/1200.0;
+				color.rgb = skyCloudsFromTex(playerPos_normalized, colortex4).rgb/1200.0;
 			#else
 				color.rgb = volumetricsFromTex(playerPos_normalized, colortex4, 0.0).rgb/1200.0;
 			#endif
