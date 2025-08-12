@@ -339,13 +339,7 @@ void main() {
 	#endif
 
 	#ifdef TAA
-		#ifdef HAND
-			// turn off jitter when camera moves.
-			// this is to hide the jitter when the same happens for TAA blend factor and the jitter becomes visible during camera movement
-			gl_Position.xy += (offsets[framemod8] * gl_Position.w * texelSize) * detectCameraMovement();
-		#else	
-			gl_Position.xy += offsets[framemod8] * gl_Position.w * texelSize;
-		#endif
+		gl_Position.xy += offsets[framemod8] * gl_Position.w*texelSize;
 	#endif
 
 	#if DOF_QUALITY == 5

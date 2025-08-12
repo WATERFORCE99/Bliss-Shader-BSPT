@@ -45,15 +45,15 @@ flat in vec3 WsunVec2;
 
 uniform float near;
 float invLinZ (float lindepth){
-	return -((2.0*near/lindepth)-far-near)/(far-near);
+	return -((2.0*dhNearPlane/lindepth)-far-dhNearPlane)/(far-dhNearPlane);
 }
 
 float ld(float dist) {
-	return (2.0 * near) / (far + near - dist * (far - near));
+	return (2.0 * dhNearPlane) / (far + dhNearPlane - dist * (far - dhNearPlane));
 }
 
-float linearizeDepthFast(const in float depth, const in float near, const in float far) {
-	return (near * far) / (depth * (near - far) + far);
+float linearizeDepthFast(const in float depth, const in float dhNearPlane, const in float far) {
+	return (dhNearPlane * far) / (depth * (dhNearPlane - far) + far);
 }
 
 uniform int isEyeInWater;
@@ -91,37 +91,39 @@ float GGX(vec3 n, vec3 v, vec3 l, float r, float f0) {
 uniform int framemod8;
 #include "/lib/TAA_jitter.glsl"
 
-vec3 rayTrace(vec3 dir, vec3 position,float dither, float fresnel, bool inwater){
-	float quality = mix(5.0, SSR_STEPS, fresnel);
+vec3 doScreenSpaceReflectiom(vec3 dir, vec3 position, float dither, float quality){
+	float biasAmount = 0.001;
+
 	vec3 clipPosition = DH_toClipSpace3(position);
-	float rayLength = ((position.z + dir.z * dhFarPlane*sqrt(3.0)) > -dhNearPlane)
-					? (-dhNearPlane - position.z) / dir.z
-					: dhFarPlane*sqrt(3.0);
-	vec3 direction = normalize(DH_toClipSpace3(position+dir*rayLength)-clipPosition);  //convert to clip space
-	direction.xy = normalize(direction.xy);
+	float rayLength = ((position.z + dir.z * dhFarPlane*sqrt(3.)) > -dhNearPlane) ? (-dhNearPlane - position.z) / dir.z : dhFarPlane*sqrt(3.);
+	
+	vec3 direction = DH_toClipSpace3(position + dir*rayLength) - clipPosition;  //convert to clip space
 
 	//get at which length the ray intersects with the edge of the screen
-	vec3 maxLengths = (step(0.,direction)-clipPosition) / direction;
-	float mult = min(min(maxLengths.x,maxLengths.y),maxLengths.z);
+	vec3 maxLengths = (step(0.0, direction) - clipPosition) / direction;
+	float mult = min(min(maxLengths.x, maxLengths.y), maxLengths.z);
+	vec3 stepv = direction * mult / quality;
 
-	vec3 stepv = direction * mult / quality * vec3(RENDER_SCALE,1.0);
+	clipPosition.xy *= RENDER_SCALE;
+	stepv.xy *= RENDER_SCALE;
 
-	vec3 spos = clipPosition*vec3(RENDER_SCALE,1.0) + stepv*dither;
-	float minZ = clipPosition.z;
-	float maxZ = spos.z+stepv.z*0.5;
+	vec3 spos = clipPosition + stepv*dither;
+	spos.xy += texelSize*0.5;
 
-	spos.xy += offsets[framemod8]*texelSize*0.5/RENDER_SCALE;
+	float minZ = spos.z - 0.00025 / DH_ld(spos.z);
+	float maxZ = spos.z;
 
 	for (int i = 0; i <= int(quality); i++) {
-		float sp = DH_inv_ld(sqrt(texelFetch2D(colortex12,ivec2(spos.xy/texelSize/4),0).a/64000.0));
+		if(spos.x < 0 || spos.x > 1 || spos.y < 0 || spos.y > 1) return vec3(1.1);
 
-		if(sp < max(minZ,maxZ) && sp > min(minZ,maxZ)) return vec3(spos.xy/RENDER_SCALE,sp);
-		spos += stepv;
+		float sampleDepth = sqrt(texelFetch2D(colortex12,ivec2(spos.xy/texelSize/4),0).a/65000.0);
+		float sp = DH_inv_ld(sampleDepth);
+		
+		if(sp < max(minZ, maxZ) && sp > min(minZ, maxZ)) return vec3(spos.xy/RENDER_SCALE,sp);
 
-		//small bias
-		minZ = maxZ-0.00005/DH_ld(spos.z);
-
+		minZ = maxZ - biasAmount / DH_ld(spos.z);
 		maxZ += stepv.z;
+		spos += stepv;
 	}
 	return vec3(1.1);
 }
@@ -139,7 +141,7 @@ vec3 applyBump(mat3 tbnMatrix, vec3 bump, float puddle_values){
 
 /* RENDERTARGETS:2,7 */
 void main() {
-	if (gl_FragCoord.x * texelSize.x < 1.0  && gl_FragCoord.y * texelSize.y < 1.0 ) {
+	if (gl_FragCoord.x * texelSize.x < 1.0  && gl_FragCoord.y * texelSize.y < 1.0) {
 
 		bool iswater = isWater > 0;
 
@@ -196,7 +198,7 @@ void main() {
 		}
 
 		#ifdef WhiteWorld
-			gl_FragData[0].rgb = vec3(0.5);
+			gl_FragData[0].rgb = vec3(1.0);
 			gl_FragData[0].a = 1.0;
 		#endif
 
@@ -261,7 +263,8 @@ void main() {
 
 		Indirect_lighting = AmbientLightColor;
 
-		vec3 FinalColor = (Indirect_lighting + Direct_lighting) * Albedo;
+		float indoors = min(max(lightmapCoords.y-0.5,0.0)/0.4,1.0);
+		vec3 FinalColor = (Indirect_lighting + Direct_lighting*indoors) * Albedo;
 
 		// specular
 		#ifdef FORWARD_SPECULAR
@@ -269,6 +272,7 @@ void main() {
 			vec4 Reflections = vec4(0.0);
 			vec3 BackgroundReflection = FinalColor; 
 			vec3 SunReflection = vec3(0.0);
+			float SSR_HIT_SKY_MASK = indoors;
 
 			float roughness = 0.0;
 			float f0 = 0.02;
@@ -286,13 +290,16 @@ void main() {
 			#endif
 
 			#if defined FORWARD_ENVIRONMENT_REFLECTION && defined DH_SCREENSPACE_REFLECTIONS
-				vec3 rtPos = rayTrace(reflectedVector, viewPos, interleaved_gradientNoise_temporal(), fresnel, false);
-				if (rtPos.z < 1.){
+				vec3 rtPos = doScreenSpaceReflectiom(reflectedVector, viewPos, interleaved_gradientNoise_temporal(), mix(5.0f, float(SSR_STEPS), fresnel));
+
+				if (rtPos.z < 0.99999){
 					vec3 previousPosition = toPreviousPos(DH_toScreenSpace(rtPos));
 					previousPosition.xy = projMAD(dhPreviousProjection, previousPosition).xy / -previousPosition.z * 0.5 + 0.5;
 					previousPosition.xy = clamp(previousPosition.xy, 0.0, 1.0);
 					Reflections.a = 1.0;
 					Reflections.rgb = texture2D(colortex5, previousPosition.xy).rgb;
+				}else{
+					if (rtPos.x > 0.0 && rtPos.y > 0.0 && rtPos.x < 1.0 && rtPos.y < 1.0) SSR_HIT_SKY_MASK = 1.0;
 				}
         		#endif
 
@@ -304,8 +311,8 @@ void main() {
 				SunReflection = (DirectLightColor * Shadows) * GGX(normalize(normals), -normalize(viewPos), normalize(WsunVec2), roughness, f0) * (1.0-Reflections.a);
 			#endif
 
-			Reflections_Final = mix(FinalColor, mix(BackgroundReflection, Reflections.rgb, Reflections.a), fresnel);
-			Reflections_Final += SunReflection;
+			Reflections_Final = mix(FinalColor, mix(BackgroundReflection*SSR_HIT_SKY_MASK, Reflections.rgb, Reflections.a), fresnel);
+			Reflections_Final += SunReflection*indoors;
 
 			gl_FragData[0].a = gl_FragData[0].a + (1.0-gl_FragData[0].a) * fresnel;
 	

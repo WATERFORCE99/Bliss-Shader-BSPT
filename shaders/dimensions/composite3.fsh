@@ -107,12 +107,12 @@ vec2 clampUV(in vec2 uv, vec2 texcoord){
 	return clamp(mix(uv, texcoord, vignette), 0.0, 0.9999999);
 }
 
-vec3 doRefractionEffect(inout vec2 texcoord, vec2 normal, float linearDistance, bool isReflectiveEntity){
+vec3 doRefractionEffect(inout vec2 texcoord, vec2 normal, float linearDistance, bool isReflectiveEntity, bool underwater){
   
 	// make the tangent space normals match the directions of the texcoord UV, this greatly improves the refraction effect.
 	vec2 UVNormal = vec2(normal.x,-normal.y);
   
-	float refractionMult = 0.5 / (1.0 + pow(linearDistance,0.8));
+	float refractionMult = 0.5 / (1.0 + pow(linearDistance,0.8) * (underwater ? 0.1 : 1.0));
 	float diffractionMult = 0.035;
 	float smudgeMult = 1.0;
 	if(isReflectiveEntity) refractionMult *= 0.5;
@@ -180,13 +180,13 @@ vec3 closestToCamera5taps(vec2 texcoord, sampler2D depth){
 	return dmin;
 }
 
-vec4 bilateralUpsample(out float outerEdgeResults, float referenceDepth, sampler2D depth){
+vec4 bilateralUpsample(out float outerEdgeResults, float referenceDepth, sampler2D depth, bool hand){
 
 	vec4 colorSum = vec4(0.0);
 	float edgeSum = 0.0;
 	float threshold = 0.005;
 
-	vec2 coord = gl_FragCoord.xy - 2.0;
+	vec2 coord = gl_FragCoord.xy - 1.5;
 
 	vec2 UV = coord;
 	const ivec2 SCALE = ivec2(1.0/VL_RENDER_RESOLUTION);
@@ -218,12 +218,12 @@ vec4 bilateralUpsample(out float outerEdgeResults, float referenceDepth, sampler
 		edgeSum += edgeDiff;
 	}
 
-	outerEdgeResults = outerEdgeResults > referenceDepth*0.05 + 0.1  ? 1.0 : 0.0;
+	outerEdgeResults = outerEdgeResults > (hand ? 0.005 : referenceDepth*0.05 + 0.1) ? 1.0 : 0.0;
 
 	return colorSum / edgeSum;
 }
 
-vec4 VLTemporalFiltering(vec3 viewPos, in float referenceDepth, sampler2D depth){
+vec4 VLTemporalFiltering(vec3 viewPos, in float referenceDepth, sampler2D depth, bool hand){
 	vec2 offsetTexcoord = gl_FragCoord.xy * texelSize;
 	vec2 VLtexCoord = offsetTexcoord * VL_RENDER_RESOLUTION;
 
@@ -239,7 +239,7 @@ vec4 VLTemporalFiltering(vec3 viewPos, in float referenceDepth, sampler2D depth)
 	// to fill pixel gaps in geometry edges, do a bilateral upsample.
 	// pass a mask to only show upsampled color around the edges of blocks. this is so it doesnt blur reprojected results.
 	float outerEdgeResults = 0.0;
-	vec4 upsampledCurrentFrame = bilateralUpsample(outerEdgeResults, referenceDepth, depth);
+	vec4 upsampledCurrentFrame = bilateralUpsample(outerEdgeResults, referenceDepth, depth, hand);
 
 	if (previousPosition.x < 0.0 || previousPosition.y < 0.0 || previousPosition.x > 1.0 || previousPosition.y > 1.0) return currentFrame;
 
@@ -275,8 +275,10 @@ void main() {
 
 	////// --------------- SETUP STUFF --------------- //////
 	vec2 texcoord = gl_FragCoord.xy*texelSize;
+	float depth = texelFetch2D(depthtex0, ivec2(gl_FragCoord.xy),0).x;
+	bool hand = depth < 0.56;
+	float z = depth;
 
-	float z = texelFetch2D(depthtex0, ivec2(gl_FragCoord.xy),0).x;//texture2D(depthtex0, texcoord).x;
 	float z2 = texture2D(depthtex1, texcoord).x;
 	float frDepth = linearize(z);
 
@@ -346,9 +348,9 @@ void main() {
 
 	#ifdef OVERWORLD_SHADER 
 		float DH_mixedLinearZ = sqrt(texelFetch2D(colortex12,ivec2(gl_FragCoord.xy),0).a/65000.0);
-		vec4 temporallyFilteredVL = VLTemporalFiltering(viewPos, DH_mixedLinearZ, colortex12);
+		vec4 temporallyFilteredVL = VLTemporalFiltering(viewPos, DH_mixedLinearZ, colortex12, hand);
 	#else
-		vec4 temporallyFilteredVL = VLTemporalFiltering(viewPos, frDepth, depthtex0);
+		vec4 temporallyFilteredVL = VLTemporalFiltering(viewPos, frDepth, depthtex0, hand);
 	#endif
 
 	gl_FragData[2] = temporallyFilteredVL;
@@ -362,7 +364,7 @@ void main() {
 	#ifdef FAKE_REFRACTION_EFFECT
 		// ApplyDistortion(refractedCoord, tangentNormals, linearDistance, isEntity);
 		// vec3 color = texture2D(colortex3, refractedCoord).rgb;
-		vec3 color = doRefractionEffect(refractedCoord, tangentNormals.xy, linearDistance, isReflectiveEntity);
+		vec3 color = doRefractionEffect(refractedCoord, tangentNormals.xy, linearDistance, isReflectiveEntity, isWater && isEyeInWater == 1);
 	#else
 		// vec3 color = texture2D(colortex3, refractedCoord).rgb;
 		vec3 color = texelFetch2D(colortex3, ivec2(refractedCoord/texelSize),0).rgb;
@@ -459,7 +461,9 @@ void main() {
 ////// --------------- BLEND FOG INTO SCENE
 //////////// apply VL fog over opaque and translucents
 
-	// bloomyFogMult *= temporallyFilteredVL.a;
+	#ifndef OVERWORLD_SHADER
+		bloomyFogMult *= temporallyFilteredVL.a;
+	#endif
   
 	#ifdef IS_IRIS
 		// if(z >= 1.0) color = vec3(0,255,0);
