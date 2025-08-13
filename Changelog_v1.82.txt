@@ -1,13 +1,15 @@
 2025-8-12 v1.82
-1.Fix an an issue with shadow filtering.
+1. Fix an an issue with shadow filtering.
 ~ composite1 修复一个阴影过滤的问题
-2.Merge X0nk's latest commit. (volume)
-~ xxx 有选择性地整合了X0nk最新的更新 (体积)
-3.Improve ambient scattering.
+2. Merge X0nk's latest commit. (volume)
+~ xxx 整合了X0nk最新的更新 (体积)
+3. Improve ambient scattering.
 ~ROBOBO_sky 优化环境光散射
+4. Fix compile error.
+~ composite3 修复编译错误
 
 2025-8-12 v1.81
-1.Selectively merge X0nk's latest commit.
+1. Selectively merge X0nk's latest commit.
 ~ xxx 有选择性地整合了X0nk最新的更新
 
 2025-7-10 v1.79
@@ -533,5 +535,6 @@
 	拆分植物摇晃选项以解决一些资源包冲突问题
 12.	Update CHS/ENG lang file.
 	中文/英文语言文件更新
+
 
 
