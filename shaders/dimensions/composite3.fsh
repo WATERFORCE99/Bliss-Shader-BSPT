@@ -366,6 +366,7 @@ void main() {
 
 	vec3 viewPos_alt = toScreenSpace(vec3(texcoord/RENDER_SCALE, z2));
 	vec3 playerPos_alt = toWorldSpace(viewPos_alt);
+	float linearDistance_cylinder_alt = length(playerPos_alt.xz);
 
 	float lightleakfix = clamp(pow(eyeBrightnessSmooth.y/240.,2) ,0.0,1.0);
 	float lightleakfixfast = clamp(eyeBrightness.y/240.,0.0,1.0);
