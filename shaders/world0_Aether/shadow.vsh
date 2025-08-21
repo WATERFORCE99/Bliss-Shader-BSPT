@@ -71,7 +71,7 @@ vec2 calcWave(in vec3 pos) {
 }
 
 vec3 calcMovePlants(in vec3 pos) {
-	vec2 move1 = calcWave(pos );
+	vec2 move1 = calcWave(pos);
 	float move1y = -length(move1);
 	return vec3(move1.x,move1y,move1.y)*5.*WAVY_STRENGTH/255.0;
 }
@@ -88,7 +88,7 @@ vec3 calcMoveLeaves(in vec3 pos, in float f0, in float f1, in float f2, in float
 	return move1*5.*WAVY_STRENGTH/255.;
 }
 
-bool intersectCone(float coneHalfAngle, vec3 coneTip , vec3 coneAxis, vec3 rayOrig, vec3 rayDir, float maxZ) {
+bool intersectCone(float coneHalfAngle, vec3 coneTip, vec3 coneAxis, vec3 rayOrig, vec3 rayDir, float maxZ) {
 	vec3 co = rayOrig - coneTip;
 	float prod = dot(normalize(co),coneAxis);
 	if (prod <= -coneHalfAngle) return true; //In view frustrum
