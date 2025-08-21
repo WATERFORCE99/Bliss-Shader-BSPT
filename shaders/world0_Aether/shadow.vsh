@@ -44,13 +44,16 @@ uniform int entityId;
 #include "/lib/blocks.glsl"
 #include "/lib/entities.glsl"
 
+#include "/lib/projections.glsl"
+#include "/lib/DistantHorizons_projections.glsl"
+
 #ifdef IS_LPV_ENABLED
 	#ifdef IRIS_FEATURE_BLOCK_EMISSION_ATTRIBUTE
 		attribute vec4 at_midBlock;
 	#else
 		attribute vec3 at_midBlock;
 	#endif
-    uniform int currentRenderedItemId;
+	uniform int currentRenderedItemId;
 	uniform int renderStage;
 
 	#include "/lib/voxel_common.glsl"
@@ -61,7 +64,6 @@ const float PI48 = 150.796447372*WAVY_SPEED;
 float pi2wt = PI48*frameTimeCounter;
 
 vec2 calcWave(in vec3 pos) {
-
 	float magnitude = abs(sin(dot(vec4(frameTimeCounter, pos),vec4(1.0,0.005,0.005,0.005)))*0.5+0.72)*0.013;
 	vec2 ret = (sin(pi2wt*vec2(0.0063,0.0015)*4. - pos.xz + pos.y*0.05)+0.1)*magnitude;
 
@@ -75,7 +77,6 @@ vec3 calcMovePlants(in vec3 pos) {
 }
 
 vec3 calcWaveLeaves(in vec3 pos, in float fm, in float mm, in float ma, in float f0, in float f1, in float f2, in float f3, in float f4, in float f5) {
-
 	float magnitude = abs(sin(dot(vec4(frameTimeCounter, pos),vec4(1.0,0.005,0.005,0.005)))*0.5+0.72)*0.013;
 	vec3 ret = (sin(pi2wt*vec3(0.0063,0.0224,0.0015)*1.5 - pos))*magnitude;
 
@@ -83,36 +84,28 @@ vec3 calcWaveLeaves(in vec3 pos, in float fm, in float mm, in float ma, in float
 }
 
 vec3 calcMoveLeaves(in vec3 pos, in float f0, in float f1, in float f2, in float f3, in float f4, in float f5, in vec3 amp1, in vec3 amp2) {
-	vec3 move1 = calcWaveLeaves(pos      , 0.0054, 0.0400, 0.0400, 0.0127, 0.0089, 0.0114, 0.0063, 0.0224, 0.0015) * amp1;
+	vec3 move1 = calcWaveLeaves(pos, 0.0054, 0.0400, 0.0400, 0.0127, 0.0089, 0.0114, 0.0063, 0.0224, 0.0015) * amp1;
 	return move1*5.*WAVY_STRENGTH/255.;
 }
 
 bool intersectCone(float coneHalfAngle, vec3 coneTip , vec3 coneAxis, vec3 rayOrig, vec3 rayDir, float maxZ) {
 	vec3 co = rayOrig - coneTip;
 	float prod = dot(normalize(co),coneAxis);
-	if (prod <= -coneHalfAngle) return true;   //In view frustrum
+	if (prod <= -coneHalfAngle) return true; //In view frustrum
 
 	float a = dot(rayDir,coneAxis)*dot(rayDir,coneAxis) - coneHalfAngle*coneHalfAngle;
 	float b = 2. * (dot(rayDir,coneAxis)*dot(co,coneAxis) - dot(rayDir,co)*coneHalfAngle*coneHalfAngle);
 	float c = dot(co,coneAxis)*dot(co,coneAxis) - dot(co,co)*coneHalfAngle*coneHalfAngle;
 
 	float det = b*b - 4.*a*c;
-	if (det < 0.) return false;    // No intersection with either forward cone and backward cone
+	if (det < 0.) return false; // No intersection with either forward cone and backward cone
 
 	det = sqrt(det);
 	float t2 = (-b + det) / (2. * a);
-	if (t2 <= 0.0 || t2 >= maxZ) return false;  //Idk why it works
+	if (t2 <= 0.0 || t2 >= maxZ) return false; //Idk why it works
 
 	return true;
 }
-
-#include "/lib/projections.glsl"
-
-// uniform float far;
-
-#include "/lib/DistantHorizons_projections.glsl"
-
-// uniform int renderStage;
 
 void main() {
 	texcoord.xy = gl_MultiTexCoord0.xy;
