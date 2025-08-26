@@ -37,5 +37,10 @@ vec3 lensflare(vec2 uv, vec2 pos) {
 	c.b += f1b + f2b + f3b;
 	c += vec3(f0);
 
-	return c * vec3(0.5, 0.4, 0.35);
+	#if colortype == 1
+		vec3 sunCol = vec3(sunColorR, sunColorG, sunColorB);
+	#else
+		vec3 sunCol = blackbody(Sun_temp);
+	#endif
+	return c * sunCol;
 }

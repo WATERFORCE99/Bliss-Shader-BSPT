@@ -8,8 +8,6 @@ flat in vec3 averageSkyCol;
 flat in vec3 lightSourceColor;
 flat in vec3 sunColor;
 flat in vec3 moonColor;
-// flat in vec3 zenithColor;
-// flat in vec3 rayleighAborbance; 
 
 flat in vec2 tempOffsets;
 

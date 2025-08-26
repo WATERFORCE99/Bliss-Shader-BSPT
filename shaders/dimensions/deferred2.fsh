@@ -6,7 +6,7 @@ uniform sampler2D depthtex0;
 uniform sampler2D dhDepthTex;
 
 uniform sampler2D colortex1;
- uniform sampler2D colortex2;
+uniform sampler2D colortex2;
 
 uniform vec2 texelSize;
 
@@ -14,7 +14,7 @@ float interleaved_gradientNoise(){
 	vec2 coord = gl_FragCoord.xy;
 	float noise = fract(52.9829189 * fract((coord.x * 0.06711056) + (coord.y * 0.00583715)));
 	return noise;
- }
+}
 
 //////////////////////////////VOID MAIN//////////////////////////////
 //////////////////////////////VOID MAIN//////////////////////////////
@@ -28,7 +28,7 @@ float interleaved_gradientNoise(){
 
 void main() {
 	vec2 texcoord = gl_FragCoord.xy * texelSize;
- 
+
 	gl_FragData[0] = texelFetch2D(colortex1, ivec2(gl_FragCoord.xy),0);
 
 	if(

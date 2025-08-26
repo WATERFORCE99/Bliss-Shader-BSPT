@@ -144,7 +144,6 @@ vec3 LightSourceColors(float vortexBounds, float lightningflash){
 }
 
 vec3 LightSourceLighting(vec3 startPos, vec3 lightPos, float noise, float density, vec3 lightColor, float vortexBound){
-
 	float phase = endFogPhase(lightPos);
 	float shadow = 0.0;
 
@@ -153,7 +152,7 @@ vec3 LightSourceLighting(vec3 startPos, vec3 lightPos, float noise, float densit
 		shadow += fogShape(shadowSamplePos);
 	}
 
-	vec3 finalLighting = lightColor * phase * exp(-32.0 * shadow) ;
+	vec3 finalLighting = lightColor * phase * exp(-32.0 * shadow);
 	finalLighting += lightColor * phase * phase * (1.0 - exp(-shadow * vec3(END_VORTEX_R, END_VORTEX_G, END_VORTEX_B))) * (1.0 - exp(-density * density));
 
 	return finalLighting;

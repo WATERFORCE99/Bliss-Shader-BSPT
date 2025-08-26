@@ -94,8 +94,6 @@ uniform int framemod8;
 uniform float viewWidth;
 uniform float viewHeight;
 
-uniform vec3 sunColor;
-
 uniform float waterEnteredAltitude;
 
 #include "/lib/Shadow_Params.glsl"
@@ -568,7 +566,7 @@ void main() {
 
 			float lightningflash = texelFetch2D(colortex4,ivec2(1,1),0).x/150.0;
 			vec3 lightColors = LightSourceColors(vortexBounds, lightningflash);
-		
+
 			float end_NdotL = clamp(dot(worldSpaceNormal, normalize(-lightPos))*0.5+0.5,0.0,1.0);
 			end_NdotL *= end_NdotL;
 
@@ -578,7 +576,7 @@ void main() {
 			Direct_lighting += lightColors * endPhase * end_NdotL * fogShadow;
 
 			vec3 AmbientLightColor = vec3(END_FOG_R, END_FOG_G, END_FOG_B);
-			
+
 			Indirect_lighting = AmbientLightColor + 0.7 * AmbientLightColor * dot(worldSpaceNormal, normalize(feetPlayerPos));
 			Indirect_lighting *= 0.1;
 		#endif

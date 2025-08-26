@@ -166,10 +166,7 @@ vec3 doBlockLightLighting(
 	return blockLight * TORCH_AMOUNT;
 }
 
-vec3 doIndirectLighting(
-	vec3 lightColor, vec3 minimumLightColor, float lightmap
-){
-
+vec3 doIndirectLighting(vec3 lightColor, vec3 minimumLightColor, float lightmap){
 	float lightmapCurve = pow(lightmap, 15.0) + pow(lightmap, 2.5) / 3.0; //make sure its 0.0-1.0;
 
 	vec3 indirectLight = lightColor * lightmapCurve * ambient_brightness; 

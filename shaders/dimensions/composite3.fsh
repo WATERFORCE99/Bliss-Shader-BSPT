@@ -52,6 +52,7 @@ uniform ivec2 eyeBrightnessSmooth;
 uniform ivec2 eyeBrightness;
 uniform float nightVision;
 uniform float rainStrength;
+uniform float wetness;
 uniform float blindness;
 uniform float darknessFactor;
 uniform float darknessLightFactor;
@@ -66,6 +67,7 @@ uniform float eyeAltitude;
 
 #ifdef OVERWORLD_SHADER
 	#include "/lib/climate_settings.glsl"
+	#include "/lib/rainbow.glsl"
 #endif
 
 #include "/lib/sky_gradient.glsl"
@@ -470,12 +472,21 @@ void main() {
  
   // blend all fog types. volumetric fog, volumetric clouds, distance based fogs for lava, powdered snow, blindness, and darkness.
 	blendAllFogTypes(color, bloomyFogMult, temporallyFilteredVL, linearDistance, playerPos_normalized, cameraPosition, isSky);
-  
+
+////// --------------- RAINBOWS
+
+	#if RAINBOW > 0 && defined OVERWORLD_SHADER
+		vec3 rainbow = drawRainbow(playerPos);
+		float bottomLayerHeight = min(CloudLayer0_height, CloudLayer1_height);
+		float bottomLayerTallness = CloudLayer0_height < CloudLayer1_height ? CloudLayer0_tallness : CloudLayer1_tallness;
+		rainbow = mix(rainbow * temporallyFilteredVL.a, rainbow, smoothstep(bottomLayerHeight + bottomLayerTallness, bottomLayerHeight, playerPos_normalized.y * RAINBOW_DISTANCE + cameraPosition.y)); // Insert cloud
+		color += rainbow;
+	#endif
+
 ////// --------------- FINALIZE
 	#ifdef display_LUT
-
-	float zoomLevel = 1.0;
-	vec3 thingy = texelFetch2D(colortex4,ivec2(gl_FragCoord.xy/zoomLevel),0).rgb /1200.0;
+		float zoomLevel = 1.0;
+		vec3 thingy = texelFetch2D(colortex4,ivec2(gl_FragCoord.xy/zoomLevel),0).rgb /1200.0;
 
 		if(luma(thingy) > 0.0) {
 			color.rgb =  thingy;

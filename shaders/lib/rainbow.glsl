@@ -6,28 +6,30 @@ vec3 smoothHue(float h) {
 }
 
 vec3 drawRainbow(vec3 playerPos) {
+	float rainbowAmount = RAINBOW == 1 ? wetness * (1.0 - rainStrength) : 1.0;
 
-	vec3 sunDir = normalize(WsunVec);
-	float rainbowAng = (sign(sunDir.x) > 0.0) ? 130.0 : -130.0;
-	float theta = radians(rainbowAng);
+	#ifdef DISTANT_HORIZONS
+		float maxDist = dhFarPlane;
+	#else
+		float maxDist = 4.0 * far;
+	#endif
 
-	float VdotL = dot(playerPos, sunDir);
-	float rainbowWidth = 0.05;
-	float rainbowCoord = clamp((VdotL - cos(theta + rainbowWidth)) / (cos(theta - rainbowWidth) - cos(theta + rainbowWidth)), 0.0, 1.0);
+	float rainbowDist = min(maxDist, RAINBOW_DISTANCE);
+	float RdotV = dot(-WsunVec, normalize(playerPos));
 
-	vec3 rainbow = vec3(0.0);
-	if (rainbowCoord > 0.0) {
-		float rainbowFactor = pow(rainbowCoord * (1.0 - rainbowCoord) * 12.0, 2.0);
+	if (isEyeInWater == 0 && rainbowAmount >0) {
+		float rainbowWidth = 0.05;
+		float rainbowCoord = clamp((RdotV - cos(0.75 - RAINBOW_WIDTH)) / (cos(0.75 + RAINBOW_WIDTH) - cos(0.75 - RAINBOW_WIDTH)), 0.0, 1.0);
 
-		float horizonFade = clamp(sunDir.y * 5.0, 0.0, 1.0);
-		float elevationFade = smoothstep(0.3, 0.4, sunDir.y);
-
-		float afterRain = RAINBOW == 1 ? wetness * (1.0 - rainStrength) : 1.0;
-
-		rainbowFactor *= horizonFade * elevationFade * afterRain;
+		float rainbowFactor = pow(rainbowCoord * (1.0 - rainbowCoord), 2.0);
 
 		vec3 colorBand = smoothHue(-rainbowCoord);
-		rainbow = colorBand * rainbowFactor * RAINBOW_STRENGTH * 0.01;
+		vec3 rainbowColor = colorBand * rainbowFactor * RAINBOW_STRENGTH;
+
+		float lengthFactor = smoothstep(rainbowDist * 0.9, rainbowDist * 1.1, length(playerPos));
+		float elevationFade = smoothstep(0.025, 0.1, WsunVec.y);
+		rainbowAmount *= lengthFactor * elevationFade;
+
+		return rainbowColor * rainbowAmount;
 	}
-	return rainbow;
 }

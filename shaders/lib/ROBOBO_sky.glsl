@@ -6,11 +6,11 @@ const float moonAngularSize = 0.516667;
 // Sky coefficients and heights
 
 const float sky_planetRadius = 6731e3;
-const float sky_atmosphereHeight = 140e3;
+const float sky_atmosphereHeight = 120e3;
 
 const vec2 sky_scaleHeights = vec2(85e2, 12e2);
 
-const vec3 ozoneAbsorption = vec3(2.0e-6, 5.8e-6, 0.2e-6);
+const vec3 ozoneAbsorption = vec3(2.0e-6, 6.0e-6, 0.2e-6);
 const vec3 rayleighBeta = vec3(5.8e-6, 13.5e-6, 33.1e-6);
 const vec3 sky_coefficientRayleigh = vec3(sky_coefficientRayleighR, sky_coefficientRayleighG, sky_coefficientRayleighB) * rayleighBeta + ozoneAbsorption;
 
@@ -34,7 +34,7 @@ const mat3 sky_coefficientsAttenuation = mat3(sky_coefficientRayleigh , sky_coef
 
 #if colortype == 1
 	#define sunColorBase vec3(sunColorR, sunColorG, sunColorB) * sun_illuminance
-	#define moonColorBase vec3(moonColorR,moonColorG,moonColorB) * moon_illuminance * moonlightbrightness
+	#define moonColorBase vec3(moonColorR, moonColorG, moonColorB) * moon_illuminance * moonlightbrightness
 #else
 	#define sunColorBase blackbody(Sun_temp) * sun_illuminance
 	#define moonColorBase blackbody(Moon_temp) * moon_illuminance * moonlightbrightness
@@ -68,7 +68,7 @@ vec3 sky_density(float centerDistance) {
 vec3 sky_airmass(vec3 position, vec3 direction, float rayLength, const float steps) {
 	float stepSize  = rayLength * (1.0 / steps);
 	vec3  increment = direction * stepSize;
-	position += increment * 0.5;
+	position += increment;
 
 	vec3 airmass = vec3(0.0);
 	for (int i = 0; i < steps; ++i, position += increment) {

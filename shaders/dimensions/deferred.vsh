@@ -12,7 +12,6 @@ flat out vec3 averageSkyCol;
 flat out vec3 sunColor;
 flat out vec3 moonColor;
 flat out vec3 lightSourceColor;
-flat out vec3 zenithColor;
 
 flat out vec2 tempOffsets;
 

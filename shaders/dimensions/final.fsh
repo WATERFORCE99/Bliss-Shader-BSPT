@@ -21,7 +21,6 @@ uniform float rainStrength;
 #ifdef OVERWORLD_SHADER
 	uniform int worldTime;
 	uniform int worldDay;
-
 	flat in vec3 WsunVec;
 
 	#include "/lib/scene_controller.glsl"
@@ -186,7 +185,8 @@ void main() {
 					cloudVis = clamp(1.0 - cloudVis * 32.0, 0.0, 1.0);
 				#endif
 
-				float sunVis = screenVis * depthVis * cloudVis;
+				float lfAmount = smoothstep(0.0, 0.3, WsunVec.y);
+				float sunVis = screenVis * depthVis * cloudVis * lfAmount;
 
 				vec3 lf = lensflare(texcoord, sunPos) * sunVis;
 				COLOR += lf;

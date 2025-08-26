@@ -65,7 +65,7 @@ vec4 GetVolumetricFog(
 	vec3 hazeColor = normalize(gl_Fog.color.rgb + 1e-6) * 0.25;
 
 	#if defined LPV_VL_FOG_ILLUMINATION && defined EXCLUDE_WRITE_TO_LUT
-    	float TorchBrightness_autoAdjust = mix(1.0, 30.0,  clamp(exp(-10.0*exposure),0.0,1.0)) / 5.0;
+    	float TorchBrightness_autoAdjust = mix(1.0, 30.0, clamp(exp(-10.0*exposure),0.0,1.0)) / 5.0;
 	#endif
 
 	for (int i = 0; i < SAMPLECOUNT; i++) {
@@ -123,7 +123,6 @@ vec4 GetVolumetricFog(
 			#if defined LPV_VL_FOG_ILLUMINATION && defined EXCLUDE_WRITE_TO_LUT
 				color += LPV_FOG_ILLUMINATION(progressW-cameraPosition, dd, dL) * TorchBrightness_autoAdjust * absorbance;
 			#endif
-
 	}
 	return vec4(color, absorbance);
 }

@@ -140,7 +140,6 @@ float convertHandDepth_2(in float depth, bool hand) {
 	#define CLOUDSHADOWSONLY
 	#include "/lib/volumetricClouds.glsl"
 	#include "/lib/aurora.glsl"
-	#include "/lib/rainbow.glsl"
 #endif
 
 #ifdef IS_LPV_ENABLED
@@ -1124,11 +1123,6 @@ void main() {
 
 			// Render aurora
 			Background += drawAurora(feetPlayerPos_normalized, noise) * AURORA_BRIGHTNESS * applyAurora;
-
-			#if RAINBOW == 1 || RAINBOW == 2
-				vec3 rainbow = drawRainbow(feetPlayerPos_normalized) * clamp(unsigned_WsunVec.y*2.0,0.0,1.0);
-				if(isEyeInWater == 0) Background += rainbow;
-			#endif
 
 			#ifndef ISOLATE_RESOURCEPACK_SKY
 				vec3 Sky = skyFromTex(feetPlayerPos_normalized, colortex4)/1200.0 * Sky_Brightness;
