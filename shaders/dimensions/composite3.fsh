@@ -65,14 +65,15 @@ uniform float eyeAltitude;
 #include "/lib/waterBump.glsl"
 #include "/lib/res_params.glsl"
 
+#include "/lib/projections.glsl"
+#include "/lib/DistantHorizons_projections.glsl"
+
 #ifdef OVERWORLD_SHADER
 	#include "/lib/climate_settings.glsl"
 	#include "/lib/rainbow.glsl"
 #endif
 
 #include "/lib/sky_gradient.glsl"
-#include "/lib/projections.glsl"
-#include "/lib/DistantHorizons_projections.glsl"
 
 vec4 blueNoise(vec2 coord){
 	return texelFetch2D(colortex6, ivec2(coord)%512 , 0);
