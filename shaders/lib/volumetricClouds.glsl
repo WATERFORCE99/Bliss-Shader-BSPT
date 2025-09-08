@@ -20,48 +20,46 @@ float densityAtPos(in vec3 pos){
 
 float getCloudShape(int LayerIndex, int LOD, in vec3 position, float minHeight, float maxHeight){
 
-	vec3 samplePos = position * vec3(1.0, 1.0/48.0, 1.0)/4.0;
+	vec3 samplePos = position * vec3(0.25, 0.005, 0.25);
 	
 	float coverage = 0.0;
 	float shape = 0.0;
 	float largeCloud = 0.0;
 	float smallCloud = 0.0;
 
-	if(LayerIndex == ALTOSTRATUS_LAYER){	
-		coverage = parameters.altostratus.x;
+	switch (LayerIndex){
+		default : { break; }
 
-		largeCloud = texture2D(noisetex, (position.xz + cloud_movement)/100000. * CloudLayer2_scale).b;
-		smallCloud = 1.0 - texture2D(noisetex, ((position.xz - cloud_movement)/7500. - vec2(1.0-largeCloud, -largeCloud)/5.0) * CloudLayer2_scale).b;
+		case SMALLCUMULUS_LAYER: {
+			coverage = parameters.smallCumulus.x;
+			largeCloud = texture2D(noisetex, (samplePos.xz + cloud_movement)/5000.0 * CloudLayer0_scale).b;
+			smallCloud = 1.0-texture2D(noisetex, (samplePos.xz - cloud_movement)/500.0 * CloudLayer0_scale).r;
+			smallCloud = abs(largeCloud-0.6) + smallCloud*smallCloud;
 
-		smallCloud = largeCloud + smallCloud * 0.4 * clamp(1.5-largeCloud,0.0,1.0);
-		
-		shape = min(max(coverage - smallCloud,0.0)/sqrt(coverage),1.0);
-		shape *= shape;
+			shape = min(max(coverage - smallCloud,0.0)/(1e-6+sqrt(coverage)),1.0);
+        break; }
 
-		return shape;
-	}
+		case LARGECUMULUS_LAYER: {
+			coverage = parameters.largeCumulus.x;
+			largeCloud = texture2D(noisetex, (samplePos.zx + cloud_movement*2.0)/10000.0 * CloudLayer1_scale).b;
+			smallCloud = texture2D(noisetex, (samplePos.zx - cloud_movement*2.0)/2500.0 * CloudLayer1_scale).b;
+			smallCloud = abs(largeCloud* -0.7) + smallCloud;
 
-	if(LayerIndex == LARGECUMULUS_LAYER){
-		coverage = parameters.largeCumulus.x;
-		
-		largeCloud = texture2D(noisetex, (samplePos.zx + cloud_movement*2.0)/10000.0 * CloudLayer1_scale).b;
-		smallCloud = texture2D(noisetex, (samplePos.zx - cloud_movement*2.0)/2500.0 * CloudLayer1_scale).b;
-		
-		smallCloud = abs(largeCloud* -0.7) + smallCloud;
+			shape = min(max(coverage - smallCloud,0.0)/(1e-6+sqrt(coverage)),1.0);
+		break; }
 
-		shape = min(max(coverage - smallCloud,0.0)/sqrt(coverage),1.0) ;	
-	}
+		case ALTOSTRATUS_LAYER: {
+			coverage = parameters.altostratus.x;
+			largeCloud = texture2D(noisetex, (position.xz + cloud_movement)/100000. * CloudLayer2_scale).b;
+			smallCloud = 1.0 - texture2D(noisetex, ((position.xz - cloud_movement)/7500. - vec2(1.0-largeCloud, -largeCloud)/5.0) * CloudLayer2_scale).b;
+			smallCloud = largeCloud + smallCloud * 0.4 * clamp(1.5-largeCloud,0.0,1.0);
+			
+			shape = min(max(coverage - smallCloud,0.0) / (1e-6+sqrt(coverage)),1.0);
+			shape *= shape;
+			return shape;
 
-	if(LayerIndex == SMALLCUMULUS_LAYER){
-		coverage = parameters.smallCumulus.x;
-
-		largeCloud = texture2D(noisetex, (samplePos.xz + cloud_movement)/5000.0 * CloudLayer0_scale).b;
-		smallCloud = 1.0-texture2D(noisetex, (samplePos.xz - cloud_movement)/500.0 * CloudLayer0_scale).r;
-
-		smallCloud = abs(largeCloud-0.6) + smallCloud * smallCloud;
-
-		shape = min(max(coverage - smallCloud,0.0)/sqrt(coverage),1.0) ;
-	}
+		break; }
+    }
 
 	float toTop = maxHeight - position.y;
 	float toBottom = position.y - minHeight;
@@ -88,21 +86,26 @@ float getCloudShape(int LayerIndex, int LOD, in vec3 position, float minHeight, 
 
  		float erosion = 0.0;
 
-		if(LayerIndex == SMALLCUMULUS_LAYER){
-			erosion += (1.0-densityAtPos(samplePos * 200.0 * CloudLayer0_scale)) * sqrt(1.0-shape);
+		switch (LayerIndex){  
+			default : { break; }
 
-			float falloff = 1.0 - clamp(toTop/100.0,0.0,1.0);
-			erosion += abs(densityAtPos(samplePos * 600.0 * CloudLayer0_scale) - falloff) * 0.75 * (1.0-shape) * (1.0-falloff*0.25);
+			case SMALLCUMULUS_LAYER: {
+				erosion += (1.0-densityAtPos(samplePos * 200.0 * CloudLayer0_scale)) * sqrt(1.0-shape);
 
-			erosion = erosion*erosion*erosion*erosion;
-		}
-		if(LayerIndex == LARGECUMULUS_LAYER){
-			erosion += (1.0 - densityAtPos(samplePos * 100.0 * CloudLayer1_scale)) * sqrt(1.0-shape);
+				float falloff = 1.0 - clamp(toTop/100.0,0.0,1.0);
+				erosion += abs(densityAtPos(samplePos * 600.0 * CloudLayer0_scale) - falloff) * 0.75 * (1.0-shape) * (1.0-falloff*0.25);
 
-			float falloff = 1.0 - clamp(toTop/200.0,0.0,1.0);
-			erosion += abs(densityAtPos(samplePos * 450.0 * CloudLayer1_scale) - falloff) * 0.75 * (1.0-shape) * (1.0-falloff*0.5);
+				erosion = erosion*erosion*erosion*erosion;
+			break; }
 
-			erosion = erosion*erosion*erosion*erosion;
+			case  LARGECUMULUS_LAYER: {
+				erosion += (1.0 - densityAtPos(samplePos * 100.0 * CloudLayer1_scale)) * sqrt(1.0-shape);
+
+				float falloff = 1.0 - clamp(toTop/200.0,0.0,1.0);
+				erosion += abs(densityAtPos(samplePos * 450.0 * CloudLayer1_scale) - falloff) * 0.75 * (1.0-shape) * (1.0-falloff*0.5);
+
+				erosion = erosion*erosion*erosion*erosion;
+			break; }
 		}
 		return max(shape - erosion * ERODE_AMOUNT,0.0);
 	}
@@ -121,14 +124,14 @@ float getSunOcculsion(vec3 playerPos, vec3 sunVector){
 	float density = 0.0;
 	#ifdef CloudLayer0
 		vec3 pos0 = playerPos + sunVector / abs(sunVector.y) * max((CloudLayer0_height + 20.0) - playerPos.y, 0.0);
-		density += getCloudShape(SMALLCUMULUS_LAYER, 0, pos0, CloudLayer0_height, CloudLayer0_height + 100.0) * parameters.smallCumulus.y;
+		density += getCloudShape(SMALLCUMULUS_LAYER, 0, pos0, CloudLayer0_height, CloudLayer0_tallness / CloudLayer0_scale + CloudLayer0_height) * parameters.smallCumulus.y;
 	#endif
 	#ifdef CloudLayer1
 		vec3 pos1 = playerPos + sunVector / abs(sunVector.y) * max((CloudLayer1_height + 40.0) - playerPos.y, 0.0);
-		density += getCloudShape(LARGECUMULUS_LAYER, 0, pos1, CloudLayer1_height, CloudLayer1_height + 200.0) * parameters.largeCumulus.y;
+		density += getCloudShape(LARGECUMULUS_LAYER, 0, pos1, CloudLayer1_height, CloudLayer1_tallness / CloudLayer1_scale + CloudLayer1_height) * parameters.largeCumulus.y;
 	#endif
 	#ifdef CloudLayer2
-		vec3 pos2 = playerPos + sunVector / abs(sunVector.y) * max((CloudLayer2_height + 1.0) - playerPos.y, 0.0);
+		vec3 pos2 = playerPos + sunVector / abs(sunVector.y) * max(CloudLayer2_height - playerPos.y, 0.0);
 		density += getCloudShape(ALTOSTRATUS_LAYER, 0, pos2, CloudLayer2_height, CloudLayer2_height + 5.0) * parameters.altostratus.y;
 	#endif
 	return density;
@@ -434,12 +437,11 @@ vec4 GetVolumetricClouds(
 	vec3 cloudDist = vec3(1.0);
 	cloudDist.xz = mix(vec2(255.0), vec2(5.0), clamp(cameraPosition.y - minHeight,0.0,clamp((maxHeight-5) - cameraPosition.y ,0.0,1.0)));
 
-	// vec3 rayDirection = NormPlayerPos.xyz * (cloudheight/abs(NormPlayerPos.y)/samples);
 	vec3 rayDirection = NormPlayerPos.xyz * (cloudheight/length(NormPlayerPos.xyz/cloudDist)/samples);
 	vec3 rayPosition = getRayOrigin(rayDirection, cameraPosition, dither.y, minHeight, maxHeight);
 
 	#ifdef SKY_GROUND
-		vec3 sampledSkyCol = indirectLightCol;
+		vec3 sampledSkyCol = mix(skyFromTex(normalize(rayPosition - cameraPosition), colortex4)/1200.0 * Sky_Brightness, indirectLightCol, heightRelativeToClouds);
 	#else
 		vec3 sampledSkyCol = skyFromTex(normalize(rayPosition-cameraPosition), colortex4)/1200.0 * Sky_Brightness;
 	#endif

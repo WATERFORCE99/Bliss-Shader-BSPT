@@ -1,4 +1,4 @@
-#define SHADER_VERSION_LABEL 1.83 // [1.83]
+#define SHADER_VERSION_LABEL 1.85 // [1.85]
 
 ////////////////////////////////////////
 // ----- WATER RELATED SETTINGS ----- //
@@ -22,9 +22,9 @@
 #define MINIMUM_WATER_ABSORBANCE -1 // [-1 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 25 30 35 40 45 50 60 70 80 90 100]
 #define rayMarchSampleCount 2 // [1 2 3 4 6 8 12 16 32 64]
 
-#define FAKE_REFRACTION_EFFECT
-#define FAKE_DISPERSION_EFFECT
-#define REFRACTION_SMUDGE
+#define FAKE_REFRACTION_AMOUNT 4 // [0 1 2 3 4 5 6 7 8]
+#define FAKE_DISPERSION_AMOUNT 4 // [0 1 2 3 4 5 6 7 8]
+#define REFRACTION_SMUDGE_AMOUNT 0 // [0 1 2 3 4 5 6 7 8]
 
 #define SSR_STEPS 30 // [10 15 20 25 30 35 40 50 100 200 400]
 #define USE_QUARTER_RES_DEPTH
@@ -100,7 +100,7 @@
 #define indirect_effect 1 // [0 1 2 3]
 #define indirect_RTGI 0 // [0 1 2]
 
-// #define AO_in_sunlight
+#define AO_in_sunlight
 #define AO_Strength 1.0 // [0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0 2.1 2.2 2.3 2.4 2.5 2.6 2.7 2.8 2.9 3.0]
 
 #define UseQuarterResDepth
@@ -267,9 +267,8 @@ const float shadowDistance = 128; // [16 32 48 64 80 96 128 160 192 256 512 1024
 #define MAX_ITERATIONS 35 // [5 10 15 20 25 30 35 40 45 50 60 70 80 90 100]
 #define MAX_DIST 25.0 // [5.0 10.0 15.0 20.0 25.0 30.0 35.0 40.0 45.0 50.0 60.0 70.0 80.0 90.0 100.0]
 
-#define Sun_specular_Strength 1 // [0 1 2 3 4 5 6 7 8 9 10]
-#define reflection_quality 30.0 // [5.0 10.0 15.0 20.0 25.0 30.0 35.0 40.0 45.0 50.0 55.0 60.0 65.0 70.0 75.0 80.0 85.0 90.0 95.0 100.0]
-#define Roughness_Threshold 0.3 // [0 0.02 0.04 0.06 0.08 0.1 0.12 0.14 0.16 0.18 0.2 0.22 0.24 0.26 0.28 0.3 0.32 0.34 0.36 0.38 0.4 0.42 0.44 0.46 0.48 0.5 0.52 0.54 0.56 0.58 0.6 0.62 0.64 0.66 0.68 0.7 0.72 0.74 0.76 0.78 0.8 0.82 0.84 0.86 0.88 0.9 0.92 0.94 0.96 0.98 1.0]
+#define SUN_SPECULAR_MULT 1 // [0 1 2 3 4 5 6 7 8 9 10]
+#define ROUGHNESS_THRESHOLD 0.3 // [0 0.02 0.04 0.06 0.08 0.1 0.12 0.14 0.16 0.18 0.2 0.22 0.24 0.26 0.28 0.3 0.32 0.34 0.36 0.38 0.4 0.42 0.44 0.46 0.48 0.5 0.52 0.54 0.56 0.58 0.6 0.62 0.64 0.66 0.68 0.7 0.72 0.74 0.76 0.78 0.8 0.82 0.84 0.86 0.88 0.9 0.92 0.94 0.96 0.98 1.0]
 
 #define MATERIAL_WETNESS_TYPE 0 // [0 1]
 
@@ -866,7 +865,7 @@ const vec3 aerochrome_color = mix(vec3(1.0, 0.0, 0.0), vec3(0.715, 0.303, 0.631)
 #endif
 #ifdef DEFERRED_SPECULAR
 #endif
-#ifdef DEFERRED_ENVIRONMENT_REFLECTION
+#ifdef if DEFERRED_SSR_QUALITY > -1
 #endif
 #ifdef DEFERRED_BACKGROUND_REFLECTION
 #endif
@@ -874,7 +873,7 @@ const vec3 aerochrome_color = mix(vec3(1.0, 0.0, 0.0), vec3(0.715, 0.303, 0.631)
 #endif
 #ifdef FORWARD_SPECULAR
 #endif
-#ifdef FORWARD_ENVIRONMENT_REFLECTION
+#ifdef if FORWARD_SSR_QUALITY > -1
 #endif
 #ifdef FORWARD_BACKGROUND_REFLECTION
 #endif

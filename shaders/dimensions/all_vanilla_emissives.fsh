@@ -4,12 +4,6 @@ in vec4 color;
 in vec2 texcoord;
 
 uniform sampler2D texture;
-uniform sampler2D normals;
-uniform sampler2D noisetex;
-
-in vec4 tangent;
-in vec4 normalMat;
-uniform float frameTimeCounter;
 
 vec3 toLinear(vec3 sRGB){
 	return sRGB * (sRGB * (sRGB * 0.305306011 + 0.682171111) + 0.012522878);
@@ -28,36 +22,35 @@ void main() {
 	vec4 Albedo = texture2D(texture, texcoord);
 	Albedo.rgb = toLinear(Albedo.rgb * color.rgb);
 
-	#if defined SPIDER_EYES || defined BEACON_BEAM || defined GLOWING 
+    #ifdef BEACON_BEAM
+	    gl_FragData[0] = vec4(Albedo.rgb*Albedo.rgb * 0.1 * 5.0 * Emissive_Brightness, Albedo.a*color.a);
+    #endif
 
-		if(Albedo.a < 0.102 || dot(Albedo.rgb, vec3(0.33333)) < 1.0/255.0) { discard; return; }
+    #ifdef LIGHTNING_AND_DRAGON_DEATH_BEAMS
+        gl_FragData[0] = vec4(Albedo.rgb * pow(1.0-pow(1.0-color.a,2),2) * 5.0 * 0.1, color.a);
+    #endif
 
-		float minimumBrightness = 0.5;
-
-		#ifdef BEACON_BEAM
-			minimumBrightness = 10.0;
-		#endif
+	#if defined SPIDER_EYES || defined GLOWING 
+		if(Albedo.a < 1.0/255.0 || dot(Albedo.rgb, vec3(0.33333)) < 1.0/255.0) { discard; return; }
 
 		#ifdef DISABLE_VANILLA_EMISSIVES
 			vec3 emissiveColor = vec3(0.0);
 			Albedo.a = 0.0;
 		#else
-			vec3 emissiveColor =  Albedo.rgb * color.a;
+			vec3 emissiveColor = Albedo.rgb * color.a * Emissive_Brightness;
 		#endif
 
-		gl_FragData[0] = vec4(emissiveColor * 0.1, Albedo.a * sqrt(color.a));
+		gl_FragData[0] = vec4(emissiveColor * 0.1, 0.000001);
 	#endif
 
 	#ifdef ENCHANT_GLINT
-		Albedo.rgb = clamp(Albedo.rgb, 0.0, 1.0); // for safety
-
 		#ifdef DISABLE_ENCHANT_GLINT
 			vec3 GlintColor = vec3(0.0);
 			Albedo.a = 0.0;
 		#else
-			vec3 GlintColor = Albedo.rgb * Emissive_Brightness;
+			vec3 GlintColor = Albedo.rgb * 0.2 * Emissive_Brightness;
 		#endif
 
-		gl_FragData[0] = vec4(GlintColor * 0.1, dot(Albedo.rgb, vec3(0.333)) * Albedo.a);
+		gl_FragData[0] = vec4(GlintColor * 0.1, 0.000001);
 	#endif
 }

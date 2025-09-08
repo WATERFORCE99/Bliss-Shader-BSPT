@@ -82,8 +82,8 @@ float shlickFresnelRoughness(float XdotN, float roughness){
 
 	float shlickFresnel = clamp(1.0 + XdotN,0.0,1.0);
 
-	float curves = exp(-4.0*pow(1-(roughness),2.5));
-	float brightness = exp(-3.0*pow(1-sqrt(roughness),3.5));
+	float curves = exp(-4.0*pow(1.0-(roughness),2.5));
+	float brightness = exp(-3.0*pow(1.0-sqrt(roughness),3.5));
 
 	shlickFresnel = pow(1.0-pow(1.0-shlickFresnel, mix(1.0, 1.9, curves)),mix(5.0, 2.6, curves));
 	shlickFresnel = mix(0.0, mix(1.0,0.065,  brightness) , clamp(shlickFresnel,0.0,1.0));
@@ -100,7 +100,11 @@ vec3 rayTraceSpeculars(vec3 dir, vec3 position, float dither, float quality, boo
 					? (-near - position.z) / dir.z
 					: far * sqrt(3.0);
 	vec3 direction = toClipSpace3(position + dir * rayLength) - clipPosition; //convert to clip space
-	vec3 reflectedTC = vec3((direction.xy + clipPosition.xy) * RENDER_SCALE, 1.0);
+	vec3 reflectedTC = vec3((direction.xy + clipPosition.xy) * RENDER_SCALE, 0.999999);
+
+	#if FORWARD_SSR_QUALITY == 1
+		return reflectedTC;
+	#endif
 
 	//get at which length the ray intersects with the edge of the screen
 	vec3 maxLengths = (step(0.0, direction) - clipPosition) / direction;
@@ -124,7 +128,9 @@ vec3 rayTraceSpeculars(vec3 dir, vec3 position, float dither, float quality, boo
 	vec3 hitPos = vec3(1.1);
 
   	for (int i = 0; i <= int(quality); i++) {
-		if(spos.x < 0 || spos.x > 1 || spos.y < 0 || spos.y > 1) return vec3(1.1);
+		#if DEFERRED_SSR_QUALITY != 1
+			if(!hand && (spos.x < 0 || spos.x > 1 || spos.y < 0 || spos.y > 1)) return vec3(1.1);
+		#endif
 
 		float sampleDepth = sqrt(texelFetch2D(colortex4, ivec2(spos.xy/texelSize/4.0),0).a/65000.0);
 		float sp = invLinZ(sampleDepth);
@@ -141,6 +147,11 @@ vec3 rayTraceSpeculars(vec3 dir, vec3 position, float dither, float quality, boo
 
 		reflectionLength += 1.0 / quality;
   	}
+
+	#if DEFERRED_SSR_QUALITY == 1
+		return reflectedTC;
+	#endif
+
 	if(hand) return reflectedTC;
 	return hitPos;
 }
@@ -156,10 +167,16 @@ vec4 screenSpaceReflections(
 ){
 	vec4 reflection = vec4(0.0);
 	float reflectionLength = 0.0;
-	float quality = 30.0f;
+
+	float quality = 1.0f;
+	#ifdef FORWARD_SPECULAR
+		quality = float(FORWARD_SSR_QUALITY);
+	#endif
+	#ifdef DEFERRED_SPECULAR
+		quality = float(DEFERRED_SSR_QUALITY);
+	#endif
 
 	vec3 raytracePos = rayTraceSpeculars(reflectedVector, viewPos, noise, quality, isHand, reflectionLength);
-
 	if (raytracePos.z > 1.0) return reflection;
 
 	// use higher LOD as the reflection goes on, to blur it. this helps denoise a little.
@@ -216,7 +233,7 @@ float getReflectionVisibility(float f0, float roughness){
 
 	// the goal is to determine if the reflection is even visible. 
 	// if it reaches a point in smoothness or reflectance where it is not visible, allow it to interpolate to diffuse lighting.
-	float thresholdValue = Roughness_Threshold;
+	float thresholdValue = ROUGHNESS_THRESHOLD;
 
 	if(thresholdValue < 0.01) return 0.0;
 
@@ -307,10 +324,8 @@ vec3 specularReflections(
 		vec3 reflectedVector_L = reflect(playerPos, normal);
 	#endif
 
-	float shlickFresnel = shlickFresnelRoughness(dot(-normalize(viewDir), vec3(0.0,0.0,1.0)), roughness);
-	#if defined FORWARD_SPECULAR && defined SNELLS_WINDOW
-		if(isEyeInWater == 1 && isWater) shlickFresnel = mix(shlickFresnel, 1.0, min(max(0.98 - (1.0-shlickFresnel),0.0)/(1-0.98),1.0));
-	#endif
+	float VdotN = dot(-normalize(viewDir), vec3(0.0,0.0,1.0));
+	float shlickFresnel = shlickFresnelRoughness(VdotN, roughness);
 
 	// F0 <  230 dialectrics
 	// F0 >= 230 hardcoded metal f0
@@ -324,13 +339,23 @@ vec3 specularReflections(
 
 	#ifdef FORWARD_SPECULAR
 		reflectanceForAlpha = clamp(dot(F0, vec3(0.3333333)), 0.0,1.0);
+
+		#if defined SNELLS_WINDOW
+			if(isEyeInWater == 1 && isWater){
+				// emulate how mojang did snells window in vibrant visuals because it works nicely tbh
+				float snellsWindow = min(max(0.54 - clamp(1.0 + VdotN,0,1),0)/0.1,1);
+				snellsWindow = 1.0-snellsWindow*snellsWindow;
+				snellsWindow *= snellsWindow*snellsWindow;
+				reflectanceForAlpha = f0 + (1.0-f0) * snellsWindow;
+			}
+		#endif
 	#endif
 
 	vec3 specularReflections = diffuseLighting;
 
 	float reflectionVisibilty = getReflectionVisibility(f0, roughness);
 
-	#if defined DEFERRED_BACKGROUND_REFLECTION || defined FORWARD_BACKGROUND_REFLECTION || defined DEFERRED_ENVIRONMENT_REFLECTION || defined FORWARD_ENVIRONMENT_REFLECTION
+	#if defined DEFERRED_BACKGROUND_REFLECTION || defined FORWARD_BACKGROUND_REFLECTION || DEFERRED_SSR_QUALITY > 0 || FORWARD_SSR_QUALITY > 0
 		if(reflectionVisibilty < 1.0){
 			float backgroundReflectMask = lightmap;
 
@@ -339,12 +364,14 @@ vec3 specularReflections(
 					vec3 backgroundReflection = volumetricsFromTex(reflectedVector_L, colortex4, roughness).rgb / 1200.0;
 				#else
 					vec3 backgroundReflection = skyCloudsFromTex(reflectedVector_L, colortex4).rgb / 1200.0;
-					
-					if(isEyeInWater == 1) backgroundReflection *= exp(-vec3(Water_Absorb_R, Water_Absorb_G, Water_Absorb_B) * 15.0)*2;
+
+					#if defined SNELLS_WINDOW
+						if(isEyeInWater == 1) backgroundReflection *= exp(-vec3(Water_Absorb_R, Water_Absorb_G, Water_Absorb_B) * 15.0)*2;
+					#endif
 				#endif
 			#endif
 
-			#if defined DEFERRED_ENVIRONMENT_REFLECTION || defined FORWARD_ENVIRONMENT_REFLECTION
+			#if DEFERRED_SSR_QUALITY > 0 || FORWARD_SSR_QUALITY > 0
 				vec4 environmentReflection = screenSpaceReflections(mat3(gbufferModelView) * reflectedVector_L, viewPos, noise.z, isHand, roughness, backgroundReflectMask);
 				// darkening for metals.
 				vec3 DarkenedDiffuseLighting = isMetal ? diffuseLighting * (1.0-environmentReflection.a) * (1.0-lightmap) : diffuseLighting;
@@ -369,8 +396,8 @@ vec3 specularReflections(
 		}
 	#endif
 
-	#ifdef OVERWORLD_SHADER
-		vec3 lightSourceReflection = Sun_specular_Strength * lightColor * GGX(normal, -playerPos, lightPos, roughness, reflectance, metalAlbedoTint);
+	#if defined OVERWORLD_SHADER || SUN_SPECULAR_MULT > 0
+		vec3 lightSourceReflection = SUN_SPECULAR_MULT * lightColor * GGX(normal, -playerPos, lightPos, roughness, reflectance, metalAlbedoTint);
 		specularReflections += lightSourceReflection;
 	#endif
 

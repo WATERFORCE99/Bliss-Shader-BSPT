@@ -11,17 +11,11 @@ Read the terms of modification and sharing before changing something below pleas
 out vec4 color;
 out vec2 texcoord;
 
-out vec4 tangent;
-out vec4 normalMat;
-attribute vec4 at_tangent;
-
 uniform sampler2D colortex4;
 
 uniform vec2 texelSize;
 uniform int framemod8;
 #include "/lib/TAA_jitter.glsl"
-
-#include "/lib/projections.glsl"
 					
 //////////////////////////////VOID MAIN//////////////////////////////
 //////////////////////////////VOID MAIN//////////////////////////////
@@ -38,11 +32,6 @@ void main() {
 
 	#ifdef BEACON_BEAM
 		if(gl_Color.a < 1.0) gl_Position = vec4(10,10,10,0);
-	#endif
-
-	#ifdef ENCHANT_GLINT
-		tangent = vec4(normalize(gl_NormalMatrix * at_tangent.rgb), at_tangent.w);
-		normalMat = vec4(normalize(gl_NormalMatrix * gl_Normal), 1.0);
 	#endif
 
 	#ifdef TAA_UPSCALING

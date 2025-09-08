@@ -42,6 +42,7 @@ uniform vec3 sunVec;
 uniform vec2 texelSize;
 uniform float frameTimeCounter;
 uniform float rainStrength;
+uniform ivec2 eyeBrightnessSmooth;
 
 uniform float viewWidth;
 uniform float aspectRatio;
@@ -49,6 +50,7 @@ uniform float viewHeight;
 
 uniform float near;
 
+#include "/lib/Shadows.glsl"
 #include "/lib/projections.glsl"
 
 vec2 tapLocation(int sampleNumber,int nb, float nbRot,float jitter,float distort){
@@ -140,7 +142,7 @@ float convertHandDepth_2(in float depth, bool hand) {
 }
 
 vec2 SSAO(
-	vec3 viewPos, vec3 normal, vec3 flatnormal, bool hand, bool leaves, float noise
+	vec3 viewPos, vec3 normal, vec3 flatnormal, bool hand, float noise
 ){
 	int samples = 7;
 	float occlusion = 0.0; 
@@ -218,6 +220,8 @@ void main() {
 	vec3 normal = mat3(gbufferModelViewInverse) * clamp(worldToView(decode(dataUnpacked0.yw)),-1.,1.);
 	vec2 lightmap = dataUnpacked1.yz;
 
+	float lightLeakFix = clamp(pow(eyeBrightnessSmooth.y/240. + lightmap.y,2.0) ,0.0,1.0);
+
 	gl_FragData[1] = vec4(0.0,0.0,0.0, texelFetch2D(colortex14,ivec2((floor(gl_FragCoord.xy)/VL_RENDER_RESOLUTION*texelSize+0.5*texelSize)/texelSize),0).a);
 
 	// bool lightningBolt = abs(dataUnpacked1.w-0.5) <0.01;
@@ -266,7 +270,7 @@ void main() {
 		vec3 FlatNormals = normalize(texture2D(colortex15,texcoord).rgb * 2.0 - 1.0);
 		if(z >= 1.0) FlatNormals = normal;
 
-		vec2 SSAO_SSS = SSAO(viewPos, worldToView(normal), worldToView(FlatNormals), hand, isLeaf, noise);
+		vec2 SSAO_SSS = SSAO(viewPos, worldToView(normal), worldToView(FlatNormals), hand, noise);
 
 		#ifndef OLD_INDIRECT_SSS
 			SSAO_SSS.y = clamp(SSAO_SSS.y + 0.5 * lightmap.y*lightmap.y,0.0,1.0);
@@ -280,13 +284,6 @@ void main() {
 	/*------------- VOLUMETRICS BEHIND TRANSLUCENTS PASS-THROUGH -------------*/
 	// colortex10 is the history buffer used in reprojection of volumetrics, i can just hijack that.
 	gl_FragData[3] = texture2D(colortex10, texcoord);
-	
-	// if(texture2D(colortex7,texcoord).a > 0.0) {
-	// 	vec4 VL = BilateralUpscale_VLFOG(colortex13, depthtex1, gl_FragCoord.xy - 1.5, ld(z));
-		
-	// 	// gl_FragData[3].rgb += VL.rgb * gl_FragData[3].a;
-	// 	// gl_FragData[3].a *= VL.a; 
-	// }
 
 	#ifdef OVERWORLD_SHADER
 		float SpecularTex = texture2D(colortex8,texcoord).z;
@@ -298,19 +295,22 @@ void main() {
 		float minshadowfilt = Min_Shadow_Filter_Radius;
 		float maxshadowfilt = Max_Shadow_Filter_Radius;
 
-		if(lightmap.y < 0.1) maxshadowfilt = min(maxshadowfilt, minshadowfilt);
-
 		#ifdef BASIC_SHADOW_FILTER
 			if (LabSSS > 0.0 && NdotL < 0.001){  
 				minshadowfilt = 50;
 				// maxshadowfilt = 50;
-			 }
+			}
 		#endif
 
 		gl_FragData[0] = vec4(minshadowfilt, 0.0, 0.0, 0.0);
 
 		#ifdef Variable_Penumbra_Shadows	
 			vec3 feetPlayerPos = toWorldSpace(viewPos);
+
+			#if LIGHTLEAKFIX_MODE == 1 && indirect_lighting_effects == 1
+				if(!hand) GriAndEminShadowFix(feetPlayerPos, FlatNormals, lightLeakFix);
+			#endif
+
 			vec3 projectedShadowPosition = toShadowSpaceProjected(feetPlayerPos);
 
 			//apply distortion
@@ -346,7 +346,7 @@ void main() {
 					// vec2 offsetS = SpiralSample(i, 7, 8, noise) * 0.5;
 					vec2 offsetS = CleanSample(i, VPS_Search_Samples - 1, noise) * 0.5;
 
-					float weight = 3.0 + (i+noise) *rdMul/SHADOW_FILTER_SAMPLE_COUNT*shadowMapResolution*distortFactor/2.7;
+					float weight = 3.0 + (i+noise) * rdMul/SHADOW_FILTER_SAMPLE_COUNT*shadowMapResolution*distortFactor/2.7;
 
 					float d = texelFetch2D(shadow, ivec2((projectedShadowPosition.xy+offsetS*rdMul)*shadowMapResolution),0).x;
 					float b = smoothstep(weight*diffthresh/2.0, weight*diffthresh, projectedShadowPosition.z - d);
