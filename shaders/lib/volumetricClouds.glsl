@@ -59,7 +59,7 @@ float getCloudShape(int LayerIndex, int LOD, in vec3 position, float minHeight, 
 			return shape;
 
 		break; }
-    }
+	}
 
 	float toTop = maxHeight - position.y;
 	float toBottom = position.y - minHeight;
