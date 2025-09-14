@@ -340,7 +340,7 @@ vec3 specularReflections(
 	#ifdef FORWARD_SPECULAR
 		reflectanceForAlpha = clamp(dot(F0, vec3(0.3333333)), 0.0,1.0);
 
-		#if defined SNELLS_WINDOW
+		#ifdef SNELLS_WINDOW
 			if(isEyeInWater == 1 && isWater){
 				// emulate how mojang did snells window in vibrant visuals because it works nicely tbh
 				float snellsWindow = min(max(0.54 - clamp(1.0 + VdotN,0,1),0)/0.1,1);
@@ -365,7 +365,7 @@ vec3 specularReflections(
 				#else
 					vec3 backgroundReflection = skyCloudsFromTex(reflectedVector_L, colortex4).rgb / 1200.0;
 
-					#if defined SNELLS_WINDOW
+					#ifdef SNELLS_WINDOW
 						if(isEyeInWater == 1) backgroundReflection *= exp(-vec3(Water_Absorb_R, Water_Absorb_G, Water_Absorb_B) * 15.0)*2;
 					#endif
 				#endif
@@ -385,7 +385,7 @@ vec3 specularReflections(
 				specularReflections = mix(DarkenedDiffuseLighting, backgroundReflection, backgroundReflectMask);
 			#endif
 
-			#if defined DEFERRED_ENVIRONMENT_REFLECTION || defined FORWARD_ENVIRONMENT_REFLECTION
+			#if DEFERRED_SSR_QUALITY > 0 || FORWARD_SSR_QUALITY > 0
 				specularReflections = mix(specularReflections, environmentReflection.rgb, environmentReflection.a);
 			#endif
 
