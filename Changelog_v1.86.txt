@@ -1,6 +1,8 @@
 2025-10-1 v1.86
 1. Partially merge X0nk's latest commit.
 ~ xxx 整合了部分X0nk最新的更新
+2. New atmosphere implemented, up to 8x performance improvement.
+~ Atmosphere 采用了新的大气，最大有8倍的性能提升
 
 2025-9-8 v1.85
 1. Partially merge X0nk's latest commit.

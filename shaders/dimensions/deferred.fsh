@@ -47,7 +47,7 @@ vec4 lightCol = vec4(lightSourceColor, float(sunElevation > 1e-5)*2-1.);
 #include "/lib/DistantHorizons_projections.glsl"
 
 #include "/lib/scene_controller.glsl"
-#include "/lib/ROBOBO_sky.glsl"
+#include "/lib/atmosphere.glsl"
 #include "/lib/sky_gradient.glsl"
 vec3 WsunVec = mat3(gbufferModelViewInverse) * sunVec;
 

@@ -45,7 +45,7 @@ uniform float nightVision;
 
 #include "/lib/climate_settings.glsl"
 #include "/lib/scene_controller.glsl"
-#include "/lib/ROBOBO_sky.glsl"
+#include "/lib/atmosphere.glsl"
 #include "/lib/sky_gradient.glsl"
 #include "/lib/aurora.glsl"
 
