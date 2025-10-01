@@ -50,7 +50,7 @@ flat out int glass;
 
 attribute vec4 at_tangent;
 attribute vec4 mc_Entity;
-#if defined ENTITIES
+#if defined ENTITIES || defined BLOCKENTITIES
 	uniform int entityId;
 #endif
 

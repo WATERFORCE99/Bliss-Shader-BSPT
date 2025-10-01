@@ -43,6 +43,27 @@ vec3 reinhard(vec3 x){
 	return x/(1.0+x);
 }
 
+// from Jodie's shadertoy: https://www.shadertoy.com/view/4dBcD1
+// i edited it a little tiny bit
+// from https://github.com/64/64.github.io/blob/src/code/tonemapping
+// https://64.github.io/tonemapping/#reinhard-jodie
+// Copyright (c) 2022 @64
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+// The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+vec3 reinhard_jodie(vec3 color){
+	// i edited it to add whitepoint control
+	// float whitePoint = 10.0;
+	// color *= (1.0 + color / (whitePoint*whitePoint));
+
+	color *= 1.5;
+	vec3 tonemapLuminance = color / (1.0 + dot(color, vec3(0.21, 0.72, 0.07)));
+	vec3 tonemapRGB = color / (1.0 + color);
+
+	// small weight because i dont want bright colors to be *too* colorful
+	return mix(tonemapLuminance, tonemapRGB, tonemapRGB*0.8+0.2);
+}
+
 vec3 ACESFilm(vec3 x){
 	x*=0.9;
 	// slower rate to bright color
