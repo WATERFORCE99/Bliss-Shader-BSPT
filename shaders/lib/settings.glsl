@@ -1,4 +1,4 @@
-#define SHADER_VERSION_LABEL 1.85 // [1.85]
+#define SHADER_VERSION_LABEL 1.86 // [1.86]
 
 ////////////////////////////////////////
 // ----- WATER RELATED SETTINGS ----- //
