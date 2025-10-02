@@ -17,19 +17,29 @@ vec3 drawRainbow(vec3 playerPos) {
 	float rainbowDist = min(maxDist, RAINBOW_DISTANCE);
 	float RdotV = dot(-WsunVec, normalize(playerPos));
 
-	if (isEyeInWater == 0 && rainbowAmount >0) {
-		float rainbowWidth = 0.05;
-		float rainbowCoord = clamp((RdotV - cos(0.75 - RAINBOW_WIDTH)) / (cos(0.75 + RAINBOW_WIDTH) - cos(0.75 - RAINBOW_WIDTH)), 0.0, 1.0);
+	if (isEyeInWater == 0 && rainbowAmount > 0.0) {		
+		vec3 colorBand = vec3(0.0);
 
-		float rainbowFactor = pow(rainbowCoord * (1.0 - rainbowCoord), 2.0);
+		float mainCoord = (RdotV - cos(0.75 - RAINBOW_WIDTH)) / (cos(0.75 + RAINBOW_WIDTH) - cos(0.75 - RAINBOW_WIDTH));
+		mainCoord = clamp(mainCoord, 0.0, 1.0);
 
-		vec3 colorBand = smoothHue(-rainbowCoord);
-		vec3 rainbowColor = colorBand * rainbowFactor * RAINBOW_STRENGTH;
+		float mainFactor = pow(mainCoord, 3.0) * pow(1.0 - mainCoord, 0.5);
+		vec3 mainColor = smoothHue(-mainCoord) * mainFactor;
+		colorBand += mainColor;
+
+		float subCoord = (RdotV - cos(1.0 - RAINBOW_WIDTH * 1.5)) / (cos(1.0 + RAINBOW_WIDTH * 1.5) - cos(1.0 - RAINBOW_WIDTH * 1.5));
+		subCoord = clamp(subCoord, 0.0, 1.0);
+
+		float subFactor = pow(subCoord * (1.0 - subCoord), 2.0);
+		vec3 subColor = smoothHue(subCoord) * subFactor * 0.2;
+		colorBand += subColor;
+		colorBand *= RAINBOW_STRENGTH;
 
 		float lengthFactor = smoothstep(rainbowDist * 0.9, rainbowDist * 1.1, length(playerPos));
 		float elevationFade = smoothstep(0.025, 0.1, WsunVec.y);
 		rainbowAmount *= lengthFactor * elevationFade;
 
-		return rainbowColor * rainbowAmount;
+		return colorBand * rainbowAmount;
 	}
+	return vec3(0.0);
 }
