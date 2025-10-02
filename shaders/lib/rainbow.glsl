@@ -36,7 +36,7 @@ vec3 drawRainbow(vec3 playerPos) {
 		colorBand *= RAINBOW_STRENGTH;
 
 		float lengthFactor = smoothstep(rainbowDist * 0.9, rainbowDist * 1.1, length(playerPos));
-		float elevationFade = smoothstep(0.025, 0.1, WsunVec.y);
+		float elevationFade = smoothstep(0.075, 0.1, WsunVec.y);
 		rainbowAmount *= lengthFactor * elevationFade;
 
 		return colorBand * rainbowAmount;
