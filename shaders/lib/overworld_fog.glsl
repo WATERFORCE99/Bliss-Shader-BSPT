@@ -290,7 +290,7 @@ vec4 GetVolumetricFog(
 		vec2 airCoef = (exp2(-max(progressW.y-SEA_LEVEL,0.0) / vec2(8.0e3, 1.2e3) * vec2(6.0, 7.0)) * 192.0 * Haze_amount) * planetVolume;
 
 		// Pbr for air, yolo mix between mie and rayleigh for water droplets
-		vec3 rL = skyRL*1e-5*airCoef.x;
+		vec3 rL = skyRL*(1e-5)*airCoef.x;
 		vec3 m =  mC*(airCoef.y+densityVol*300.0);
 
 		// calculate the atmosphere haze seperately and purely additive to color, do not contribute to absorbtion.
