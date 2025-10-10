@@ -143,9 +143,6 @@ vec4 GetVolumetricFog(
 	float skyPhase = 2.0 + pow(1.0-pow(1.0-clamp(normalize(wpos).y*0.5+0.5,0.0,1.0),2.0),5.0) * 2.0 ;
 	float rayL = phaseRayleigh(SdotV);
 
-	vec3 rC = vec3(sky_coefficientRayleighR*1e-6, sky_coefficientRayleighG*1e-5, sky_coefficientRayleighB*1e-5) ;
-	vec3 mC = vec3(fog_coefficientMieR*1e-6, fog_coefficientMieG*1e-6, fog_coefficientMieB*1e-6);
-
 	#if defined EXCLUDE_WRITE_TO_LUT && defined USE_CUSTOM_FOG_LIGHTING_COLORS
 		LightColor = luma(LightColor) * vec3(DIRECTLIGHT_FOG_R,DIRECTLIGHT_FOG_G,DIRECTLIGHT_FOG_B);
 		AmbientColor = luma(AmbientColor) * vec3(INDIRECTLIGHT_FOG_R,INDIRECTLIGHT_FOG_G,INDIRECTLIGHT_FOG_B);
@@ -293,7 +290,7 @@ vec4 GetVolumetricFog(
 		vec2 airCoef = (exp2(-max(progressW.y-SEA_LEVEL,0.0) / vec2(8.0e3, 1.2e3) * vec2(6.0, 7.0)) * 192.0 * Haze_amount) * planetVolume;
 
 		// Pbr for air, yolo mix between mie and rayleigh for water droplets
-		vec3 rL = rC*airCoef.x;
+		vec3 rL = skyRL*1e-5*airCoef.x;
 		vec3 m =  mC*(airCoef.y+densityVol*300.0);
 
 		// calculate the atmosphere haze seperately and purely additive to color, do not contribute to absorbtion.

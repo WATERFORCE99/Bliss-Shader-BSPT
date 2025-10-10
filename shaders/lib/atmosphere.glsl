@@ -7,20 +7,20 @@ const float moonAngularSize = 0.516667;
 
 const float INFINITY = 1.0 / 0.0;
 
-const float EARTH_RADIUS = 6360e3;
-const float ATMOSPHERE_HEIGHT = 120e3;
+const float EARTH_RADIUS = 6731e3;
+const float ATMOSPHERE_HEIGHT = 110e3;
 const float ATMOSPHERE_RADIUS = EARTH_RADIUS + ATMOSPHERE_HEIGHT;
 
-const float RAYLEIGH_SCALE_HEIGHT = 320000.0; 
-const vec3 RAYLEIGH_SCATTERING_COEFFICIENTS = vec3(6.6e-6, 12.2e-6, 29.2e-6);
-const vec3 RAYLEIGH_EXTINCTION_COEFFICIENTS = RAYLEIGH_SCATTERING_COEFFICIENTS;
+const float RAYLEIGH_SCALE_HEIGHT = 32e4; 
+const vec3 RAYLEIGH_SCATTERING_COEFFICIENTS = vec3(6.384e-6, 12.00e-6, 28.74e-6);
+const vec3 RAYLEIGH_EXTINCTION_COEFFICIENTS = RAYLEIGH_SCATTERING_COEFFICIENTS * skyRL;
 
-const float MIE_SCALE_HEIGHT = 140000.0;
-const vec3 MIE_SCATTERING_COEFFICIENTS = vec3(1.4e-6, 1.8e-6, 2.6e-6);
-const vec3 MIE_EXTINCTION_COEFFICIENTS = MIE_SCATTERING_COEFFICIENTS * 1.1;
+const float MIE_SCALE_HEIGHT = 14e4;
+const vec3 MIE_SCATTERING_COEFFICIENTS = vec3(1.252e-6, 1.689e-6, 2.530e-6);
+const vec3 MIE_EXTINCTION_COEFFICIENTS = MIE_SCATTERING_COEFFICIENTS * skyMie * 1.1;
 
-const float OZONE_SCALE_HEIGHT = 455000.0;
-const vec3 OZONE_EXTINCTION_COEFFICIENTS = vec3(2.1e-6,3.6e-6,0.2e-6);
+const float OZONE_SCALE_HEIGHT = 45.5e4;
+const vec3 OZONE_EXTINCTION_COEFFICIENTS = vec3(1.824e-6, 1.883e-6, 0.0);
 
 #ifdef MOONPHASE_BASED_MOONLIGHT
 	float moonlightbrightness = abs(4-moonPhase)/4.0;
@@ -69,28 +69,33 @@ float air_mass(float r, float z, float t, float H) {
 		return a * (d * erfcx(-c) - erfcx(-b));
 }
 
-float rayleigh_phase(float mu) {
+float rayleighPhase(float mu) {
 	const float rayleighFactor = 3.0 * rPI / 16.0;
 	return rayleighFactor * (1.0 + mu * mu);
 }
 
-float mie_phase(float mu) {
-	const float g = 0.82;
-	float gg = g * g;
-	float denom = 1.0 + gg - 2.0 * g * mu;
-	if (denom <= 0.0) return 0.0;
-
-	float num = (1.0 - gg) * (1.0 + mu * mu);
-	float basePhase = (3.0 * rPI / 8.0) * num / ((2.0 + gg) * pow(denom, 1.5));
-
-	float forwardScatter = smoothstep(-0.3, 0.95, mu) * 0.5;
-	return basePhase * (1.0 + forwardScatter);
+float henyeyGreensteinPhase(float mu, float g) {
+	return rPI / 4.0 * (1.0 - g * g) / pow(1.0 + g * g - 2.0 * g * mu, 1.5);
 }
 
-float distance_to_atmosphere(vec3 origin, vec3 direction) {
+float drainePhase(float mu, float g, float a) {
+	return ((1.0 - g * g) * (1.0 + a * mu * mu)) / (4.0 * (1.0 + (a * (1.0 + 2.0 * g * g)) / 3.0) * PI * pow(1.0 + g * g - 2.0 * g * mu, 1.5));
+}
+
+float miePhase(float mu) {
+	const float g1 = 0.862;
+	const float g2 = 0.5069161813017329;
+	const float a = 250.0;
+	const float w = 0.24075857115188248;
+	float HG = henyeyGreensteinPhase(mu, g1);
+	float draine = drainePhase(mu, g2, a);
+	return mix(HG, draine, w);
+}
+
+float calculateDistance(vec3 origin, vec3 direction, float radius) {
 	float r = length(origin);
 	float z = dot(normalize(origin), direction);
-	float d = ATMOSPHERE_RADIUS * ATMOSPHERE_RADIUS - r * r * (1.0 - z * z);
+	float d = radius * radius - r * r * (1.0 - z * z);
 	if (d < 0.0) return INFINITY;
 
 	float t1 = sqrt(d) - r * z;
@@ -100,20 +105,7 @@ float distance_to_atmosphere(vec3 origin, vec3 direction) {
 	return min(t1, t2);
 }
 
-float distance_to_ground(vec3 origin, vec3 direction) {
-	float r = length(origin);
-	float z = dot(normalize(origin), direction);
-	float d = EARTH_RADIUS * EARTH_RADIUS - r * r * (1.0 - z * z);
-	if (d < 0.0) return INFINITY;
-
-	float t1 = sqrt(d) - r * z;
-	float t2 = -sqrt(d) - r * z;
-	t1 = t1 < 0.0 ? INFINITY : t1;
-	t2 = t2 < 0.0 ? INFINITY : t2;
-	return min(t1, t2);
-}
-
-vec3 calculate_transmittance(vec3 origin, vec3 direction, float t) {
+vec3 skyTransmittance(vec3 origin, vec3 direction, float t) {
 	float r = length(origin);
 	float z = dot(normalize(origin), direction);
 
@@ -133,10 +125,10 @@ vec3 calculateScattering(vec3 origin, vec3 direction, vec3 light_dir, float t, v
 	vec3 scattering_r = RAYLEIGH_SCATTERING_COEFFICIENTS * air_mass(r, z, t, RAYLEIGH_SCALE_HEIGHT);
 	vec3 scattering_m = MIE_SCATTERING_COEFFICIENTS * air_mass(r, z, t, MIE_SCALE_HEIGHT);
 
-	vec3 trans_light = calculate_transmittance(origin, light_dir, INFINITY);
+	vec3 trans_light = skyTransmittance(origin, light_dir, INFINITY);
 
-	float phase_r = rayleigh_phase(mu);
-	float phase_m = mie_phase(mu);
+	float phase_r = rayleighPhase(mu);
+	float phase_m = miePhase(mu);
 
 	vec3 scattering = (scattering_r * phase_r + scattering_m * phase_m) * trans_light * light_color;
 
@@ -146,8 +138,8 @@ vec3 calculateScattering(vec3 origin, vec3 direction, vec3 light_dir, float t, v
 vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 sunVector, vec3 moonVector, out vec2 pid, out vec3 transmittance, const int iSteps, float noise) {
 	vec3 origin = (EARTH_RADIUS + eyeAltitude) * upVector;
 
-	float t_atmosphere = distance_to_atmosphere(origin, viewVector);
-	float t_ground = distance_to_ground(origin, viewVector);
+	float t_atmosphere = calculateDistance(origin, viewVector, ATMOSPHERE_RADIUS);
+	float t_ground = calculateDistance(origin, viewVector, EARTH_RADIUS);
 
 	float t = min(t_atmosphere, t_ground);
     
@@ -157,22 +149,22 @@ vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 s
 		return background;
 	}
 
-	transmittance = calculate_transmittance(origin, viewVector, t);
+	transmittance = skyTransmittance(origin, viewVector, t);
 
 	#ifdef SKY_GROUND
-		float planetGround = exp(-40 * pow(max(-viewVector.y*2.5 + 0.05,0.0),1.8));
+		float planetGround = exp(-40 * pow(max(-viewVector.y * 2.5 + 0.05, 0.0), 1.8));
 	#else
-		float planetGround = pow(clamp(viewVector.y+1.0,0.0,1.0),1.5);
+		float planetGround = pow(clamp(viewVector.y + 1.0, 0.0, 1.0), 1.5);
 	#endif
 
-	vec3 sun_scattering = calculateScattering(origin, viewVector, sunVector, t, sunColorBase);
+	vec3 sunScattering = calculateScattering(origin, viewVector, sunVector, t, sunColorBase);
 
-	vec3 moon_scattering = calculateScattering(origin, viewVector, moonVector, t, moonColorBase);
+	vec3 moonScattering = calculateScattering(origin, viewVector, moonVector, t, moonColorBase);
 
-	float sunHeight = max(0.0, sunVector.y);
-	vec3 ambient_sky = mix(vec3(0.01, 0.02, 0.05), vec3(0.3, 0.5, 0.8), sunHeight) * background;
+	vec3 ambientSky = mix(vec3(0.15, 0.06, 0.05), vec3(0.4, 0.55, 0.8), sunVector.y) * background;
 
 	pid = vec2(-1.0, t_ground);
 
-	return ambient_sky + sun_scattering * planetGround + moon_scattering * planetGround * 0.5;
+	vec3 color = ambientSky + sunScattering * planetGround + moonScattering * planetGround * 0.5;
+	return color;
 }

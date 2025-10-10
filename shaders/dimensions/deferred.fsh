@@ -199,8 +199,6 @@ void main() {
 			vec3 sky = vec3(0.0);
 			vec3 skyAbsorb = vec3(0.0);
 
-			vec3 mC = vec3(fog_coefficientMieR*1e-6, fog_coefficientMieG*1e-6, fog_coefficientMieB*1e-6);
-
 			sky = calculateAtmosphere((averageSkyCol*4000.0/2.0), viewVector, vec3(0.0,1.0,0.0), WsunVec, -WsunVec, planetSphere, skyAbsorb, 10, blueNoise());
 
 			// fade atmosphere conditions for rain away when you pass above the cloud plane.

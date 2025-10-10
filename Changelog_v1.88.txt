@@ -1,8 +1,16 @@
+2025-10-10 v1.88
+1. Slightly improve codes.
+~ xxx 微微优化代码
+2. Slight improve cloud scattering.
+~ volumetricClouds 微微优化云层光照
+3. Improve atmosphere color blending.
+~ atmosphere 优化大气色彩混合
+
 2025-10-2 v1.87
 1. Greatly improve rainbow visual.
 ~ rainbow 极大的提升了彩虹的观感
 2. Fix default settings for atmosphere.
-~settings 修复了关于大气的默认参数错误
+~ settings 修复了关于大气的默认参数错误
 
 2025-10-1 v1.86
 1. Partially merge X0nk's latest commit.

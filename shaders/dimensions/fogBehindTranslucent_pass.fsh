@@ -166,14 +166,13 @@ vec4 waterVolumetrics( vec3 rayStart, vec3 rayEnd, float estEndDepth, float estS
 			vec3 pos = vec3(spPos.xy*distortFactor, spPos.z);
 			if(abs(pos.x) < 1.0-0.5/2048. && abs(pos.y) < 1.0-0.5/2048){
 				pos = pos*vec3(0.5,0.5,0.5/6.0)+0.5;
-				// sh = shadow2D( shadow, pos).x;
 
 				#ifdef LPV_SHADOWS
 					pos.xy *= 0.8;
 				#endif
 
 				#ifdef TRANSLUCENT_COLORED_SHADOWS
-					sh = vec3(shadow2D(shadowtex0, pos).x);
+					sh *= vec3(shadow2D(shadowtex0, pos).x);
 
 					if(shadow2D(shadowtex1, pos).x > pos.z && sh.x < 1.0){
 						vec4 translucentShadow = texture2D(shadowcolor0, pos.xy);

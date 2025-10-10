@@ -199,13 +199,13 @@ vec3 getCloudLighting(
 	float backScatterPhase,
 	vec4 phaseLevels
 ){
-	float beerCoef = -4.0;
-	float powder = min(exp(beerCoef*exp(beerCoef*shapeFaded)) * 3.5, 1);
+	float beerCoef = -3.0;
+	float powder = 1.0 - exp(beerCoef * shapeFaded);
 	float backscatter = powder * backScatterPhase;
 	float forwardscatter = mix(mix(phaseLevels.x, phaseLevels.y, powder), mix(phaseLevels.z, phaseLevels.w, powder), powder);
 
-	vec3 directScattering = 6.28 * directLightCol * exp((beerCoef-1.0)*sunShadowMask) * (forwardscatter + backscatter);
-	vec3 indirectScattering = indirectLightCol * mix(1.0, exp2(-5.0*shape), indirectShadowMask*indirectShadowMask);
+	vec3 directScattering = TAU * directLightCol * exp((beerCoef - 2.0) * sunShadowMask) * (forwardscatter + backscatter);
+	vec3 indirectScattering = indirectLightCol * mix(1.0, exp2(-5.0 * shape), indirectShadowMask * indirectShadowMask);
 
 	return indirectScattering + directScattering;
 }
