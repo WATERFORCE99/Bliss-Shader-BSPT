@@ -1,4 +1,4 @@
-//Original atmosphere code : https://www.shadertoy.com/view/WcdSW4, highly customized.
+//Original atmosphere code : https://www.shadertoy.com/view/WcdSW4, heavily customized.
 
 uniform int moonPhase;
 
@@ -11,16 +11,16 @@ const float EARTH_RADIUS = 6731e3;
 const float ATMOSPHERE_HEIGHT = 110e3;
 const float ATMOSPHERE_RADIUS = EARTH_RADIUS + ATMOSPHERE_HEIGHT;
 
-const float RAYLEIGH_SCALE_HEIGHT = 32e4; 
-const vec3 RAYLEIGH_SCATTERING_COEFFICIENTS = vec3(6.384e-6, 12.00e-6, 28.74e-6);
+const float RAYLEIGH_SCALE_HEIGHT = 32.4e4; 
+const vec3 RAYLEIGH_SCATTERING_COEFFICIENTS = vec3(6.184e-6, 12.30e-6, 28.04e-6);
 const vec3 RAYLEIGH_EXTINCTION_COEFFICIENTS = RAYLEIGH_SCATTERING_COEFFICIENTS * skyRL;
 
-const float MIE_SCALE_HEIGHT = 14e4;
-const vec3 MIE_SCATTERING_COEFFICIENTS = vec3(1.252e-6, 1.689e-6, 2.530e-6);
+const float MIE_SCALE_HEIGHT = 14.0e4;
+const vec3 MIE_SCATTERING_COEFFICIENTS = vec3(1.252e-5, 1.689e-5, 2.530e-5);
 const vec3 MIE_EXTINCTION_COEFFICIENTS = MIE_SCATTERING_COEFFICIENTS * skyMie * 1.1;
 
 const float OZONE_SCALE_HEIGHT = 45.5e4;
-const vec3 OZONE_EXTINCTION_COEFFICIENTS = vec3(1.824e-6, 1.883e-6, 0.0);
+const vec3 OZONE_EXTINCTION_COEFFICIENTS = vec3(1.224e-6, 2.883e-6, 5.441e-8);
 
 #ifdef MOONPHASE_BASED_MOONLIGHT
 	float moonlightbrightness = abs(4-moonPhase)/4.0;
@@ -47,10 +47,7 @@ float erfcx(float x) {
 	float F = (t2 + 5.95908795446633271 * t + 9.19435612886969243) / (t2 + 4.11240942957450885 * t + 4.48640329523408675);
 	float y = A * B * C * D * E * F;
 
-	if (x < 0.0)
-		return 2.0 * exp(t2) - y;
-	else
-		return y;
+	return (x < 0.0) ? 2.0 * exp(t2) - y : y;
 }
 
 float air_mass(float r, float z, float t, float H) {
@@ -63,46 +60,32 @@ float air_mass(float r, float z, float t, float H) {
 	float c = t / H + b;
 	float d = exp(b * b - c * c);
 
-	if (z >= 0.0 || t + r * z >= 0.0)
-		return a * (erfcx(b) - d * erfcx(c));
-	else
-		return a * (d * erfcx(-c) - erfcx(-b));
+	return (z >= 0.0 || t + r * z >= 0.0) 
+		? a * (erfcx(b) - d * erfcx(c))
+		: a * (d * erfcx(-c) - erfcx(-b));
 }
 
 float rayleighPhase(float mu) {
-	const float rayleighFactor = 3.0 * rPI / 16.0;
-	return rayleighFactor * (1.0 + mu * mu);
-}
-
-float henyeyGreensteinPhase(float mu, float g) {
-	return rPI / 4.0 * (1.0 - g * g) / pow(1.0 + g * g - 2.0 * g * mu, 1.5);
-}
-
-float drainePhase(float mu, float g, float a) {
-	return ((1.0 - g * g) * (1.0 + a * mu * mu)) / (4.0 * (1.0 + (a * (1.0 + 2.0 * g * g)) / 3.0) * PI * pow(1.0 + g * g - 2.0 * g * mu, 1.5));
+	return 3.0 * rPI / 16.0 * (1.0 + mu * mu);
 }
 
 float miePhase(float mu) {
-	const float g1 = 0.862;
-	const float g2 = 0.5069161813017329;
-	const float a = 250.0;
-	const float w = 0.24075857115188248;
-	float HG = henyeyGreensteinPhase(mu, g1);
-	float draine = drainePhase(mu, g2, a);
-	return mix(HG, draine, w);
+	float g = 0.77;
+	float g2 = g * g;
+	return rPI / 4.0 * (1.0 - g2) / pow(1.0 + g2 - 2.0 * g * mu, 1.5);
 }
 
 float calculateDistance(vec3 origin, vec3 direction, float radius) {
 	float r = length(origin);
 	float z = dot(normalize(origin), direction);
 	float d = radius * radius - r * r * (1.0 - z * z);
+
 	if (d < 0.0) return INFINITY;
 
 	float t1 = sqrt(d) - r * z;
 	float t2 = -sqrt(d) - r * z;
-	t1 = t1 < 0.0 ? INFINITY : t1;
-	t2 = t2 < 0.0 ? INFINITY : t2;
-	return min(t1, t2);
+
+	return (t1 > 0.0) ? ((t2 > 0.0) ? min(t1, t2) : t1) : ((t2 > 0.0) ? t2 : INFINITY);
 }
 
 vec3 skyTransmittance(vec3 origin, vec3 direction, float t) {
@@ -125,7 +108,7 @@ vec3 calculateScattering(vec3 origin, vec3 direction, vec3 light_dir, float t, v
 	vec3 scattering_r = RAYLEIGH_SCATTERING_COEFFICIENTS * air_mass(r, z, t, RAYLEIGH_SCALE_HEIGHT);
 	vec3 scattering_m = MIE_SCATTERING_COEFFICIENTS * air_mass(r, z, t, MIE_SCALE_HEIGHT);
 
-	vec3 trans_light = skyTransmittance(origin, light_dir, INFINITY);
+	vec3 trans_light = skyTransmittance(origin + direction * t * 0.15, light_dir, INFINITY);
 
 	float phase_r = rayleighPhase(mu);
 	float phase_m = miePhase(mu);
@@ -135,36 +118,36 @@ vec3 calculateScattering(vec3 origin, vec3 direction, vec3 light_dir, float t, v
 	return scattering;
 }
 
-vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 sunVector, vec3 moonVector, out vec2 pid, out vec3 transmittance, const int iSteps, float noise) {
+vec3 colorCorrection(vec3 color) {
+	float luminance = dot(color, vec3(0.299, 0.587, 0.114));
+	vec3 gray = vec3(luminance);
+
+	float saturation = mix(0.8, 1.15, smoothstep(0.1, 0.5, luminance));
+
+	color = mix(gray, color, saturation);   
+	return color;
+}
+
+vec3 calculateAtmosphere(vec3 background, vec3 viewVector, vec3 upVector, vec3 sunVector, vec3 moonVector, out vec2 pid, out vec3 transmittance, float noise) {
 	vec3 origin = (EARTH_RADIUS + eyeAltitude) * upVector;
 
-	float t_atmosphere = calculateDistance(origin, viewVector, ATMOSPHERE_RADIUS);
-	float t_ground = calculateDistance(origin, viewVector, EARTH_RADIUS);
-
-	float t = min(t_atmosphere, t_ground);
-    
-	if (t >= INFINITY) {
-		transmittance = vec3(1.0);
-		pid = vec2(-1.0, -1.0);
-		return background;
-	}
-
+	float t = 100000.0;
 	transmittance = skyTransmittance(origin, viewVector, t);
 
+	float t_ground = calculateDistance(origin, viewVector, EARTH_RADIUS);
+	pid = vec2(-1.0, t_ground);
+
 	#ifdef SKY_GROUND
-		float planetGround = exp(-40 * pow(max(-viewVector.y * 2.5 + 0.05, 0.0), 1.8));
+		float planetGround = exp(-40.0 * pow(max(-viewVector.y * 2.5 + 0.05, 0.0), 1.8));
 	#else
-		float planetGround = pow(clamp(viewVector.y + 1.0, 0.0, 1.0), 1.5);
+		float planetGround = pow(max(viewVector.y + 1.0, 0.0), 1.5);
 	#endif
 
 	vec3 sunScattering = calculateScattering(origin, viewVector, sunVector, t, sunColorBase);
-
 	vec3 moonScattering = calculateScattering(origin, viewVector, moonVector, t, moonColorBase);
 
-	vec3 ambientSky = mix(vec3(0.15, 0.06, 0.05), vec3(0.4, 0.55, 0.8), sunVector.y) * background;
+	vec3 ambientSky = mix(vec3(0.45, 0.2, 0.37), vec3(0.6, 0.75, 0.85), smoothstep(0.1, 0.3, sunVector.y)) * background;
 
-	pid = vec2(-1.0, t_ground);
-
-	vec3 color = ambientSky + sunScattering * planetGround + moonScattering * planetGround * 0.5;
-	return color;
+	vec3 color = ambientSky + (sunScattering + moonScattering * 0.5) * planetGround;
+	return colorCorrection(color);
 }

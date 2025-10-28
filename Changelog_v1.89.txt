@@ -1,3 +1,11 @@
+2025-10-28 v1.89
+1. Stupid way to fix atmosphere below y=0.
+~ atmosphere 大概修复了高度小于0时的大气故障
+2. Simple fix to fog disappearing when clouds disabled.
+~ deferred 简单地修复了关闭体积云时雾气连带消失的问题
+3. Fix cloud quality unfunctioning issue.
+~ volumetricClouds 修复了云层质量失效的问题
+
 2025-10-10 v1.88
 1. Slightly improve codes.
 ~ xxx 微微优化代码

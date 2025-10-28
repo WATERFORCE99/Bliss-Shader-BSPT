@@ -199,7 +199,7 @@ void main() {
 			vec3 sky = vec3(0.0);
 			vec3 skyAbsorb = vec3(0.0);
 
-			sky = calculateAtmosphere((averageSkyCol*4000.0/2.0), viewVector, vec3(0.0,1.0,0.0), WsunVec, -WsunVec, planetSphere, skyAbsorb, 10, blueNoise());
+			sky = calculateAtmosphere((averageSkyCol*4000.0/2.0), viewVector, vec3(0.0,1.0,0.0), WsunVec, -WsunVec, planetSphere, skyAbsorb, blueNoise());
 
 			// fade atmosphere conditions for rain away when you pass above the cloud plane.
 			float heightRelativeToClouds = clamp(1.0 - max(eyeAltitude - CloudLayer0_height,0.0) / 200.0 ,0.0,1.0);
@@ -245,8 +245,7 @@ void main() {
 			float atmosphereAlpha = 1.0;
 			vec4 volumetricFog = GetVolumetricFog(viewPos, WsunVec, vec2(noise, 1.0-noise), suncol*2.5, skyGroundCol/30.0, averageSkyCol_Clouds*5.0, atmosphereAlpha, volumetricClouds.rgb, cloudPlaneDistance);
 
-			sky = sky * volumetricClouds.a + volumetricClouds.rgb / 5.0;
-			sky = sky * volumetricFog.a + volumetricFog.rgb / 5.0;
+			sky += volumetricClouds.rgb * volumetricClouds.a + volumetricFog.rgb * volumetricFog.a;
 
 			gl_FragData[0] = vec4(sky,1.0);
 

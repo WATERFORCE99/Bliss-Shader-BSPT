@@ -498,8 +498,9 @@ vec4 GetVolumetricClouds(
 		NormPlayerPos.y += 0.03;
 	#endif
 
-	float maxSamples = 15.0;
-	float minSamples = 10.0;
+	float maxSamples = 20.0 * CLOUDS_QUALITY;
+	float minSamples = 15.0 * CLOUDS_QUALITY;
+
 	int samples = int(clamp(maxSamples / sqrt(exp2(NormPlayerPos.y)), 0.0, minSamples));
 
    	///------- setup the ray
