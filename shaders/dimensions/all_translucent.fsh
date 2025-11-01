@@ -258,7 +258,7 @@ float ld(float dist) {
 				translucentShadow.rgb = max(normalize(translucentShadow.rgb + 0.0001), max(opaqueShadow, 1.0-shadowAlpha)) * shadowAlpha;
 
 				// make it such that full alpha areas that arent in a shadow have a value of 1.0 instead of 0.0
-				translucentTint += mix(translucentShadow.rgb, vec3(1.0),  opaqueShadow*shadowDepthDiff);
+				translucentTint += mix(translucentShadow.rgb, vec3(1.0), opaqueShadow*shadowDepthDiff);
 			#else
 				shadowmap += shadow2D(shadow, projectedShadowPosition).x;
 			#endif

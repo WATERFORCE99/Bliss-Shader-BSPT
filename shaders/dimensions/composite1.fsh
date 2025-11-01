@@ -374,7 +374,7 @@ void doEdgeAwareBlur(
 	}
 	// sample without an offset with texture filtering to get a slightly blurred sample. make sure to average without skewing the rest of the average.
 	filteredShadow = shadow_RESULT/edgeSum * 0.8 + 0.2 * texture2D(tex1, texelSize*gl_FragCoord.xy).rgb;
-	ambientEffects =   ssao_RESULT/edgeSum * 0.8 + 0.2 * texture2D(tex2, texelSize*gl_FragCoord.xy).rg;
+	ambientEffects = ssao_RESULT/edgeSum * 0.8 + 0.2 * texture2D(tex2, texelSize*gl_FragCoord.xy).rg;
 }
 
 vec4 BilateralUpscale_VLFOG(sampler2D tex, sampler2D depth, float referenceDepth){
@@ -422,46 +422,42 @@ vec4 BilateralUpscale_VLFOG(sampler2D tex, sampler2D depth, float referenceDepth
 		float backface = NdotL <= 0.0 ? 1.0 : 0.0;
 		vec3 shadowColor = vec3(0.0);
 		vec3 translucentTint = vec3(0.0);
-		float tShadowAccum = 0.0;
 
 		int samples = 1;
-		float rdMul = 0.0;
-
 		#ifdef BASIC_SHADOW_FILTER
 			samples = SHADOW_FILTER_SAMPLE_COUNT;
-			rdMul = (shadowBlockerDepth * distortFactor * d0 * k / shadowMapResolution) * 0.3;
+			float rdMul = (shadowBlockerDepth * distortFactor * d0 * k / shadowMapResolution) * 0.3;
+
+			for(int i = 0; i < samples; i++){
+				vec2 offsetS = CleanSample(i, samples - 1, noise) * rdMul;
+				projectedShadowPosition.xy += offsetS;
 		#endif
 
-		vec3 samplePos = projectedShadowPosition;
-		for (int i = 0; i < samples; i++) {
-			#ifdef BASIC_SHADOW_FILTER
-				samplePos.xy += CleanSample(i, samples - 1, noise) * rdMul;
-			#endif
+		#ifdef TRANSLUCENT_COLORED_SHADOWS
+			float opaqueShadow = shadow2D(shadowtex0, projectedShadowPosition).x;
+			float opaqueShadowT = shadow2D(shadowtex1, projectedShadowPosition).x;
+			vec4 translucentShadow = texture2D(shadowcolor0, projectedShadowPosition.xy);
 
-			#ifdef TRANSLUCENT_COLORED_SHADOWS
-				float opaqueShadow = shadow2D(shadowtex0, samplePos).x;
-				float opaqueShadowT = shadow2D(shadowtex1, samplePos).x;
-				vec4 translucentShadow = texture2D(shadowcolor0, samplePos.xy);
+			float shadowAlpha = pow(translucentShadow.a * (2.0 - translucentShadow.a), 5.0);
+			translucentShadow.rgb = normalize(translucentShadow.rgb * translucentShadow.rgb + 0.0001) * (1.0 - shadowAlpha);
 
-				float shadowAlpha = pow(translucentShadow.a * (2.0 - translucentShadow.a), 5.0);
-				translucentShadow.rgb = normalize(translucentShadow.rgb * translucentShadow.rgb + 0.0001) * (1.0 - shadowAlpha);
+			shadowColor += directLightColor * mix(translucentShadow.rgb * opaqueShadowT, vec3(1.0), opaqueShadow);
 
-				shadowColor += directLightColor * mix(translucentShadow.rgb * opaqueShadowT, vec3(1.0), opaqueShadow);
-				translucentTint += mix(translucentShadow.rgb, vec3(1.0), max(opaqueShadow, backface * step(1.0, shadowAlpha)));
-				tShadowAccum += (1.0 - shadowAlpha) * opaqueShadowT/samples;
-			#else
-				shadowColor += vec3(1.0) * shadow2D(shadow, projectedShadowPosition).x;
-			#endif
-		}
+			translucentTint += mix(translucentShadow.rgb, vec3(1.0), max(opaqueShadow, backface * (shadowAlpha < 1.0 ? 0.0 : 1.0)));
+			tShadow += ((1.0 - shadowAlpha) * opaqueShadowT) / samples;
+		#else
+			shadowColor += vec3(1.0) * shadow2D(shadow, projectedShadowPosition).x;
+		#endif
+
+		#ifdef BASIC_SHADOW_FILTER
+			}
+		#endif
 
 		#ifdef debug_SHADOWMAP
 			shadowDebug = shadow2D(shadow, projectedShadowPosition).x;
 		#endif
 
-		tShadow += tShadowAccum / samples;
-		tintedSunlight *= translucentTint.rgb / samples;
 		return shadowColor.rgb / samples;
-		// return mix(directLightColor, shadowColor.rgb / samples, maxDistFade);
 	}
 #endif
 

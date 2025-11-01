@@ -89,7 +89,6 @@ float phaseg(float x, float g){
 	return (gg * -0.25 + 0.25) * pow(-2.0 * (g * x) + (gg + 1.0), -1.5) / 3.14;
 }
 
-// #undef BASIC_SHADOW_FILTER
 #ifdef OVERWORLD_SHADER
 	float ComputeShadowMap(inout vec3 directLightColor, vec3 playerPos, float maxDistFade){
 
