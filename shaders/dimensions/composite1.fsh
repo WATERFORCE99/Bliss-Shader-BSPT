@@ -1111,7 +1111,6 @@ void main() {
  				#endif
 
 				#if !defined ambientLight_only && (RESOURCEPACK_SKY == 0 || RESOURCEPACK_SKY == 1)
-
 					Background += drawSun(dot(unsigned_WsunVec, feetPlayerPos_normalized), 0, DirectLightColor,vec3(0.0));
 
 					vec3 moonLightCol = moonCol / 2400.0;
@@ -1123,7 +1122,9 @@ void main() {
 			#endif
 
 			// Render aurora
-			Background += drawAurora(feetPlayerPos_normalized, noise) * AURORA_BRIGHTNESS * applyAurora;
+			if (unsigned_WsunVec.y < 0) {
+				Background += drawAurora(feetPlayerPos_normalized, noise) * AURORA_BRIGHTNESS * applyAurora;
+			}
 
 			#ifndef ISOLATE_RESOURCEPACK_SKY
 				vec3 Sky = skyFromTex(feetPlayerPos_normalized, colortex4)/1200.0 * Sky_Brightness;

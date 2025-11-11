@@ -121,7 +121,7 @@ float invLinZ (float lindepth){
 #endif
 
 void waterVolumetrics_notoverworld(inout vec3 inColor, vec3 rayStart, vec3 rayEnd, float estEndDepth, float estSunDepth, float rayLength, float dither, vec3 waterCoefs, vec3 scatterCoef, vec3 ambient){
-	inColor *= exp(-rayLength * waterCoefs);	//No need to take the integrated value
+	inColor *= exp(-rayLength * waterCoefs); //No need to take the integrated value
 	
 	int spCount = rayMarchSampleCount;
 	vec3 start = toShadowSpaceProjected(toWorldSpace(rayStart));

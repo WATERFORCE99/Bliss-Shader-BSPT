@@ -100,10 +100,10 @@ float getCloudShape(int LayerIndex, int LOD, in vec3 position, float minHeight, 
 			break; }
 
 			case LARGECUMULUS_LAYER: {
-				erosion += (1.0 - densityAtPos(samplePos * 100.0 * CloudLayer1_scale)) * sqrt(1.0-shape);
+				erosion += (1.0 - densityAtPos(samplePos * 70.0 * CloudLayer1_scale)) * sqrt(1.0-shape);
 
 				float falloff = 1.0 - clamp(toTop/200.0,0.0,1.0);
-				erosion += abs(densityAtPos(samplePos * 450.0 * CloudLayer1_scale) - falloff) * 0.75 * (1.0-shape) * (1.0-falloff*0.5);
+				erosion += abs(densityAtPos(samplePos * 250.0 * CloudLayer1_scale) - falloff) * 0.75 * (1.0-shape) * (1.0-falloff*0.5);
 
 				erosion = erosion*erosion*erosion*erosion;
 			break; }
@@ -251,7 +251,7 @@ vec4 raymarchCloud(
 	if(LayerIndex == ALTOSTRATUS_LAYER){
 		float density = parameters.altostratus.y;
 
-		bool ifAboveOrBelowPlane = max(mix(-1.0, 1.0, clamp(cameraPosition.y - minHeight,0.0,1.0)) * normalize(rayDirection).y,0.0) > 0.0;
+		bool ifAboveOrBelowPlane = max(mix(-1.0, 1.0, clamp(cameraPosition.y - minHeight, 0.0, 1.0)) * normalize(rayDirection).y + 0.0001, 0.0) > 0.0;
 
 		// check if the ray staring position is going farther than the reference distance, if yes, dont begin marching. this is to check for intersections with the world.
 		// check if the camera is above or below the cloud plane, so it doesnt waste work on the opposite hemisphere

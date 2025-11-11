@@ -1,3 +1,9 @@
+2025-11-11 v1.9
+1. Fix aurora mistakenly rendered at day.
+~ composite1 修复了极光在白天也渲染的错误
+2. Merge X0nk's latest commit.
+~ xxx 整合了X0nk最新的更新
+
 2025-10-28 v1.89
 1. Stupid way to fix atmosphere below y=0.
 ~ atmosphere 大概修复了高度小于0时的大气故障
@@ -26,56 +32,40 @@
 2. New atmosphere implemented, up to 8x performance improvement.
 ~ atmosphere 采用了新的大气，最大有8倍的性能提升
 
-2025-9-8 v1.85
-1. Partially merge X0nk's latest commit.
-~ xxx 整合了部分X0nk最新的更新
-
-2025-8-26 v1.84
-1. Sync lensflare color to sun color.
-~ lensflare 将镜头炫光颜色与太阳颜色同步
-2. Reduce lensflare strenghth when the sun is low to reduce the flickering occlusion by cloud.
-~ final 日落时降低镜头炫光强度以减少被云遮挡时产生的闪烁
-3. Move rainbow to the front of the cloud. (use Merlin1809's code to make rainbow insert cloud)
-~ rainbow/composite3 将彩虹移至云层前方 (彩虹插入云层部分使用Merlin1809的代码)
-
-2025-8-20 v1.83
-1. Fix compile error while entering modded dimensions.
-~ deferred1 修复了进入模组维度时的编译错误
-2. Many small tweaks.
-~ xxx 许多细小的调整
-
-2025-8-12 v1.82
-1. Fix an an issue with shadow filtering.
-~ composite1 修复一个阴影过滤的问题
-2. Merge X0nk's latest commit. (volume)
-~ xxx 整合了X0nk最新的更新 (体积)
-3. Improve ambient scattering.
-~ROBOBO_sky 优化环境光散射
-4. Fix compile error.
-~ composite3 修复编译错误
-
-2025-8-12 v1.81
+2025-8-12 ~ 9-8 v1.81 ~ 1.85
 1. Selectively merge X0nk's latest commit.
 ~ xxx 有选择性地整合了X0nk最新的更新
+2. Fix an an issue with shadow filtering.
+~ composite1 修复一个阴影过滤的问题
+4. Improve ambient scattering.
+~ROBOBO_sky 优化环境光散射
+5. Sync lensflare color to sun color.
+~ lensflare 将镜头炫光颜色与太阳颜色同步
+6. Reduce lensflare strenghth when the sun is low to reduce the flickering occlusion by cloud.
+~ final 日落时降低镜头炫光强度以减少被云遮挡时产生的闪烁
+7. Move rainbow to the front of the cloud. (use Merlin1809's code to make rainbow insert cloud)
+~ rainbow/composite3 将彩虹移至云层前方 (彩虹插入云层部分使用Merlin1809的代码)
+8. Fix compile errors including while entering modded dimensions.
+~ composite3 修复编译错误，包含进入模组维度时的错误
+9. Many small tweaks.
+~ xxx 许多细小的调整
 
 2025-6-26 ~ 7-10 v1.76 ~ 1.79
 1. Fix glowing haze at night.
 ~ overworld_fog 修复了夜晚发光的雾霾
 2. Add options for atmosphere absorbance.
 ~ setting 为大气吸收率添加选项
-1. Restore sun path rotation.
+3. Restore sun path rotation.
 ~ settings 还原了日月倾角选项
-2. Fix ripple issue.
+4. Fix ripple issue.
 ~ all_translucent 修复了涟漪问题
-1. Merge X0nk's latest commit. (shadow, ssrt etc.)
-~ xxx 整合了X0nk最新的更新 (阴影，SSRT等)
-1. Merge X0nk's latest commit. (motion blur)
-~ xxx 整合了X0nk最新的更新 (动态模糊)
-2. Agx preset slider.
+5. Merge X0nk's latest commit.
+~ xxx 整合了X0nk最新的更新
+6. Agx preset slider.
 ~ tonemapping 添加AGX预设模式
-3. Some improvements with setting screens.
+7. Some improvements with setting screens.
 ~ shader 设置界面调整
-4. Update LANG.
+8. Update LANG.
 ~ zh_cn/en_us 语言文件更新
 
 2025-5-19 ~ 6-26 v1.71 ~ 1.75
