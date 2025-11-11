@@ -1,7 +1,9 @@
 2025-11-11 v1.9
 1. Fix aurora mistakenly rendered at day.
 ~ composite1 修复了极光在白天也渲染的错误
-2. Merge X0nk's latest commit.
+2. Improve aurora perf.
+~ aurora 优化极光性能
+3. Merge X0nk's latest commit.
 ~ xxx 整合了X0nk最新的更新
 
 2025-10-28 v1.89

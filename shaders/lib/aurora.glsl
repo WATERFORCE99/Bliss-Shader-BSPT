@@ -47,7 +47,7 @@ vec4 aurora(vec3 dir, float dither) {
 	vec4 outerColor = vec4(0.0);
 	vec4 avgColor = vec4(0.0);
 
-	const int aurStep = 32;
+	const int aurStep = 24;
 	for (int i = 0; i < aurStep; ++i) {
 		float amp = float(i) / float(aurStep - 1);
 		float jitter = 0.012 * dither * clamp(smoothstep(0.0, 15.0, float(i)), 0.0, 1.0);
@@ -55,9 +55,12 @@ vec4 aurora(vec3 dir, float dither) {
 
 		vec2 aurPos = (pt * dir).zx;
 		float rzt = triNoise2d(aurPos, speed);
-		vec4 innerColor = vec4(0.0, 0.0, 0.0, rzt);
+		if (rzt < 0.01) continue;
 
+		vec4 innerColor;
 		innerColor.rgb = rzt * mix(lowerColor, upperColor, smoothstep(0.0, 1.0, amp));
+		innerColor.a = rzt;
+
 		avgColor =  mix(avgColor, innerColor, 0.5);
 		outerColor += avgColor * exp2(-(amp * 24) * 0.065 - 2.5) * smoothstep(0.0, 5.0, (amp * 24)) * 24 / aurStep;
 	}
@@ -68,7 +71,6 @@ vec4 aurora(vec3 dir, float dither) {
 }
 
 vec3 drawAurora(vec3 rayDir, float dither) {
-
 	vec3 color = vec3(0.0);
 	float fade = smoothstep(0.0, 0.1, abs(rayDir.y)) * 0.1+0.9;
 
